@@ -2,8 +2,10 @@ import { HARLINGEN } from "@/lib/location";
 import type { GetijItem } from "@/lib/api/types";
 import { dagKeyAmsterdam } from "./day-label";
 import { extractExtremes, type TidePoint } from "./extract-extremes";
+import { parseOpenMeteoLocalTime } from "./parse-open-meteo-time";
 
 interface OpenMeteoMarineResponse {
+  utc_offset_seconds?: number;
   hourly?: {
     time?: string[];
     sea_level_height_msl?: (number | null)[];
@@ -38,12 +40,17 @@ export async function fetchHarlingenTides(): Promise<GetijItem[]> {
   const data = (await res.json()) as OpenMeteoMarineResponse;
   const times = data.hourly?.time ?? [];
   const heights = data.hourly?.sea_level_height_msl ?? [];
+  const utcOffset = data.utc_offset_seconds ?? 0;
 
   const points: TidePoint[] = [];
   for (let i = 0; i < times.length; i++) {
     const h = heights[i];
-    if (h == null || times[i] == null) continue;
-    points.push({ time: new Date(times[i]), heightM: h });
+    const iso = times[i];
+    if (h == null || iso == null) continue;
+    points.push({
+      time: parseOpenMeteoLocalTime(iso, utcOffset),
+      heightM: h,
+    });
   }
 
   const allowed = allowedDayKeys();

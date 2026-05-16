@@ -113,6 +113,8 @@ export function TideCard({ getijden }: TideCardProps) {
 
         <p className="mt-3 text-center text-[0.65rem] text-zinc-500">
           Getij: Open-Meteo · Harlingen (voorspeld)
+          <br />
+          Tijden bij benadering (interpolatie uit uurdata)
         </p>
       </CardContent>
     </Card>

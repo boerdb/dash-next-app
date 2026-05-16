@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "tsx --test lib/tides/tides.test.ts",
     "icons:pwa": "node scripts/generate-pwa-icons.mjs"
   },
   "dependencies": {
@@ -34,6 +35,7 @@
     "eslint-config-next": "16.2.6",
     "sharp": "^0.34.5",
     "tailwindcss": "^4",
+    "tsx": "^4.22.0",
     "typescript": "^5"
   }
 }
