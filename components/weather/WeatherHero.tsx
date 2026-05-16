@@ -3,11 +3,14 @@
 import {
   Cloud,
   CloudFog,
+  CloudLightning,
   CloudRain,
+  CloudSnow,
   CloudSun,
   Moon,
   Sun,
   Sunset,
+  Wind,
 } from "lucide-react";
 import type { AstronomieApi, WeerLive, WeatherCondition } from "@/lib/api/types";
 import { periodLabels } from "@/lib/astronomy/sun-moon";
@@ -21,6 +24,10 @@ const icons: Record<WeatherCondition, typeof Sun> = {
   "partly-cloudy": CloudSun,
   cloudy: Cloud,
   rain: CloudRain,
+  snow: CloudSnow,
+  thunder: CloudLightning,
+  storm: CloudLightning,
+  wind: Wind,
   fog: CloudFog,
   night: Moon,
   evening: Sunset,
@@ -72,7 +79,10 @@ export function WeatherHero({
           className={cn(
             "mx-auto my-2 h-10 w-10 text-white/90 drop-shadow-lg",
             condition === "sunny" && "text-amber-200",
-            condition === "evening" && "text-orange-200"
+            condition === "evening" && "text-orange-200",
+            (condition === "thunder" || condition === "storm") && "text-violet-200",
+            condition === "snow" && "text-sky-200",
+            condition === "wind" && "text-teal-200"
           )}
           strokeWidth={1.5}
         />

@@ -4,6 +4,10 @@ import {
   conditionFromOpenWeather,
   openWeatherImpliesFog,
   openWeatherImpliesRain,
+  openWeatherImpliesSnow,
+  openWeatherImpliesThunder,
+  openWeatherImpliesWind,
+  openWeatherThunderCondition,
 } from "@/lib/openweather/condition";
 
 function conditionFromSolar(solar: number): WeatherCondition {
@@ -18,6 +22,12 @@ function isStationFoggy(data: WeerLive): boolean {
   return humidity >= 95 && wind < 5;
 }
 
+function isStationWindy(data: WeerLive): boolean {
+  const wind = Number(data.windspd_avg10m_kmh) || 0;
+  const gust = Number(data.windgust_kmh) || 0;
+  return wind >= 40 || gust >= 55;
+}
+
 export function getWeatherCondition(
   data: WeerLive | null,
   period: DayPeriod = "day",
@@ -30,12 +40,18 @@ export function getWeatherCondition(
   const owId = openWeather?.weatherId ?? 0;
   const owClouds = openWeather?.cloudsPct ?? 0;
 
+  if (openWeather && openWeatherImpliesSnow(owId)) return "snow";
+  if (openWeather && openWeatherImpliesThunder(owId)) {
+    return openWeatherThunderCondition(owId);
+  }
   if (rainRate > 0 || (openWeather && openWeatherImpliesRain(owId))) {
     return "rain";
   }
   if (isStationFoggy(data) || (openWeather && openWeatherImpliesFog(owId))) {
     return "fog";
   }
+  if (openWeather && openWeatherImpliesWind(owId)) return "wind";
+  if (isStationWindy(data)) return "wind";
 
   if (period === "night" || (period === "evening" && sunBelowHorizon)) {
     return "night";
@@ -52,6 +68,10 @@ export function getWeatherCondition(
 
 export const conditionLabels: Record<WeatherCondition, string> = {
   rain: "Regen",
+  snow: "Sneeuw",
+  thunder: "Onweer",
+  storm: "Storm",
+  wind: "Wind",
   fog: "Mist",
   night: "Nacht",
   evening: "Avond",

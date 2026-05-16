@@ -70,6 +70,10 @@ export interface EnergieHistorie {
 
 export type WeatherCondition =
   | "rain"
+  | "snow"
+  | "thunder"
+  | "storm"
+  | "wind"
   | "fog"
   | "night"
   | "evening"
