@@ -1,13 +1,21 @@
 import { HARLINGEN } from "@/lib/location";
 import type { OpenWeatherSupplement } from "@/lib/api/types";
-import { mapOpenWeatherSupplement } from "./map";
-import type { OwForecastResponse, OwWeatherResponse } from "./types";
+import { mapOneCall3, mapOpenWeatherSupplement } from "./map";
+import type {
+  OwForecastResponse,
+  OwOneCallResponse,
+  OwWeatherResponse,
+} from "./types";
 
-const BASE = "https://api.openweathermap.org/data/2.5";
+const BASE_25 = "https://api.openweathermap.org/data/2.5";
+const BASE_30 = "https://api.openweathermap.org/data/3.0";
 const LANG = "nl";
 const UNITS = "metric";
+const FETCH_OPTS = { next: { revalidate: 1800 } } as const;
 
-function buildUrl(path: string, apiKey: string): string {
+const ONECALL_FALLBACK_STATUSES = new Set([401, 403, 404]);
+
+function build25Url(path: string, apiKey: string): string {
   const params = new URLSearchParams({
     lat: String(HARLINGEN.latitude),
     lon: String(HARLINGEN.longitude),
@@ -15,15 +23,25 @@ function buildUrl(path: string, apiKey: string): string {
     units: UNITS,
     lang: LANG,
   });
-  return `${BASE}/${path}?${params}`;
+  return `${BASE_25}/${path}?${params}`;
 }
 
-export async function fetchOpenWeatherSupplement(
-  apiKey: string
-): Promise<OpenWeatherSupplement> {
+function buildOneCallUrl(apiKey: string): string {
+  const params = new URLSearchParams({
+    lat: String(HARLINGEN.latitude),
+    lon: String(HARLINGEN.longitude),
+    appid: apiKey,
+    units: UNITS,
+    lang: LANG,
+    exclude: "minutely",
+  });
+  return `${BASE_30}/onecall?${params}`;
+}
+
+async function fetchOpenWeather25(apiKey: string): Promise<OpenWeatherSupplement> {
   const [currentRes, forecastRes] = await Promise.all([
-    fetch(buildUrl("weather", apiKey), { next: { revalidate: 1800 } }),
-    fetch(buildUrl("forecast", apiKey), { next: { revalidate: 1800 } }),
+    fetch(build25Url("weather", apiKey), FETCH_OPTS),
+    fetch(build25Url("forecast", apiKey), FETCH_OPTS),
   ]);
 
   if (!currentRes.ok) {
@@ -37,4 +55,21 @@ export async function fetchOpenWeatherSupplement(
   const forecast = (await forecastRes.json()) as OwForecastResponse;
 
   return mapOpenWeatherSupplement(current, forecast);
+}
+
+export async function fetchOpenWeatherSupplement(
+  apiKey: string
+): Promise<OpenWeatherSupplement> {
+  const oneCallRes = await fetch(buildOneCallUrl(apiKey), FETCH_OPTS);
+
+  if (oneCallRes.ok) {
+    const data = (await oneCallRes.json()) as OwOneCallResponse;
+    return mapOneCall3(data);
+  }
+
+  if (ONECALL_FALLBACK_STATUSES.has(oneCallRes.status)) {
+    return fetchOpenWeather25(apiKey);
+  }
+
+  throw new Error(`OpenWeather One Call: ${oneCallRes.status}`);
 }

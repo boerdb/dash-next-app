@@ -113,10 +113,20 @@ export interface OpenWeatherCurrent {
   dewPointC: number | null;
 }
 
+export interface OpenWeatherAlert {
+  event: string;
+  senderName: string;
+  startAt: string;
+  endAt: string;
+  description: string;
+}
+
 export interface OpenWeatherSupplement {
   current: OpenWeatherCurrent;
   hourly: OpenWeatherHourly[];
   daily: OpenWeatherDaily[];
+  alerts: OpenWeatherAlert[];
+  dataSource: "onecall-3" | "2.5";
   updatedAt: string;
 }
 

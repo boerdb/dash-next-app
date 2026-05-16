@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "tsx --test lib/tides/tides.test.ts",
+    "test": "tsx --test lib/tides/tides.test.ts lib/openweather/map.test.ts",
     "icons:pwa": "node scripts/generate-pwa-icons.mjs"
   },
   "dependencies": {
