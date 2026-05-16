@@ -1,0 +1,181 @@
+"use client";
+
+import { useMemo } from "react";
+import useSWR from "swr";
+import dynamic from "next/dynamic";
+import { WeatherHero } from "@/components/weather/WeatherHero";
+import { MetricGrid } from "@/components/weather/MetricGrid";
+import { TideCard } from "@/components/weather/TideCard";
+import { OpenWeatherSection } from "@/components/weather/OpenWeatherSection";
+import { PullToRefresh } from "@/components/shared/PullToRefresh";
+import { DataError } from "@/components/shared/DataError";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
+import { getAstronomyInfo, toAstronomieApi } from "@/lib/astronomy/sun-moon";
+import { jsonFetcher, FetchError } from "@/lib/fetcher";
+import { getWeatherCondition } from "@/lib/utils/weather-condition";
+import type {
+  AstronomieApi,
+  GetijItem,
+  OpenWeatherSupplement,
+  WeerHistorie,
+  WeerLive,
+} from "@/lib/api/types";
+
+const TemperatureChart = dynamic(
+  () =>
+    import("@/components/weather/TemperatureChart").then((m) => m.TemperatureChart),
+  { ssr: false, loading: () => <Skeleton className="h-48 w-full rounded-2xl" /> }
+);
+
+const defaultAstro: AstronomieApi = {
+  period: "day",
+  sunriseLabel: "—",
+  sunsetLabel: "—",
+  sunProgress: 0.5,
+  sunBelowHorizon: false,
+  sunAltitudeDeg: 0,
+  moon: { phase: 0.5, fraction: 0.5, label: "Maan", illuminationPct: 50 },
+};
+
+export default function WeerPage() {
+  const {
+    data: weer,
+    error: weerError,
+    isLoading: weerLoading,
+    mutate: mutateWeer,
+  } = useSWR<WeerLive, FetchError>("/api/weer/live", jsonFetcher, {
+    refreshInterval: 60_000,
+    shouldRetryOnError: true,
+    errorRetryCount: 3,
+  });
+
+  const { data: historie, mutate: mutateHistorie } = useSWR<WeerHistorie, FetchError>(
+    weer ? "/api/weer/historie" : null,
+    jsonFetcher,
+    { refreshInterval: 60_000 }
+  );
+
+  const { data: getijden = [], mutate: mutateGetijden } = useSWR<GetijItem[]>(
+    "/api/weer/getijden",
+    jsonFetcher,
+    { refreshInterval: 3600_000 }
+  );
+
+  const { data: astro, mutate: mutateAstro } = useSWR<AstronomieApi>(
+    "/api/weer/astronomie",
+    jsonFetcher,
+    { refreshInterval: 300_000 }
+  );
+
+  const { data: openWeather, mutate: mutateOpenWeather } = useSWR<
+    OpenWeatherSupplement | null,
+    FetchError
+  >("/api/weer/openweather", openWeatherFetcher, {
+    refreshInterval: 1_800_000,
+    shouldRetryOnError: false,
+    revalidateOnFocus: false,
+  });
+
+  const astroFallback = useMemo(() => {
+    try {
+      return toAstronomieApi(getAstronomyInfo());
+    } catch {
+      return defaultAstro;
+    }
+  }, []);
+
+  const astroData = astro ?? astroFallback;
+
+  const refreshAll = async () => {
+    await Promise.all([
+      mutateWeer(),
+      mutateHistorie(),
+      mutateGetijden(),
+      mutateAstro(),
+      mutateOpenWeather(),
+    ]);
+  };
+
+  const updateLabel = weer
+    ? `Update: ${new Date().toLocaleString("nl-NL", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }).replace(/\//g, "-")}`
+    : undefined;
+
+  const condition = useMemo(
+    () =>
+      getWeatherCondition(
+        weer ?? null,
+        astroData.period,
+        openWeather?.current,
+        astroData.sunBelowHorizon
+      ),
+    [weer, astroData.period, astroData.sunBelowHorizon, openWeather?.current]
+  );
+  const showSkeleton = weerLoading && !weer && !weerError;
+
+  return (
+    <PullToRefresh onRefresh={refreshAll}>
+      <header className="mb-4 text-center">
+        <h1 className="text-xl font-semibold text-white">Actueel weer</h1>
+      </header>
+
+      {showSkeleton ? (
+        <WeerSkeleton />
+      ) : weerError && !weer ? (
+        <DataError message={weerError.message} onRetry={() => mutateWeer()} />
+      ) : weer ? (
+        <div className="space-y-4">
+          <WeatherHero
+            data={weer}
+            condition={condition}
+            astro={astroData}
+            updateLabel={updateLabel}
+          />
+          <MetricGrid data={weer} />
+          {openWeather ? <OpenWeatherSection data={openWeather} /> : null}
+          {historie?.labels?.length ? <TemperatureChart data={historie} /> : null}
+          <TideCard getijden={getijden} />
+        </div>
+      ) : (
+        <DataError onRetry={() => mutateWeer()} />
+      )}
+    </PullToRefresh>
+  );
+}
+
+async function openWeatherFetcher(
+  url: string
+): Promise<OpenWeatherSupplement | null> {
+  const res = await fetch(url);
+  if (res.status === 503) return null;
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new FetchError(body.error ?? "OpenWeather niet beschikbaar", res.status);
+  }
+  return res.json() as Promise<OpenWeatherSupplement>;
+}
+
+function WeerSkeleton() {
+  return (
+    <div className="space-y-4">
+      <Skeleton className="h-80 w-full rounded-3xl" />
+      <div className="grid grid-cols-2 gap-3">
+        <Skeleton className="h-28" />
+        <Skeleton className="h-28" />
+        <Skeleton className="h-28" />
+        <Skeleton className="h-28" />
+      </div>
+      <Card>
+        <CardContent>
+          <Skeleton className="h-40 w-full" />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

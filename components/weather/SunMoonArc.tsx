@@ -1,0 +1,161 @@
+"use client";
+
+import type { AstronomieApi } from "@/lib/api/types";
+
+interface SunMoonArcProps {
+  astro: AstronomieApi;
+}
+
+const W = 320;
+const H = 130;
+const CX = W / 2;
+const BASE_Y = 108;
+const R = 88;
+
+function sunPoint(progress: number) {
+  const angle = Math.PI * (1 - progress);
+  return {
+    x: CX + R * Math.cos(angle),
+    y: BASE_Y - R * Math.sin(angle),
+  };
+}
+
+function MoonPhaseDisc({
+  phase,
+  fraction,
+  size = 28,
+}: {
+  phase: number;
+  fraction: number;
+  size?: number;
+}) {
+  const waxing = phase < 0.5;
+  const litPct = Math.round(fraction * 100);
+
+  const background =
+    litPct < 3
+      ? "#1e293b"
+      : litPct > 97
+        ? "#e2e8f0"
+        : waxing
+          ? `linear-gradient(90deg, #0f172a 0%, #0f172a ${100 - litPct}%, #e2e8f0 ${100 - litPct}%)`
+          : `linear-gradient(270deg, #0f172a 0%, #0f172a ${100 - litPct}%, #e2e8f0 ${100 - litPct}%)`;
+
+  return (
+    <div
+      className="shrink-0 rounded-full border border-white/20"
+      style={{ width: size, height: size, background }}
+    />
+  );
+}
+
+export function SunMoonArc({ astro }: SunMoonArcProps) {
+  const sunUp =
+    !astro.sunBelowHorizon &&
+    astro.sunProgress >= 0 &&
+    astro.sunProgress <= 1;
+  const sun = sunPoint(Math.max(0, Math.min(1, astro.sunProgress)));
+  const arcPath = `M ${CX - R} ${BASE_Y} A ${R} ${R} 0 0 1 ${CX + R} ${BASE_Y}`;
+
+  return (
+    <div className="mx-auto mt-1 w-full max-w-[320px]">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="w-full overflow-visible"
+        aria-label={`Zonopkomst ${astro.sunriseLabel}, zonondergang ${astro.sunsetLabel}`}
+      >
+        <defs>
+          <linearGradient id="sunArcGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.3" />
+            <stop offset="50%" stopColor="#fde68a" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="#fb923c" stopOpacity="0.3" />
+          </linearGradient>
+        </defs>
+        <path
+          d={arcPath}
+          fill="none"
+          stroke="rgba(255,255,255,0.15)"
+          strokeWidth="2"
+          strokeDasharray="5 4"
+        />
+        <path
+          d={arcPath}
+          fill="none"
+          stroke="url(#sunArcGlow)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        />
+
+        {sunUp && (
+          <g transform={`translate(${sun.x}, ${sun.y})`}>
+            <circle r="16" fill="#fbbf24" opacity="0.25" />
+            <circle r="11" fill="#fde68a" />
+            {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
+              <line
+                key={deg}
+                x1={0}
+                y1={-15}
+                x2={0}
+                y2={-19}
+                stroke="#fde68a"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                transform={`rotate(${deg})`}
+                opacity={0.75}
+              />
+            ))}
+          </g>
+        )}
+
+        {astro.period === "night" && (
+          <g transform={`translate(${CX}, ${BASE_Y - 48})`}>
+            <foreignObject x={-16} y={-16} width={32} height={32}>
+              <div className="flex h-8 w-8 items-center justify-center">
+                <MoonPhaseDisc
+                  phase={astro.moon.phase}
+                  fraction={astro.moon.fraction}
+                  size={32}
+                />
+              </div>
+            </foreignObject>
+          </g>
+        )}
+
+        <text
+          x={CX - R}
+          y={BASE_Y + 16}
+          textAnchor="start"
+          fill="rgba(255,255,255,0.9)"
+          fontSize="11"
+          fontWeight="500"
+        >
+          ↑ {astro.sunriseLabel}
+        </text>
+        <text
+          x={CX + R}
+          y={BASE_Y + 16}
+          textAnchor="end"
+          fill="rgba(255,255,255,0.9)"
+          fontSize="11"
+          fontWeight="500"
+        >
+          {astro.sunsetLabel} ↓
+        </text>
+      </svg>
+
+      <div className="mt-2 flex items-center justify-center gap-2.5 rounded-xl bg-black/25 px-3 py-2">
+        <MoonPhaseDisc
+          phase={astro.moon.phase}
+          fraction={astro.moon.fraction}
+          size={26}
+        />
+        <div className="text-left text-sm leading-tight">
+          <p className="font-medium text-white">{astro.moon.label}</p>
+          <p className="text-xs text-white/60">
+            {astro.moon.illuminationPct}% verlicht
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
