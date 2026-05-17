@@ -46,7 +46,9 @@ export default function EnergiePage() {
   return (
     <PullToRefresh onRefresh={refreshAll}>
       <header className="mb-4">
-        <h1 className="text-xl font-semibold text-white">Energie dashboard</h1>
+        <h1 className="bg-gradient-to-r from-amber-300 to-orange-200 bg-clip-text text-xl font-semibold text-transparent">
+          Energie dashboard
+        </h1>
       </header>
 
       {showSkeleton ? (

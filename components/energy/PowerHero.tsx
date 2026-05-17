@@ -11,13 +11,14 @@ interface PowerHeroProps {
 
 export function PowerHero({ data }: PowerHeroProps) {
   const exporting = data.stroom_nu < 0;
-  const powerColor = exporting ? "text-emerald-400" : "text-white";
+  const powerColor = exporting ? "text-emerald-400" : "text-amber-100";
 
   return (
     <Card
+      variant="energy"
       className={cn(
-        "border-amber-500/20 bg-gradient-to-br from-zinc-900/90 to-amber-950/20",
-        exporting && "shadow-[0_0_40px_-10px_rgba(52,211,153,0.4)]"
+        exporting &&
+          "border-emerald-500/30 bg-gradient-to-br from-emerald-950/40 via-card to-card shadow-[0_0_40px_-10px_rgba(52,211,153,0.4)]"
       )}
     >
       <CardContent className="flex items-center justify-between">
@@ -31,7 +32,12 @@ export function PowerHero({ data }: PowerHeroProps) {
           </h1>
           <p className="mt-2 text-sm text-zinc-400">
             Actueel tarief:{" "}
-            <span className="font-semibold text-white">
+            <span
+              className={cn(
+                "font-semibold",
+                data.tarief === 2 ? "text-amber-400" : "text-sky-300"
+              )}
+            >
               {data.tarief === 2 ? "Piek" : "Dal"}
             </span>
           </p>

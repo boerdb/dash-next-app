@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { WeatherHero } from "@/components/weather/WeatherHero";
 import { MetricGrid } from "@/components/weather/MetricGrid";
 import { TideCard } from "@/components/weather/TideCard";
-import { OpenWeatherSection } from "@/components/weather/OpenWeatherSection";
+import { OpenWeatherPanel } from "@/components/weather/OpenWeatherPanel";
 import { PullToRefresh } from "@/components/shared/PullToRefresh";
 import { DataError } from "@/components/shared/DataError";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -71,14 +71,23 @@ export default function WeerPage() {
     { refreshInterval: 300_000 }
   );
 
-  const { data: openWeather, mutate: mutateOpenWeather } = useSWR<
-    OpenWeatherSupplement | null,
-    FetchError
-  >("/api/weer/openweather", openWeatherFetcher, {
-    refreshInterval: 1_800_000,
-    shouldRetryOnError: false,
-    revalidateOnFocus: false,
-  });
+  const {
+    data: openWeather,
+    error: openWeatherError,
+    isLoading: openWeatherLoading,
+    mutate: mutateOpenWeather,
+  } = useSWR<OpenWeatherSupplement | null, FetchError>(
+    "/api/weer/openweather",
+    openWeatherFetcher,
+    {
+      refreshInterval: 1_800_000,
+      revalidateOnMount: true,
+      revalidateOnFocus: true,
+      shouldRetryOnError: true,
+      errorRetryCount: 2,
+      dedupingInterval: 5_000,
+    }
+  );
 
   const astroFallback = useMemo(() => {
     try {
@@ -125,7 +134,9 @@ export default function WeerPage() {
   return (
     <PullToRefresh onRefresh={refreshAll}>
       <header className="mb-4 text-center">
-        <h1 className="text-xl font-semibold text-white">Actueel weer</h1>
+        <h1 className="bg-gradient-to-r from-sky-300 to-cyan-200 bg-clip-text text-xl font-semibold text-transparent">
+          Actueel weer
+        </h1>
       </header>
 
       {showSkeleton ? (
@@ -141,7 +152,12 @@ export default function WeerPage() {
             updateLabel={updateLabel}
           />
           <MetricGrid data={weer} />
-          {openWeather ? <OpenWeatherSection data={openWeather} /> : null}
+          <OpenWeatherPanel
+            data={openWeather}
+            error={openWeatherError}
+            isLoading={openWeatherLoading}
+            onRetry={() => mutateOpenWeather()}
+          />
           {historie?.labels?.length ? <TemperatureChart data={historie} /> : null}
           <TideCard getijden={getijden} bron={getijBron} />
         </div>
@@ -155,14 +171,24 @@ export default function WeerPage() {
 async function openWeatherFetcher(
   url: string
 ): Promise<OpenWeatherSupplement | null> {
-  const res = await fetch(url);
-  if (res.status === 503) return null;
+  const res = await fetch(url, { cache: "no-store" });
+  if (res.status === 503) {
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new FetchError(
+      body.error ?? "OpenWeather niet geconfigureerd",
+      503
+    );
+  }
   if (!res.ok) {
     const body = (await res.json().catch(() => ({}))) as { error?: string };
     throw new FetchError(body.error ?? "OpenWeather niet beschikbaar", res.status);
   }
   const raw = (await res.json()) as Partial<OpenWeatherSupplement>;
-  return normalizeOpenWeatherSupplement(raw);
+  const normalized = normalizeOpenWeatherSupplement(raw);
+  if (!normalized) {
+    throw new FetchError("OpenWeather ongeldige response", 502);
+  }
+  return normalized;
 }
 
 function WeerSkeleton() {

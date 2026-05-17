@@ -23,13 +23,25 @@ export function OpenWeatherSection({ data }: OpenWeatherSectionProps) {
     dataSource === "onecall-3" ? "Komende uren" : "Komende uren (elke 3 u)";
 
   return (
-    <Card>
+    <Card variant="weather">
       <CardContent className="space-y-4">
-        <header className="text-center">
-          <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
-            Voorspelling & aanvulling
-          </p>
-          <p className="mt-0.5 text-[0.65rem] text-zinc-500">
+        <header>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="border-l-2 border-sky-500/50 pl-2 text-xs font-semibold uppercase tracking-widest text-zinc-400">
+              Voorspelling & aanvulling
+            </p>
+            <span
+              className={cn(
+                "rounded-full px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide",
+                dataSource === "onecall-3"
+                  ? "bg-sky-500/20 text-sky-300"
+                  : "bg-zinc-500/20 text-zinc-400"
+              )}
+            >
+              {dataSourceLabel(dataSource)}
+            </span>
+          </div>
+          <p className="mt-1 text-[0.65rem] text-zinc-500">
             OpenWeather · Harlingen · bepaalt ook luchtbeeld bovenaan
           </p>
         </header>
@@ -75,7 +87,7 @@ export function OpenWeatherSection({ data }: OpenWeatherSectionProps) {
 
         {hourly.length > 0 && (
           <section>
-            <p className="mb-2 text-[0.65rem] uppercase tracking-wide text-zinc-500">
+            <p className="mb-2 border-l-2 border-sky-500/50 pl-2 text-[0.65rem] uppercase tracking-wide text-zinc-500">
               {hourlyTitle}
             </p>
             <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -88,7 +100,7 @@ export function OpenWeatherSection({ data }: OpenWeatherSectionProps) {
 
         {daily.length > 0 && (
           <section>
-            <p className="mb-2 text-[0.65rem] uppercase tracking-wide text-zinc-500">
+            <p className="mb-2 border-l-2 border-sky-500/50 pl-2 text-[0.65rem] uppercase tracking-wide text-zinc-500">
               5-daagse voorspelling
             </p>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
@@ -182,18 +194,26 @@ function SupplementChip({
   );
 }
 
+function tempColorClass(tempC: number): string {
+  if (tempC <= 5) return "text-sky-300";
+  if (tempC >= 20) return "text-orange-300";
+  return "text-white";
+}
+
 function HourlyChip({
   item,
 }: {
   item: OpenWeatherSupplement["hourly"][number];
 }) {
   return (
-    <div className="flex min-w-[4.5rem] shrink-0 flex-col items-center rounded-xl border border-white/10 bg-black/30 px-2 py-2">
+    <div className="flex min-w-[4.5rem] shrink-0 flex-col items-center rounded-xl border border-sky-500/10 bg-black/30 px-2 py-2">
       <span className="text-[0.65rem] font-medium text-zinc-400">{item.label}</span>
       {item.icon ? (
         <img src={item.icon} alt="" width={36} height={36} className="my-0.5 h-9 w-9" />
       ) : null}
-      <span className="text-sm font-bold tabular-nums text-white">{item.tempC}°</span>
+      <span className={cn("text-sm font-bold tabular-nums", tempColorClass(item.tempC))}>
+        {item.tempC}°
+      </span>
       <span
         className={cn(
           "text-[0.65rem] tabular-nums",
@@ -219,8 +239,10 @@ function DailyChip({
       {item.icon ? (
         <img src={item.icon} alt="" width={40} height={40} className="my-1 h-10 w-10" />
       ) : null}
-      <span className="text-xs font-bold tabular-nums text-white">
-        {item.tempMinC}° / {item.tempMaxC}°
+      <span className="text-xs font-bold tabular-nums">
+        <span className={tempColorClass(item.tempMinC)}>{item.tempMinC}°</span>
+        <span className="text-zinc-500"> / </span>
+        <span className={tempColorClass(item.tempMaxC)}>{item.tempMaxC}°</span>
       </span>
       <span
         className={cn(

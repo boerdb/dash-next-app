@@ -17,13 +17,27 @@ export const weatherBackgrounds: Record<WeatherCondition, { image: string }> = {
   dawn: { image: "/weather/dawn.jpg" },
 };
 
+/** Lichter dan voorheen: midden laat foto-kleur door; onder sluit aan op --background */
 const overlay =
-  "linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.2) 40%, rgba(10,10,10,0.75) 100%)";
+  "linear-gradient(to bottom, rgba(0,0,0,0.32) 0%, rgba(0,0,0,0.08) 48%, rgba(12,18,34,0.52) 100%)";
+
+const darkConditions = new Set<WeatherCondition>([
+  "night",
+  "evening",
+  "storm",
+  "thunder",
+  "rain",
+  "fog",
+]);
+
+const overlayDark =
+  "linear-gradient(to bottom, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.15) 45%, rgba(12,18,34,0.58) 100%)";
 
 export function getWeatherBackgroundStyle(condition: WeatherCondition): CSSProperties {
   const { image } = weatherBackgrounds[condition];
+  const scrim = darkConditions.has(condition) ? overlayDark : overlay;
   return {
-    backgroundImage: `${overlay}, url(${image})`,
+    backgroundImage: `${scrim}, url(${image})`,
     backgroundSize: "cover",
     backgroundPosition: "center",
   };

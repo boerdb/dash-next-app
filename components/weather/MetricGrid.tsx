@@ -23,7 +23,7 @@ function MetricCard({
   className?: string;
 }) {
   return (
-    <Card className={className}>
+    <Card variant="weather" className={className}>
       <CardContent className="flex flex-col items-center justify-center text-center">
         {children}
       </CardContent>
@@ -56,7 +56,7 @@ export function MetricGrid({ data }: MetricGridProps) {
         </MetricCard>
 
         <MetricCard>
-          <Droplets className="h-8 w-8 text-sky-400" />
+          <Droplets className="h-8 w-8 text-blue-400" />
           <p className="mt-2 text-xs uppercase tracking-wide text-zinc-400">Regen</p>
           <p className="text-2xl font-bold tabular-nums">
             {Number(data.dailyrain_mm ?? 0).toFixed(1)}
@@ -68,7 +68,7 @@ export function MetricGrid({ data }: MetricGridProps) {
         </MetricCard>
 
         <MetricCard>
-          <Gauge className="h-8 w-8 text-zinc-200" />
+          <Gauge className="h-8 w-8 text-violet-400" />
           <p className="mt-2 text-xs uppercase tracking-wide text-zinc-400">Luchtdruk</p>
           <p className="text-2xl font-bold tabular-nums">
             {Number(data.baromrel_hpa ?? 0).toFixed(1)}
@@ -87,14 +87,14 @@ export function MetricGrid({ data }: MetricGridProps) {
         </MetricCard>
       </div>
 
-      <Card>
+      <Card variant="weather">
         <CardContent className="flex flex-wrap items-center justify-center gap-3 text-center">
-          <Home className="h-5 w-5 text-zinc-400" />
+          <Home className="h-5 w-5 text-emerald-400" />
           <span className="text-xs uppercase text-zinc-400">Binnen:</span>
-          <strong className="text-lg">{data.tempin_c}°C</strong>
+          <strong className="text-lg text-sky-100">{data.tempin_c}°C</strong>
           <span className="text-zinc-600">|</span>
           <span className="text-xs uppercase text-zinc-400">Vocht:</span>
-          <strong className="text-lg">{data.humidityin}%</strong>
+          <strong className="text-lg text-cyan-200">{data.humidityin}%</strong>
         </CardContent>
       </Card>
     </div>

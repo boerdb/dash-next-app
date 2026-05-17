@@ -50,7 +50,7 @@ export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
         : "text-zinc-400 bg-zinc-500/10";
 
   return (
-    <Card>
+    <Card variant="weather">
       <CardContent>
         <p className="mb-2 text-center text-[0.65rem] text-zinc-500">
           Vandaag en morgen · Harlingen

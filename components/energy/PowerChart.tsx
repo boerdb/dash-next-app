@@ -28,9 +28,9 @@ export function PowerChart({ data }: PowerChartProps) {
   }));
 
   return (
-    <Card>
+    <Card variant="energy">
       <CardContent>
-        <p className="mb-3 text-xs uppercase tracking-wide text-zinc-400">
+        <p className="mb-3 border-l-2 border-amber-500/50 pl-2 text-xs uppercase tracking-wide text-zinc-400">
           Verbruik afgelopen 24 uur (Watt)
         </p>
         <ChartContainer height={CHART_HEIGHT}>

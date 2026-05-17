@@ -1,15 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a0a;
+  --background: #0c1222;
   --foreground: #ededed;
   --primary: #38bdf8;
-  --card: rgba(0, 0, 0, 0.4);
+  --accent-weather: #38bdf8;
+  --accent-energy: #fbbf24;
+  --card: rgba(255, 255, 255, 0.05);
+  --card-border: rgba(255, 255, 255, 0.1);
+  --surface-muted: #a1a1aa;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-accent-weather: var(--accent-weather);
+  --color-accent-energy: var(--accent-energy);
+  --color-card: var(--card);
+  --color-card-border: var(--card-border);
+  --color-surface-muted: var(--surface-muted);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

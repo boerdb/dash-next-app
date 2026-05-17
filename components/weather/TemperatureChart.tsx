@@ -28,9 +28,9 @@ export function TemperatureChart({ data }: TemperatureChartProps) {
   }));
 
   return (
-    <Card>
+    <Card variant="weather">
       <CardContent>
-        <p className="mb-1 text-xs uppercase tracking-wide text-zinc-400">
+        <p className="mb-1 border-l-2 border-sky-500/50 pl-2 text-xs uppercase tracking-wide text-zinc-400">
           Temperatuur afgelopen 24 uur
         </p>
         <p className="mb-3 text-sm text-zinc-500">

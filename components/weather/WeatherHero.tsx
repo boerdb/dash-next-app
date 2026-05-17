@@ -60,17 +60,17 @@ export function WeatherHero({
       className="relative -mx-4 overflow-hidden rounded-b-3xl px-4 pb-8 pt-6 sm:-mx-6"
       style={getWeatherBackgroundStyle(condition)}
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-[#0a0a0a]/90" />
-      <div className="relative z-10 text-center">
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-background/75" />
+      <div className="relative z-10 text-center [text-shadow:0_1px_10px_rgba(0,0,0,0.75)]">
         {updateLabel && (
-          <p className="mb-2 text-xs text-white/70">{updateLabel}</p>
+          <p className="mb-2 text-xs text-white/85">{updateLabel}</p>
         )}
 
         <p className="text-xs font-semibold uppercase tracking-widest text-white">
           {periodLabel}
         </p>
         {showWeatherSub && (
-          <p className="mt-0.5 text-[0.65rem] uppercase tracking-wide text-white/65">
+          <p className="mt-0.5 text-[0.65rem] uppercase tracking-wide text-white/80">
             {weatherLabel}
           </p>
         )}
@@ -90,7 +90,7 @@ export function WeatherHero({
         <SunMoonArc astro={astro} />
 
         <p className="mt-3 text-sm uppercase tracking-wide text-white/80">Buiten</p>
-        <h1 className="text-6xl font-bold tabular-nums text-white drop-shadow-md">
+        <h1 className="text-6xl font-bold tabular-nums text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]">
           {temp}
           <sup className="ml-1 text-2xl font-normal text-white/80">°C</sup>
         </h1>
