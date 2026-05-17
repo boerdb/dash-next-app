@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { env } from "@/lib/env.server";
 import { fetchOpenWeatherSupplement } from "@/lib/openweather/fetch";
+import { normalizeOpenWeatherSupplement } from "@/lib/openweather/map";
 
 export async function GET() {
   const apiKey = env.OPENWEATHER_API_KEY;
@@ -12,7 +13,12 @@ export async function GET() {
   }
 
   try {
-    const data = await fetchOpenWeatherSupplement(apiKey);
+    const data = normalizeOpenWeatherSupplement(
+      await fetchOpenWeatherSupplement(apiKey)
+    );
+    if (!data) {
+      return NextResponse.json({ error: "OpenWeather ongeldige response" }, { status: 502 });
+    }
     return NextResponse.json(data, {
       headers: { "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600" },
     });

@@ -1,6 +1,11 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { mapOneCall3, mapOpenWeatherSupplement } from "./map";
+import type { OpenWeatherSupplement } from "@/lib/api/types";
+import {
+  mapOneCall3,
+  mapOpenWeatherSupplement,
+  normalizeOpenWeatherSupplement,
+} from "./map";
 import type { OwForecastResponse, OwOneCallResponse, OwWeatherResponse } from "./types";
 
 const NOW_SEC = Math.floor(Date.now() / 1000);
@@ -66,6 +71,32 @@ describe("mapOneCall3", () => {
     assert.equal(result.alerts[0].event, "Code geel wind");
     assert.equal(result.alerts[0].senderName, "KNMI");
     assert.match(result.alerts[0].startAt, /\d/);
+  });
+});
+
+describe("normalizeOpenWeatherSupplement", () => {
+  it("fills missing alerts and arrays from legacy cached payloads", () => {
+    const legacy = {
+      current: {
+        description: "helder",
+        icon: "",
+        weatherId: 800,
+        cloudsPct: 0,
+        visibilityKm: 10,
+        humidityPct: 50,
+        dewPointC: null,
+      },
+      hourly: undefined,
+      daily: undefined,
+      updatedAt: "2026-01-01T00:00:00.000Z",
+    } as unknown as Partial<OpenWeatherSupplement>;
+
+    const result = normalizeOpenWeatherSupplement(legacy);
+    assert.ok(result);
+    assert.deepEqual(result!.alerts, []);
+    assert.deepEqual(result!.hourly, []);
+    assert.deepEqual(result!.daily, []);
+    assert.equal(result!.dataSource, "2.5");
   });
 });
 

@@ -219,3 +219,19 @@ function groupDaily(list: OwForecastItem[]): OpenWeatherDaily[] {
       icon: iconUrl(g.icon),
     }));
 }
+
+/** Zorgt dat oude/gedeeltelijke API- of cache-responses niet crashen. */
+export function normalizeOpenWeatherSupplement(
+  raw: Partial<OpenWeatherSupplement> | null | undefined
+): OpenWeatherSupplement | null {
+  if (!raw?.current) return null;
+
+  return {
+    current: raw.current,
+    hourly: Array.isArray(raw.hourly) ? raw.hourly : [],
+    daily: Array.isArray(raw.daily) ? raw.daily : [],
+    alerts: Array.isArray(raw.alerts) ? raw.alerts : [],
+    dataSource: raw.dataSource === "onecall-3" ? "onecall-3" : "2.5",
+    updatedAt: raw.updatedAt ?? new Date().toISOString(),
+  };
+}

@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { getAstronomyInfo, toAstronomieApi } from "@/lib/astronomy/sun-moon";
 import { jsonFetcher, FetchError } from "@/lib/fetcher";
+import { normalizeOpenWeatherSupplement } from "@/lib/openweather/map";
 import { getWeatherCondition } from "@/lib/utils/weather-condition";
 import type {
   AstronomieApi,
@@ -158,7 +159,8 @@ async function openWeatherFetcher(
     const body = (await res.json().catch(() => ({}))) as { error?: string };
     throw new FetchError(body.error ?? "OpenWeather niet beschikbaar", res.status);
   }
-  return res.json() as Promise<OpenWeatherSupplement>;
+  const raw = (await res.json()) as Partial<OpenWeatherSupplement>;
+  return normalizeOpenWeatherSupplement(raw);
 }
 
 function WeerSkeleton() {

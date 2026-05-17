@@ -2,6 +2,7 @@
 
 import { AlertTriangle, Cloud, Droplets, Eye, Thermometer } from "lucide-react";
 import type { OpenWeatherAlert, OpenWeatherSupplement } from "@/lib/api/types";
+import { normalizeOpenWeatherSupplement } from "@/lib/openweather/map";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +15,10 @@ function dataSourceLabel(dataSource: OpenWeatherSupplement["dataSource"]): strin
 }
 
 export function OpenWeatherSection({ data }: OpenWeatherSectionProps) {
-  const { current, hourly, daily, alerts, dataSource } = data;
+  const normalized = normalizeOpenWeatherSupplement(data);
+  if (!normalized) return null;
+
+  const { current, hourly, daily, alerts, dataSource } = normalized;
   const hourlyTitle =
     dataSource === "onecall-3" ? "Komende uren" : "Komende uren (elke 3 u)";
 
