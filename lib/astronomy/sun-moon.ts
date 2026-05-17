@@ -33,13 +33,13 @@ function formatTimeNl(date: Date): string {
 
 export function getMoonPhaseLabel(phase: number): string {
   if (phase < 0.03 || phase > 0.97) return "Nieuwe maan";
-  if (phase < 0.22) return "Wassende sichel";
+  if (phase < 0.22) return "Wassende sikkel";
   if (phase < 0.28) return "Eerste kwartier";
   if (phase < 0.47) return "Wassende maan";
   if (phase < 0.53) return "Volle maan";
   if (phase < 0.72) return "Afnemende maan";
   if (phase < 0.78) return "Laatste kwartier";
-  return "Afnemende sichel";
+  return "Afnemende sikkel";
 }
 
 export function getDayPeriod(now: Date, times: GetTimesResult): DayPeriod {
