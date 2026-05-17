@@ -33,7 +33,6 @@ function buildOneCallUrl(apiKey: string): string {
     appid: apiKey,
     units: UNITS,
     lang: LANG,
-    exclude: "minutely",
   });
   return `${BASE_30}/onecall?${params}`;
 }

@@ -88,11 +88,21 @@ export type WeatherCondition =
   | "cloudy";
 
 /** Aanvulling van OpenWeather — station blijft leidend voor live waarden. */
+export interface OpenWeatherMinutely {
+  at: number;
+  label: string;
+  precipitationMm: number;
+}
+
 export interface OpenWeatherHourly {
   at: number;
   label: string;
   tempC: number;
+  feelsLikeC: number | null;
   popPct: number;
+  humidityPct: number | null;
+  windSpeedKmh: number | null;
+  windDeg: number | null;
   description: string;
   icon: string;
 }
@@ -103,6 +113,13 @@ export interface OpenWeatherDaily {
   tempMinC: number;
   tempMaxC: number;
   popPct: number;
+  uviMax: number | null;
+  windSpeedKmh: number | null;
+  windDeg: number | null;
+  sunriseAt: string | null;
+  sunsetAt: string | null;
+  rainMm: number | null;
+  snowMm: number | null;
   description: string;
   icon: string;
 }
@@ -112,10 +129,19 @@ export interface OpenWeatherCurrent {
   icon: string;
   /** OpenWeather condition code (bijv. 800 = helder) */
   weatherId: number;
+  tempC: number | null;
+  feelsLikeC: number | null;
   cloudsPct: number;
   visibilityKm: number | null;
-  humidityPct: number;
+  humidityPct: number | null;
   dewPointC: number | null;
+  pressureHpa: number | null;
+  uvi: number | null;
+  windSpeedKmh: number | null;
+  windDeg: number | null;
+  windGustKmh: number | null;
+  rainMm1h: number | null;
+  snowMm1h: number | null;
 }
 
 export interface OpenWeatherAlert {
@@ -128,6 +154,7 @@ export interface OpenWeatherAlert {
 
 export interface OpenWeatherSupplement {
   current: OpenWeatherCurrent;
+  minutely: OpenWeatherMinutely[];
   hourly: OpenWeatherHourly[];
   daily: OpenWeatherDaily[];
   alerts: OpenWeatherAlert[];

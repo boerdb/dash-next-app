@@ -1,17 +1,28 @@
 import type {
   OpenWeatherAlert,
+  OpenWeatherCurrent,
   OpenWeatherDaily,
   OpenWeatherHourly,
+  OpenWeatherMinutely,
   OpenWeatherSupplement,
 } from "@/lib/api/types";
 import { dagKeyAmsterdam, dagLabelAmsterdam } from "@/lib/tides/day-label";
+import {
+  msToKmh,
+  normalizeDewPointC,
+  normalizeHumidityPct,
+  normalizeMetricTemp,
+} from "./normalize-metrics";
 import type {
   OwForecastItem,
   OwForecastResponse,
   OwOneCallAlert,
+  OwOneCallCurrent,
   OwOneCallDaily,
   OwOneCallHourly,
+  OwOneCallMinutely,
   OwOneCallResponse,
+  OwPrecipVolume,
   OwWeatherResponse,
 } from "./types";
 
@@ -43,52 +54,72 @@ function formatAlertTime(unixSec: number): string {
   });
 }
 
-export function mapOneCall3(data: OwOneCallResponse): OpenWeatherSupplement {
-  const now = Date.now();
-  const current = data.current;
+function precip1h(vol?: OwPrecipVolume): number | null {
+  const mm = vol?.["1h"];
+  if (mm == null || Number.isNaN(mm)) return null;
+  return round1(mm);
+}
+
+function pickHumidity(
+  primary: number | undefined,
+  fallback?: OwOneCallHourly
+): number | null {
+  return (
+    normalizeHumidityPct(primary) ??
+    normalizeHumidityPct(fallback?.humidity) ??
+    null
+  );
+}
+
+function pickDewPoint(
+  primary: number | undefined,
+  fallback?: OwOneCallHourly
+): number | null {
+  return (
+    normalizeDewPointC(primary) ??
+    normalizeDewPointC(fallback?.dew_point) ??
+    null
+  );
+}
+
+function mapCurrent3(
+  current: OwOneCallCurrent | undefined,
+  hourlyFallback?: OwOneCallHourly
+): OpenWeatherCurrent {
   const w = current?.weather?.[0];
   const visibilityM = current?.visibility;
-
-  const hourly: OpenWeatherHourly[] = (data.hourly ?? [])
-    .filter((item) => item.dt * 1000 > now - 60_000)
-    .slice(0, 8)
-    .map((item) => toOneCallHourly(item));
-
-  const today = dagKeyAmsterdam(new Date());
-  const daily: OpenWeatherDaily[] = (data.daily ?? []).slice(0, 5).map((item) => {
-    const date = new Date(item.dt * 1000);
-    const dagKey = dagKeyAmsterdam(date);
-    const weather = item.weather?.[0];
-    return {
-      dagKey,
-      label: dagKey === today ? "Vandaag" : dagLabelAmsterdam(date),
-      tempMinC: round1(item.temp?.min ?? 0),
-      tempMaxC: round1(item.temp?.max ?? 0),
-      popPct: Math.round((item.pop ?? 0) * 100),
-      description: weather?.description ?? "",
-      icon: weather?.icon ? iconUrl(weather.icon) : "",
-    };
-  });
-
-  const alerts: OpenWeatherAlert[] = (data.alerts ?? []).map(mapAlert);
+  const rain = precip1h(current?.rain);
+  const snow = precip1h(current?.snow);
 
   return {
-    current: {
-      description: w?.description ?? "—",
-      icon: w?.icon ? iconUrl(w.icon) : "",
-      weatherId: w?.id ?? 0,
-      cloudsPct: current?.clouds ?? 0,
-      visibilityKm:
-        visibilityM != null ? round1(visibilityM / 1000) : null,
-      humidityPct: current?.humidity ?? 0,
-      dewPointC:
-        current?.dew_point != null ? round1(current.dew_point) : null,
-    },
-    hourly,
-    daily,
-    alerts,
-    dataSource: "onecall-3",
-    updatedAt: new Date().toISOString(),
+    description: w?.description ?? "—",
+    icon: w?.icon ? iconUrl(w.icon) : "",
+    weatherId: w?.id ?? 0,
+    tempC: normalizeMetricTemp(current?.temp),
+    feelsLikeC: normalizeMetricTemp(current?.feels_like),
+    cloudsPct: Math.round(current?.clouds ?? 0),
+    visibilityKm:
+      visibilityM != null ? round1(visibilityM / 1000) : null,
+    humidityPct: pickHumidity(current?.humidity, hourlyFallback),
+    dewPointC: pickDewPoint(current?.dew_point, hourlyFallback),
+    pressureHpa:
+      current?.pressure != null ? Math.round(current.pressure) : null,
+    uvi: current?.uvi != null ? round1(current.uvi) : null,
+    windSpeedKmh: msToKmh(current?.wind_speed),
+    windDeg:
+      current?.wind_deg != null ? Math.round(current.wind_deg) : null,
+    windGustKmh: msToKmh(current?.wind_gust),
+    rainMm1h: rain,
+    snowMm1h: snow,
+  };
+}
+
+function toOneCallMinutely(item: OwOneCallMinutely): OpenWeatherMinutely {
+  const date = new Date(item.dt * 1000);
+  return {
+    at: item.dt * 1000,
+    label: formatTime(date),
+    precipitationMm: round1(item.precipitation ?? 0),
   };
 }
 
@@ -98,10 +129,69 @@ function toOneCallHourly(item: OwOneCallHourly): OpenWeatherHourly {
   return {
     at: item.dt * 1000,
     label: formatTime(date),
-    tempC: round1(item.temp ?? 0),
+    tempC: normalizeMetricTemp(item.temp) ?? 0,
+    feelsLikeC: normalizeMetricTemp(item.feels_like),
     popPct: Math.round((item.pop ?? 0) * 100),
+    humidityPct: normalizeHumidityPct(item.humidity),
+    windSpeedKmh: msToKmh(item.wind_speed),
+    windDeg: item.wind_deg != null ? Math.round(item.wind_deg) : null,
     description: w?.description ?? "",
     icon: w?.icon ? iconUrl(w.icon) : "",
+  };
+}
+
+function toOneCallDaily(item: OwOneCallDaily): OpenWeatherDaily {
+  const date = new Date(item.dt * 1000);
+  const dagKey = dagKeyAmsterdam(date);
+  const today = dagKeyAmsterdam(new Date());
+  const weather = item.weather?.[0];
+
+  return {
+    dagKey,
+    label: dagKey === today ? "Vandaag" : dagLabelAmsterdam(date),
+    tempMinC: normalizeMetricTemp(item.temp?.min) ?? 0,
+    tempMaxC: normalizeMetricTemp(item.temp?.max) ?? 0,
+    popPct: Math.round((item.pop ?? 0) * 100),
+    uviMax: item.uvi != null ? round1(item.uvi) : null,
+    windSpeedKmh: msToKmh(item.wind_speed),
+    windDeg: item.wind_deg != null ? Math.round(item.wind_deg) : null,
+    sunriseAt: item.sunrise ? formatTime(new Date(item.sunrise * 1000)) : null,
+    sunsetAt: item.sunset ? formatTime(new Date(item.sunset * 1000)) : null,
+    rainMm: item.rain != null ? round1(item.rain) : null,
+    snowMm: item.snow != null ? round1(item.snow) : null,
+    description: weather?.description ?? "",
+    icon: weather?.icon ? iconUrl(weather.icon) : "",
+  };
+}
+
+export function mapOneCall3(data: OwOneCallResponse): OpenWeatherSupplement {
+  const now = Date.now();
+  const hourlyRaw = data.hourly ?? [];
+  const hourlyFallback = hourlyRaw.find((item) => item.dt * 1000 > now - 60_000);
+
+  const hourly: OpenWeatherHourly[] = hourlyRaw
+    .filter((item) => item.dt * 1000 > now - 60_000)
+    .slice(0, 8)
+    .map((item) => toOneCallHourly(item));
+
+  const daily: OpenWeatherDaily[] = (data.daily ?? [])
+    .slice(0, 5)
+    .map((item) => toOneCallDaily(item));
+
+  const minutely: OpenWeatherMinutely[] = (data.minutely ?? [])
+    .slice(0, 60)
+    .map((item) => toOneCallMinutely(item));
+
+  const alerts: OpenWeatherAlert[] = (data.alerts ?? []).map(mapAlert);
+
+  return {
+    current: mapCurrent3(data.current, hourlyFallback),
+    minutely,
+    hourly,
+    daily,
+    alerts,
+    dataSource: "onecall-3",
+    updatedAt: new Date().toISOString(),
   };
 }
 
@@ -114,6 +204,29 @@ function mapAlert(a: OwOneCallAlert): OpenWeatherAlert {
     startAt: formatAlertTime(start),
     endAt: formatAlertTime(end),
     description: a.description ?? "",
+  };
+}
+
+function emptyCurrent25(
+  partial: Partial<OpenWeatherCurrent>
+): OpenWeatherCurrent {
+  return {
+    description: partial.description ?? "—",
+    icon: partial.icon ?? "",
+    weatherId: partial.weatherId ?? 0,
+    tempC: partial.tempC ?? null,
+    feelsLikeC: partial.feelsLikeC ?? null,
+    cloudsPct: partial.cloudsPct ?? 0,
+    visibilityKm: partial.visibilityKm ?? null,
+    humidityPct: partial.humidityPct ?? null,
+    dewPointC: partial.dewPointC ?? null,
+    pressureHpa: partial.pressureHpa ?? null,
+    uvi: partial.uvi ?? null,
+    windSpeedKmh: partial.windSpeedKmh ?? null,
+    windDeg: partial.windDeg ?? null,
+    windGustKmh: partial.windGustKmh ?? null,
+    rainMm1h: partial.rainMm1h ?? null,
+    snowMm1h: partial.snowMm1h ?? null,
   };
 }
 
@@ -136,16 +249,27 @@ export function mapOpenWeatherSupplement(
   const dew = current.main?.dew_point;
 
   return {
-    current: {
+    current: emptyCurrent25({
       description: w?.description ?? "—",
       icon: w?.icon ? iconUrl(w.icon) : "",
       weatherId: w?.id ?? 0,
+      tempC: normalizeMetricTemp(current.main?.temp),
+      feelsLikeC: normalizeMetricTemp(current.main?.feels_like),
       cloudsPct: current.clouds?.all ?? 0,
       visibilityKm:
-        visibilityM != null ? Math.round((visibilityM / 1000) * 10) / 10 : null,
-      humidityPct: current.main?.humidity ?? 0,
-      dewPointC: dew != null ? Math.round(dew * 10) / 10 : null,
-    },
+        visibilityM != null ? round1(visibilityM / 1000) : null,
+      humidityPct: normalizeHumidityPct(current.main?.humidity),
+      dewPointC: normalizeDewPointC(dew),
+      pressureHpa:
+        current.main?.pressure != null
+          ? Math.round(current.main.pressure)
+          : null,
+      windSpeedKmh: msToKmh(current.wind?.speed),
+      windDeg:
+        current.wind?.deg != null ? Math.round(current.wind.deg) : null,
+      windGustKmh: msToKmh(current.wind?.gust),
+    }),
+    minutely: [],
     hourly,
     daily,
     alerts: [],
@@ -160,8 +284,12 @@ function toHourly(item: OwForecastItem): OpenWeatherHourly {
   return {
     at: item.dt * 1000,
     label: formatTime(date),
-    tempC: Math.round((item.main?.temp ?? 0) * 10) / 10,
+    tempC: normalizeMetricTemp(item.main?.temp) ?? 0,
+    feelsLikeC: normalizeMetricTemp(item.main?.feels_like),
     popPct: Math.round((item.pop ?? 0) * 100),
+    humidityPct: normalizeHumidityPct(item.main?.humidity),
+    windSpeedKmh: msToKmh(item.wind?.speed),
+    windDeg: item.wind?.deg != null ? Math.round(item.wind.deg) : null,
     description: w?.description ?? "",
     icon: w?.icon ? iconUrl(w.icon) : "",
   };
@@ -212,9 +340,16 @@ function groupDaily(list: OwForecastItem[]): OpenWeatherDaily[] {
     .map(([dagKey, g]) => ({
       dagKey,
       label: dagKey === today ? "Vandaag" : dagLabelAmsterdam(g.date),
-      tempMinC: Math.round(Math.min(...g.temps) * 10) / 10,
-      tempMaxC: Math.round(Math.max(...g.temps) * 10) / 10,
+      tempMinC: round1(Math.min(...g.temps)),
+      tempMaxC: round1(Math.max(...g.temps)),
       popPct: Math.max(...g.pops),
+      uviMax: null,
+      windSpeedKmh: null,
+      windDeg: null,
+      sunriseAt: null,
+      sunsetAt: null,
+      rainMm: null,
+      snowMm: null,
       description: g.description,
       icon: iconUrl(g.icon),
     }));
@@ -226,8 +361,21 @@ export function normalizeOpenWeatherSupplement(
 ): OpenWeatherSupplement | null {
   if (!raw?.current) return null;
 
+  const c = raw.current;
   return {
-    current: raw.current,
+    current: emptyCurrent25({
+      ...c,
+      humidityPct:
+        c.humidityPct != null
+          ? normalizeHumidityPct(c.humidityPct)
+          : null,
+      dewPointC:
+        c.dewPointC != null ? normalizeDewPointC(c.dewPointC) : null,
+      tempC: c.tempC != null ? normalizeMetricTemp(c.tempC) : null,
+      feelsLikeC:
+        c.feelsLikeC != null ? normalizeMetricTemp(c.feelsLikeC) : null,
+    }),
+    minutely: Array.isArray(raw.minutely) ? raw.minutely : [],
     hourly: Array.isArray(raw.hourly) ? raw.hourly : [],
     daily: Array.isArray(raw.daily) ? raw.daily : [],
     alerts: Array.isArray(raw.alerts) ? raw.alerts : [],
