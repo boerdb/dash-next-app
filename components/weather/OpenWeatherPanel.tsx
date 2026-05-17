@@ -1,6 +1,6 @@
 "use client";
 
-import type { OpenWeatherSupplement } from "@/lib/api/types";
+import type { OpenWeatherSupplement, WeerLive } from "@/lib/api/types";
 import { OpenWeatherSection } from "@/components/weather/OpenWeatherSection";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -8,6 +8,7 @@ import type { FetchError } from "@/lib/fetcher";
 
 interface OpenWeatherPanelProps {
   data: OpenWeatherSupplement | null | undefined;
+  station?: WeerLive | null;
   error: FetchError | undefined;
   isLoading: boolean;
   onRetry: () => void;
@@ -15,12 +16,13 @@ interface OpenWeatherPanelProps {
 
 export function OpenWeatherPanel({
   data,
+  station,
   error,
   isLoading,
   onRetry,
 }: OpenWeatherPanelProps) {
   if (data) {
-    return <OpenWeatherSection data={data} />;
+    return <OpenWeatherSection data={data} station={station} />;
   }
 
   if (isLoading && !error) {

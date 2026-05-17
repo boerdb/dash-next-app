@@ -61,42 +61,44 @@ function precip1h(vol?: OwPrecipVolume): number | null {
   return round1(mm);
 }
 
-function firstValidHumidityPct(
-  ...candidates: Array<number | undefined>
-): number | null {
-  for (const value of candidates) {
-    const pct = normalizeHumidityPct(value);
-    if (pct != null) return pct;
-  }
-  return null;
+function referenceDtSec(current: OwOneCallCurrent | undefined): number {
+  return current?.dt ?? Math.floor(Date.now() / 1000);
 }
 
-function firstValidDewPointC(
-  ...candidates: Array<number | undefined>
-): number | null {
-  for (const value of candidates) {
-    const dp = normalizeDewPointC(value);
-    if (dp != null) return dp;
-  }
-  return null;
+/** Dichtstbij `current.dt` (of nu), niet array-volgorde. */
+function hourliesByNearest(
+  hourly: OwOneCallHourly[],
+  refDt: number
+): OwOneCallHourly[] {
+  return [...hourly].sort(
+    (a, b) => Math.abs(a.dt - refDt) - Math.abs(b.dt - refDt)
+  );
 }
 
+/** One Call 3.0: `current.humidity` is leidend; bij ongeldige API-waarden nearest hourly. */
 function pickHumidity(
   current: OwOneCallCurrent | undefined,
   hourly: OwOneCallHourly[]
 ): number | null {
-  const hourlyHumidity = hourly.map((h) => h.humidity);
-  const direct = firstValidHumidityPct(current?.humidity, ...hourlyHumidity);
-  if (direct != null) return direct;
+  const fromCurrent = normalizeHumidityPct(current?.humidity);
+  if (fromCurrent != null) return fromCurrent;
+
+  const refDt = referenceDtSec(current);
+  for (const slot of hourliesByNearest(hourly, refDt)) {
+    const pct = normalizeHumidityPct(slot.humidity);
+    if (pct != null) return pct;
+  }
 
   const tempC = normalizeMetricTemp(current?.temp);
-  const dewPointC = firstValidDewPointC(
-    current?.dew_point,
-    ...hourly.map((h) => h.dew_point)
-  );
-  if (tempC != null && dewPointC != null) {
-    return humidityFromDewPoint(tempC, dewPointC);
+  if (tempC == null) return null;
+
+  for (const slot of hourliesByNearest(hourly, refDt)) {
+    const dewPointC = normalizeDewPointC(slot.dew_point);
+    if (dewPointC != null) {
+      return humidityFromDewPoint(tempC, dewPointC);
+    }
   }
+
   return null;
 }
 
@@ -104,10 +106,15 @@ function pickDewPoint(
   current: OwOneCallCurrent | undefined,
   hourly: OwOneCallHourly[]
 ): number | null {
-  return firstValidDewPointC(
-    current?.dew_point,
-    ...hourly.map((h) => h.dew_point)
-  );
+  const fromCurrent = normalizeDewPointC(current?.dew_point);
+  if (fromCurrent != null) return fromCurrent;
+
+  const refDt = referenceDtSec(current);
+  for (const slot of hourliesByNearest(hourly, refDt)) {
+    const dp = normalizeDewPointC(slot.dew_point);
+    if (dp != null) return dp;
+  }
+  return null;
 }
 
 function mapCurrent3(
@@ -189,6 +196,17 @@ function toOneCallDaily(item: OwOneCallDaily): OpenWeatherDaily {
     snowMm: item.snow != null ? round1(item.snow) : null,
     description: weather?.description ?? "",
     icon: weather?.icon ? iconUrl(weather.icon) : "",
+  };
+}
+
+/** Ruwe One Call `current`-velden (alleen voor development/debug). */
+export function getOneCallRawCurrentDebug(data: OwOneCallResponse) {
+  const c = data.current;
+  return {
+    rawHumidity: c?.humidity ?? null,
+    rawDewPoint: c?.dew_point ?? null,
+    rawTemp: c?.temp ?? null,
+    rawDt: c?.dt ?? null,
   };
 }
 
@@ -396,19 +414,22 @@ export function normalizeOpenWeatherSupplement(
   let humidityPct =
     c.humidityPct != null ? normalizeHumidityPct(c.humidityPct) : null;
 
-  if (Array.isArray(raw.hourly)) {
-    if (humidityPct == null) {
-      for (const h of raw.hourly) {
-        const pct = normalizeHumidityPct(h.humidityPct);
-        if (pct != null) {
-          humidityPct = pct;
-          break;
-        }
+  if (humidityPct == null && Array.isArray(raw.hourly)) {
+    for (const h of raw.hourly) {
+      const pct = normalizeHumidityPct(h.humidityPct);
+      if (pct != null) {
+        humidityPct = pct;
+        break;
       }
     }
   }
 
-  if (humidityPct == null && tempC != null && dewPointC != null) {
+  if (
+    humidityPct == null &&
+    raw.dataSource === "onecall-3" &&
+    tempC != null &&
+    dewPointC != null
+  ) {
     humidityPct = humidityFromDewPoint(tempC, dewPointC);
   }
 

@@ -130,30 +130,79 @@ describe("mapOneCall3", () => {
     assert.equal(result.alerts.length, 1);
   });
 
-  it("falls back to hourly humidity when current is invalid", () => {
+  it("uses current.humidity directly when valid", () => {
+    const result = mapOneCall3(oneCallFixture);
+    assert.equal(result.current.humidityPct, 72);
+    assert.equal(result.current.dewPointC, 8.4);
+  });
+
+  it("falls back to nearest valid hourly when current humidity is invalid", () => {
+    const refDt = NOW_SEC + 1200;
     const broken: OwOneCallResponse = {
       ...oneCallFixture,
       current: {
         ...oneCallFixture.current!,
+        dt: refDt,
         humidity: 1,
-        dew_point: 234.5,
+        dew_point: -38.5,
       },
+      hourly: [
+        {
+          dt: refDt - 1800,
+          temp: 12.9,
+          humidity: 92,
+          dew_point: 11.8,
+          pop: 0.9,
+          weather: [{ id: 500, description: "lichte regen", icon: "10d" }],
+        },
+        {
+          dt: refDt + 600,
+          temp: 13.1,
+          humidity: 1,
+          dew_point: -38.5,
+          pop: 0.5,
+          weather: [{ id: 804, description: "bewolkt", icon: "04d" }],
+        },
+        ...(oneCallFixture.hourly ?? []).slice(1),
+      ],
     };
     const result = mapOneCall3(broken);
-    assert.equal(result.current.humidityPct, 80);
-    assert.ok(result.current.dewPointC != null && result.current.dewPointC > 0);
+    assert.equal(result.current.humidityPct, 92);
+    assert.equal(result.current.dewPointC, 11.8);
   });
 
-  it("computes humidity from temp and dew point when API humidity is wrong", () => {
-    const broken: OwOneCallResponse = {
-      ...oneCallFixture,
+  it("Harlingen-like API: invalid current, nearest hourly also invalid, next nearest valid", () => {
+    const refDt = NOW_SEC + 1380;
+    const harlingenLike: OwOneCallResponse = {
       current: {
+        dt: refDt,
+        temp: 13.16,
+        humidity: 1,
+        dew_point: -38.53,
+        weather: [{ id: 804, description: "bewolkt", icon: "04d" }],
+      },
+      hourly: [
+        { dt: NOW_SEC, temp: 12.93, humidity: 19, dew_point: -9.02, pop: 0.2, weather: [{ id: 804, description: "bewolkt", icon: "04d" }] },
+        { dt: NOW_SEC + 3600, temp: 13.16, humidity: 1, dew_point: -38.53, pop: 0.3, weather: [{ id: 804, description: "bewolkt", icon: "04d" }] },
+        { dt: NOW_SEC + 7200, temp: 12.84, humidity: 19, dew_point: -9.09, pop: 0.2, weather: [{ id: 804, description: "bewolkt", icon: "04d" }] },
+      ],
+    };
+    const result = mapOneCall3(harlingenLike);
+    assert.equal(result.current.humidityPct, 19);
+    assert.equal(result.current.dewPointC, -9);
+  });
+
+  it("computes humidity from temp and dew point when all humidities missing", () => {
+    const refDt = NOW_SEC + 900;
+    const broken: OwOneCallResponse = {
+      current: {
+        dt: refDt,
         temp: 13.2,
         feels_like: 10.6,
         clouds: 100,
         visibility: 10_000,
         humidity: 1,
-        dew_point: 234.5,
+        dew_point: -38.5,
         pressure: 1011,
         uvi: 0.7,
         wind_speed: 4.2,
@@ -162,14 +211,13 @@ describe("mapOneCall3", () => {
       },
       hourly: [
         {
-          dt: NOW_SEC + 3600,
+          dt: refDt + 300,
           temp: 13,
           humidity: 1,
           dew_point: 9.5,
           pop: 0.8,
           weather: [{ id: 804, description: "bewolkt", icon: "04d" }],
         },
-        ...(oneCallFixture.hourly ?? []).slice(1),
       ],
     };
     const result = mapOneCall3(broken);

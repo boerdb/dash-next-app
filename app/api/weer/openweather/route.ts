@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { env } from "@/lib/env.server";
-import { fetchOpenWeatherSupplement } from "@/lib/openweather/fetch";
-import { normalizeOpenWeatherSupplement } from "@/lib/openweather/map";
+import {
+  fetchOpenWeatherSupplement,
+  fetchOneCallRaw,
+} from "@/lib/openweather/fetch";
+import {
+  getOneCallRawCurrentDebug,
+  normalizeOpenWeatherSupplement,
+} from "@/lib/openweather/map";
 
 export async function GET() {
   const apiKey = env.OPENWEATHER_API_KEY;
@@ -13,13 +19,25 @@ export async function GET() {
   }
 
   try {
+    let prefetchedOneCall;
+    if (process.env.NODE_ENV === "development") {
+      try {
+        prefetchedOneCall = await fetchOneCallRaw(apiKey);
+      } catch {
+        /* val terug op fetchOpenWeatherSupplement met 2.5-fallback */
+      }
+    }
     const data = normalizeOpenWeatherSupplement(
-      await fetchOpenWeatherSupplement(apiKey)
+      await fetchOpenWeatherSupplement(apiKey, prefetchedOneCall)
     );
     if (!data) {
       return NextResponse.json({ error: "OpenWeather ongeldige response" }, { status: 502 });
     }
-    return NextResponse.json(data, {
+    const body =
+      process.env.NODE_ENV === "development" && prefetchedOneCall
+        ? { ...data, _debug: getOneCallRawCurrentDebug(prefetchedOneCall) }
+        : data;
+    return NextResponse.json(body, {
       headers: { "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600" },
     });
   } catch (e) {

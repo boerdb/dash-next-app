@@ -11,8 +11,17 @@ import {
   Thermometer,
   Wind,
 } from "lucide-react";
-import type { OpenWeatherAlert, OpenWeatherSupplement } from "@/lib/api/types";
+import type {
+  OpenWeatherAlert,
+  OpenWeatherSupplement,
+  WeerLive,
+} from "@/lib/api/types";
 import { normalizeOpenWeatherSupplement } from "@/lib/openweather/map";
+import {
+  parseStationHumidityPct,
+  shouldShowStationHumidityComparison,
+  shouldShowWetWeatherModelHint,
+} from "@/lib/openweather/model-hints";
 import { getWindDirection } from "@/lib/utils/wind";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -31,6 +40,7 @@ const OpenWeatherMinutelyChart = dynamic(
 
 interface OpenWeatherSectionProps {
   data: OpenWeatherSupplement;
+  station?: WeerLive | null;
 }
 
 function dataSourceLabel(dataSource: OpenWeatherSupplement["dataSource"]): string {
@@ -42,11 +52,17 @@ function fmt(value: string | number | null | undefined, suffix = ""): string {
   return `${value}${suffix}`;
 }
 
-export function OpenWeatherSection({ data }: OpenWeatherSectionProps) {
+export function OpenWeatherSection({ data, station }: OpenWeatherSectionProps) {
   const normalized = normalizeOpenWeatherSupplement(data);
   if (!normalized) return null;
 
   const { current, minutely, hourly, daily, alerts, dataSource } = normalized;
+  const stationHumidityPct = parseStationHumidityPct(station?.humidity);
+  const showStationRh = shouldShowStationHumidityComparison(
+    current.humidityPct,
+    stationHumidityPct
+  );
+  const showWetHint = shouldShowWetWeatherModelHint(current, stationHumidityPct);
   const hourlyTitle =
     dataSource === "onecall-3" ? "Komende uren" : "Komende uren (elke 3 u)";
 
@@ -96,17 +112,32 @@ export function OpenWeatherSection({ data }: OpenWeatherSectionProps) {
 
         <CurrentStatusBlock current={current} />
 
+        {showWetHint && (
+          <p className="rounded-lg border border-amber-500/30 bg-amber-950/25 px-3 py-2 text-[0.7rem] leading-relaxed text-amber-100/90">
+            Het OpenWeather-model toont weinig vocht terwijl er regen/nat weer is. Vertrouw
+            je weerstation voor actuele luchtvochtigheid aan de kust.
+          </p>
+        )}
+
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <SupplementChip icon={Eye} label="Zicht" value={fmt(current.visibilityKm, " km")} />
           <SupplementChip icon={Cloud} label="Bewolking" value={fmt(current.cloudsPct, "%")} />
           <SupplementChip
             icon={Droplets}
-            label="Rel. vocht"
+            label="Rel. vocht (model)"
             value={fmt(current.humidityPct, "%")}
           />
+          {showStationRh && stationHumidityPct != null ? (
+            <SupplementChip
+              icon={Droplets}
+              label="Rel. vocht (station)"
+              value={`${stationHumidityPct}%`}
+              valueClassName="text-cyan-200"
+            />
+          ) : null}
           <SupplementChip
             icon={Thermometer}
-            label="Dauwpunt"
+            label="Dauwpunt (model)"
             value={fmt(current.dewPointC, "°C")}
           />
           <SupplementChip
@@ -224,16 +255,25 @@ function SupplementChip({
   icon: Icon,
   label,
   value,
+  valueClassName,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   value: string;
+  valueClassName?: string;
 }) {
   return (
     <div className="flex flex-col items-center rounded-xl border border-sky-500/10 bg-black/30 px-2 py-2.5 text-center">
       <Icon className="mb-1 h-4 w-4 text-sky-400/80" />
       <span className="text-[0.6rem] uppercase tracking-wide text-zinc-500">{label}</span>
-      <span className="mt-0.5 text-sm font-semibold tabular-nums text-zinc-200">{value}</span>
+      <span
+        className={cn(
+          "mt-0.5 text-sm font-semibold tabular-nums text-zinc-200",
+          valueClassName
+        )}
+      >
+        {value}
+      </span>
     </div>
   );
 }

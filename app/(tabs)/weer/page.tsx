@@ -154,6 +154,7 @@ export default function WeerPage() {
           <MetricGrid data={weer} />
           <OpenWeatherPanel
             data={openWeather}
+            station={weer}
             error={openWeatherError}
             isLoading={openWeatherLoading}
             onRetry={() => mutateOpenWeather()}

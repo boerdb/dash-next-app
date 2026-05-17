@@ -1,11 +1,9 @@
 import { HARLINGEN } from "@/lib/location";
 import type { OpenWeatherSupplement } from "@/lib/api/types";
 import { mapOneCall3, mapOpenWeatherSupplement } from "./map";
-import type {
-  OwForecastResponse,
-  OwOneCallResponse,
-  OwWeatherResponse,
-} from "./types";
+import type { OwForecastResponse, OwOneCallResponse, OwWeatherResponse } from "./types";
+
+export type { OwOneCallResponse };
 
 const BASE_25 = "https://api.openweathermap.org/data/2.5";
 const BASE_30 = "https://api.openweathermap.org/data/3.0";
@@ -56,9 +54,23 @@ async function fetchOpenWeather25(apiKey: string): Promise<OpenWeatherSupplement
   return mapOpenWeatherSupplement(current, forecast);
 }
 
+/** Haalt ruwe One Call 3.0 JSON op (bijv. voor development-debug). */
+export async function fetchOneCallRaw(apiKey: string): Promise<OwOneCallResponse> {
+  const oneCallRes = await fetch(buildOneCallUrl(apiKey), FETCH_OPTS);
+  if (!oneCallRes.ok) {
+    throw new Error(`OpenWeather One Call: ${oneCallRes.status}`);
+  }
+  return (await oneCallRes.json()) as OwOneCallResponse;
+}
+
 export async function fetchOpenWeatherSupplement(
-  apiKey: string
+  apiKey: string,
+  prefetchedOneCall?: OwOneCallResponse
 ): Promise<OpenWeatherSupplement> {
+  if (prefetchedOneCall) {
+    return mapOneCall3(prefetchedOneCall);
+  }
+
   const oneCallRes = await fetch(buildOneCallUrl(apiKey), FETCH_OPTS);
 
   if (oneCallRes.ok) {
