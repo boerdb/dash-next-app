@@ -51,11 +51,11 @@ export function OpenWeatherSection({ data }: OpenWeatherSectionProps) {
     dataSource === "onecall-3" ? "Komende uren" : "Komende uren (elke 3 u)";
 
   const precipLabel =
-    current.rainMm1h != null
+    current.rainMm1h != null && current.rainMm1h > 0
       ? `${current.rainMm1h} mm/u`
-      : current.snowMm1h != null
+      : current.snowMm1h != null && current.snowMm1h > 0
         ? `${current.snowMm1h} mm/u sneeuw`
-        : "—";
+        : "Geen";
 
   const windLabel =
     current.windSpeedKmh != null

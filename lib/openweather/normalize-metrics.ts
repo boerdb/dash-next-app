@@ -22,6 +22,23 @@ export function normalizeHumidityPct(value: number | undefined | null): number |
   return pct;
 }
 
+/** Magnus-formule: relatieve vochtigheid uit temperatuur en dauwpunt (°C). */
+export function humidityFromDewPoint(
+  tempC: number,
+  dewPointC: number
+): number | null {
+  if (Number.isNaN(tempC) || Number.isNaN(dewPointC)) return null;
+  const a = 17.625;
+  const b = 243.04;
+  const gammaTd = (a * dewPointC) / (b + dewPointC);
+  const gammaT = (a * tempC) / (b + tempC);
+  const rh = (100 * Math.exp(gammaTd)) / Math.exp(gammaT);
+  if (!Number.isFinite(rh) || rh < MIN_HUMIDITY_PCT || rh > MAX_HUMIDITY_PCT) {
+    return null;
+  }
+  return Math.round(rh);
+}
+
 export function normalizeDewPointC(value: number | undefined | null): number | null {
   if (value == null || Number.isNaN(value)) return null;
   const fromKelvin = value > KELVIN_THRESHOLD_C;

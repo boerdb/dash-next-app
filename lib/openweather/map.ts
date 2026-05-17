@@ -8,6 +8,7 @@ import type {
 } from "@/lib/api/types";
 import { dagKeyAmsterdam, dagLabelAmsterdam } from "@/lib/tides/day-label";
 import {
+  humidityFromDewPoint,
   msToKmh,
   normalizeDewPointC,
   normalizeHumidityPct,
@@ -60,31 +61,58 @@ function precip1h(vol?: OwPrecipVolume): number | null {
   return round1(mm);
 }
 
-function pickHumidity(
-  primary: number | undefined,
-  fallback?: OwOneCallHourly
+function firstValidHumidityPct(
+  ...candidates: Array<number | undefined>
 ): number | null {
-  return (
-    normalizeHumidityPct(primary) ??
-    normalizeHumidityPct(fallback?.humidity) ??
-    null
+  for (const value of candidates) {
+    const pct = normalizeHumidityPct(value);
+    if (pct != null) return pct;
+  }
+  return null;
+}
+
+function firstValidDewPointC(
+  ...candidates: Array<number | undefined>
+): number | null {
+  for (const value of candidates) {
+    const dp = normalizeDewPointC(value);
+    if (dp != null) return dp;
+  }
+  return null;
+}
+
+function pickHumidity(
+  current: OwOneCallCurrent | undefined,
+  hourly: OwOneCallHourly[]
+): number | null {
+  const hourlyHumidity = hourly.map((h) => h.humidity);
+  const direct = firstValidHumidityPct(current?.humidity, ...hourlyHumidity);
+  if (direct != null) return direct;
+
+  const tempC = normalizeMetricTemp(current?.temp);
+  const dewPointC = firstValidDewPointC(
+    current?.dew_point,
+    ...hourly.map((h) => h.dew_point)
   );
+  if (tempC != null && dewPointC != null) {
+    return humidityFromDewPoint(tempC, dewPointC);
+  }
+  return null;
 }
 
 function pickDewPoint(
-  primary: number | undefined,
-  fallback?: OwOneCallHourly
+  current: OwOneCallCurrent | undefined,
+  hourly: OwOneCallHourly[]
 ): number | null {
-  return (
-    normalizeDewPointC(primary) ??
-    normalizeDewPointC(fallback?.dew_point) ??
-    null
+  return firstValidDewPointC(
+    current?.dew_point,
+    ...hourly.map((h) => h.dew_point)
   );
 }
 
 function mapCurrent3(
   current: OwOneCallCurrent | undefined,
-  hourlyFallback?: OwOneCallHourly
+  hourlyRaw: OwOneCallHourly[]
 ): OpenWeatherCurrent {
   const w = current?.weather?.[0];
   const visibilityM = current?.visibility;
@@ -100,8 +128,8 @@ function mapCurrent3(
     cloudsPct: Math.round(current?.clouds ?? 0),
     visibilityKm:
       visibilityM != null ? round1(visibilityM / 1000) : null,
-    humidityPct: pickHumidity(current?.humidity, hourlyFallback),
-    dewPointC: pickDewPoint(current?.dew_point, hourlyFallback),
+    humidityPct: pickHumidity(current, hourlyRaw),
+    dewPointC: pickDewPoint(current, hourlyRaw),
     pressureHpa:
       current?.pressure != null ? Math.round(current.pressure) : null,
     uvi: current?.uvi != null ? round1(current.uvi) : null,
@@ -167,7 +195,6 @@ function toOneCallDaily(item: OwOneCallDaily): OpenWeatherDaily {
 export function mapOneCall3(data: OwOneCallResponse): OpenWeatherSupplement {
   const now = Date.now();
   const hourlyRaw = data.hourly ?? [];
-  const hourlyFallback = hourlyRaw.find((item) => item.dt * 1000 > now - 60_000);
 
   const hourly: OpenWeatherHourly[] = hourlyRaw
     .filter((item) => item.dt * 1000 > now - 60_000)
@@ -185,7 +212,7 @@ export function mapOneCall3(data: OwOneCallResponse): OpenWeatherSupplement {
   const alerts: OpenWeatherAlert[] = (data.alerts ?? []).map(mapAlert);
 
   return {
-    current: mapCurrent3(data.current, hourlyFallback),
+    current: mapCurrent3(data.current, hourlyRaw),
     minutely,
     hourly,
     daily,
@@ -362,18 +389,36 @@ export function normalizeOpenWeatherSupplement(
   if (!raw?.current) return null;
 
   const c = raw.current;
+  const tempC = c.tempC != null ? normalizeMetricTemp(c.tempC) : null;
+  const feelsLikeC =
+    c.feelsLikeC != null ? normalizeMetricTemp(c.feelsLikeC) : null;
+  let dewPointC = c.dewPointC != null ? normalizeDewPointC(c.dewPointC) : null;
+  let humidityPct =
+    c.humidityPct != null ? normalizeHumidityPct(c.humidityPct) : null;
+
+  if (Array.isArray(raw.hourly)) {
+    if (humidityPct == null) {
+      for (const h of raw.hourly) {
+        const pct = normalizeHumidityPct(h.humidityPct);
+        if (pct != null) {
+          humidityPct = pct;
+          break;
+        }
+      }
+    }
+  }
+
+  if (humidityPct == null && tempC != null && dewPointC != null) {
+    humidityPct = humidityFromDewPoint(tempC, dewPointC);
+  }
+
   return {
     current: emptyCurrent25({
       ...c,
-      humidityPct:
-        c.humidityPct != null
-          ? normalizeHumidityPct(c.humidityPct)
-          : null,
-      dewPointC:
-        c.dewPointC != null ? normalizeDewPointC(c.dewPointC) : null,
-      tempC: c.tempC != null ? normalizeMetricTemp(c.tempC) : null,
-      feelsLikeC:
-        c.feelsLikeC != null ? normalizeMetricTemp(c.feelsLikeC) : null,
+      tempC,
+      feelsLikeC,
+      humidityPct,
+      dewPointC,
     }),
     minutely: Array.isArray(raw.minutely) ? raw.minutely : [],
     hourly: Array.isArray(raw.hourly) ? raw.hourly : [],

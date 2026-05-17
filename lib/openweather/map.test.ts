@@ -2,6 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import type { OpenWeatherSupplement } from "@/lib/api/types";
 import {
+  humidityFromDewPoint,
   normalizeDewPointC,
   normalizeHumidityPct,
   normalizeMetricTemp,
@@ -103,6 +104,11 @@ describe("normalize-metrics", () => {
   it("converts Kelvin temperature", () => {
     assert.equal(normalizeMetricTemp(293.15), 20);
   });
+
+  it("computes RH from temp and dew point", () => {
+    const rh = humidityFromDewPoint(13.2, 9.5);
+    assert.ok(rh != null && rh >= 70 && rh <= 85);
+  });
 });
 
 describe("mapOneCall3", () => {
@@ -136,6 +142,41 @@ describe("mapOneCall3", () => {
     const result = mapOneCall3(broken);
     assert.equal(result.current.humidityPct, 80);
     assert.ok(result.current.dewPointC != null && result.current.dewPointC > 0);
+  });
+
+  it("computes humidity from temp and dew point when API humidity is wrong", () => {
+    const broken: OwOneCallResponse = {
+      ...oneCallFixture,
+      current: {
+        temp: 13.2,
+        feels_like: 10.6,
+        clouds: 100,
+        visibility: 10_000,
+        humidity: 1,
+        dew_point: 234.5,
+        pressure: 1011,
+        uvi: 0.7,
+        wind_speed: 4.2,
+        wind_deg: 250,
+        weather: [{ id: 804, description: "bewolkt", icon: "04d" }],
+      },
+      hourly: [
+        {
+          dt: NOW_SEC + 3600,
+          temp: 13,
+          humidity: 1,
+          dew_point: 9.5,
+          pop: 0.8,
+          weather: [{ id: 804, description: "bewolkt", icon: "04d" }],
+        },
+        ...(oneCallFixture.hourly ?? []).slice(1),
+      ],
+    };
+    const result = mapOneCall3(broken);
+    assert.equal(result.current.dewPointC, 9.5);
+    assert.ok(
+      result.current.humidityPct != null && result.current.humidityPct >= 60
+    );
   });
 });
 
@@ -193,9 +234,17 @@ describe("normalizeOpenWeatherSupplement", () => {
       updatedAt: "2026-01-01T00:00:00.000Z",
     };
 
-    const result = normalizeOpenWeatherSupplement(legacy);
-    assert.equal(result!.current.humidityPct, null);
-    assert.equal(result!.current.dewPointC, null);
+    const result = normalizeOpenWeatherSupplement({
+      ...legacy,
+      current: {
+        ...legacy.current!,
+        tempC: 13.2,
+        dewPointC: 9.5,
+      },
+      hourly: [{ ...oneCallFixture.hourly![0], humidityPct: 78 }],
+    });
+    assert.equal(result!.current.humidityPct, 78);
+    assert.equal(result!.current.dewPointC, 9.5);
   });
 });
 
