@@ -9,6 +9,7 @@ import {
   parabolicVertexOffsetHours,
   type TidePoint,
 } from "./extract-extremes";
+import { parseRwsTideExtremes, type RwsResponse } from "./rws-client";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -31,6 +32,14 @@ function amsterdamTime(d: Date): string {
 function minutesFromTijd(tijd: string): number {
   const [h, m] = tijd.split(":").map(Number);
   return h * 60 + m;
+}
+
+function assertWithinMinutes(actual: string, expected: string, maxMin: number) {
+  const diff = Math.abs(minutesFromTijd(actual) - minutesFromTijd(expected));
+  assert.ok(
+    diff <= maxMin,
+    `expected ${expected} ±${maxMin}min, got ${actual} (${diff} min off)`
+  );
 }
 
 function pointsFromFixture(fixture: Fixture): TidePoint[] {
@@ -106,5 +115,68 @@ describe("extractExtremes with Harlingen fixture", () => {
       return mins % 60 !== 0;
     });
     assert.ok(hasMinutes, "expected at least one tide time not on the hour");
+  });
+});
+
+describe("parseRwsTideExtremes (Harlingen RWS fixture)", () => {
+  const fixture = JSON.parse(
+    readFileSync(join(__dirname, "__fixtures__", "harlingen-rws.json"), "utf8")
+  ) as RwsResponse;
+
+  const allowed = new Set(["2026-05-17", "2026-05-18"]);
+  const items = parseRwsTideExtremes(fixture, allowed);
+
+  /** Officiële RWS-extremen (Europe/Amsterdam) voor Harlingen Waddenzee. */
+  const expected: Array<{
+    dagKey: string;
+    type: "HW" | "LW";
+    tijd: string;
+    hoogte: string;
+  }> = [
+    { dagKey: "2026-05-17", type: "LW", tijd: "05:42", hoogte: "-1.14" },
+    { dagKey: "2026-05-17", type: "HW", tijd: "11:04", hoogte: "0.88" },
+    { dagKey: "2026-05-17", type: "LW", tijd: "18:06", hoogte: "-1.19" },
+    { dagKey: "2026-05-17", type: "HW", tijd: "23:26", hoogte: "0.98" },
+    { dagKey: "2026-05-18", type: "LW", tijd: "06:27", hoogte: "-1.12" },
+    { dagKey: "2026-05-18", type: "HW", tijd: "11:45", hoogte: "0.95" },
+    { dagKey: "2026-05-18", type: "LW", tijd: "18:54", hoogte: "-1.22" },
+  ];
+
+  it("returns all HW/LW extremes for two days", () => {
+    assert.equal(items.length, expected.length);
+  });
+
+  it("matches RWS tide times within 15 minutes", () => {
+    for (let i = 0; i < expected.length; i++) {
+      const exp = expected[i]!;
+      const got = items[i]!;
+      assert.equal(got.dagKey, exp.dagKey);
+      assert.equal(got.type, exp.type);
+      assertWithinMinutes(got.tijd, exp.tijd, 0);
+      assert.equal(got.hoogte, exp.hoogte);
+    }
+  });
+
+  it("differs from Open-Meteo hourly model on the same calendar day", () => {
+    const openMeteo = extractExtremes(pointsFromFixture(
+      JSON.parse(
+        readFileSync(join(__dirname, "__fixtures__", "harlingen-48h.json"), "utf8")
+      ) as Fixture
+    )).filter((e) => e.dagKey === "2026-05-17");
+
+    const rws = items.filter((e) => e.dagKey === "2026-05-17");
+    const firstLwOm = openMeteo.find((e) => e.type === "LW")!.tijd;
+    const firstLwRws = rws.find((e) => e.type === "LW")!.tijd;
+    const diffMin = Math.abs(
+      minutesFromTijd(firstLwOm) - minutesFromTijd(firstLwRws)
+    );
+    assert.ok(diffMin >= 60, "RWS and Open-Meteo should differ by at least 1 hour");
+  });
+});
+
+describe("extractExtremes 10-minute resolution", () => {
+  it("allows smaller parabolic shift than hourly data", () => {
+    const delta = parabolicVertexOffsetHours(1, 0, 1, 5 / 60);
+    assert.ok(Math.abs(delta) <= 5 / 60 + 1e-9);
   });
 });

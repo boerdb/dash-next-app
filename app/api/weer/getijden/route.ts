@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { fetchHarlingenTides } from "@/lib/tides/open-meteo-client";
+import { fetchHarlingenTides } from "@/lib/tides/fetch-tides";
 
 export const revalidate = 3600;
 
 export async function GET() {
   try {
-    const items = await fetchHarlingenTides();
+    const { items } = await fetchHarlingenTides();
     return NextResponse.json(items);
   } catch (e) {
     console.error("Getijden fout:", e);

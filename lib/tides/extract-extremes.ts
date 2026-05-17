@@ -7,18 +7,24 @@ export interface TidePoint {
 }
 
 const TZ = "Europe/Amsterdam";
-const MAX_DELTA_HOURS = 0.5;
+const DEFAULT_MAX_DELTA_HOURS = 0.5;
+
+export interface ExtractExtremesOptions {
+  /** Max parabolic shift from center sample (hours). Use ~5/60 for 10-min data. */
+  maxDeltaHours?: number;
+}
 
 /** Parabolic vertex offset (hours) from center sample; 0 if denominator ~0. */
 export function parabolicVertexOffsetHours(
   hPrev: number,
   hCur: number,
-  hNext: number
+  hNext: number,
+  maxDeltaHours = DEFAULT_MAX_DELTA_HOURS
 ): number {
   const denom = hPrev - 2 * hCur + hNext;
   if (Math.abs(denom) < 1e-6) return 0;
   const delta = (hPrev - hNext) / (2 * denom);
-  return Math.max(-MAX_DELTA_HOURS, Math.min(MAX_DELTA_HOURS, delta));
+  return Math.max(-maxDeltaHours, Math.min(maxDeltaHours, delta));
 }
 
 /** Height at parabola vertex (x = delta from center hour). */
@@ -34,9 +40,13 @@ export function parabolicVertexHeight(
 }
 
 /** Local maxima = HW, local minima = LW with parabolic sub-hour refinement. */
-export function extractExtremes(points: TidePoint[]): GetijItem[] {
+export function extractExtremes(
+  points: TidePoint[],
+  options: ExtractExtremesOptions = {}
+): GetijItem[] {
   if (points.length < 3) return [];
 
+  const maxDeltaHours = options.maxDeltaHours ?? DEFAULT_MAX_DELTA_HOURS;
   const sorted = [...points].sort((a, b) => a.time.getTime() - b.time.getTime());
   const extremes: GetijItem[] = [];
 
@@ -46,9 +56,13 @@ export function extractExtremes(points: TidePoint[]): GetijItem[] {
     const hNext = sorted[i + 1].heightM;
 
     if (hCur > hPrev && hCur >= hNext) {
-      extremes.push(refinedItem("HW", sorted[i], hPrev, hCur, hNext));
+      extremes.push(
+        refinedItem("HW", sorted[i], hPrev, hCur, hNext, maxDeltaHours)
+      );
     } else if (hCur < hPrev && hCur <= hNext) {
-      extremes.push(refinedItem("LW", sorted[i], hPrev, hCur, hNext));
+      extremes.push(
+        refinedItem("LW", sorted[i], hPrev, hCur, hNext, maxDeltaHours)
+      );
     }
   }
 
@@ -60,9 +74,15 @@ function refinedItem(
   center: TidePoint,
   hPrev: number,
   hCur: number,
-  hNext: number
+  hNext: number,
+  maxDeltaHours: number
 ): GetijItem {
-  const deltaHours = parabolicVertexOffsetHours(hPrev, hCur, hNext);
+  const deltaHours = parabolicVertexOffsetHours(
+    hPrev,
+    hCur,
+    hNext,
+    maxDeltaHours
+  );
   const at = center.time.getTime() + deltaHours * 3600_000;
   const heightM = parabolicVertexHeight(hPrev, hCur, hNext, deltaHours);
   const time = new Date(at);

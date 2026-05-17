@@ -1,5 +1,6 @@
 import { HARLINGEN } from "@/lib/location";
 import type { GetijItem } from "@/lib/api/types";
+import { allowedDayKeys } from "./allowed-days";
 import { dagKeyAmsterdam } from "./day-label";
 import { extractExtremes, type TidePoint } from "./extract-extremes";
 import { parseOpenMeteoLocalTime } from "./parse-open-meteo-time";
@@ -12,14 +13,7 @@ interface OpenMeteoMarineResponse {
   };
 }
 
-function allowedDayKeys(): Set<string> {
-  const today = dagKeyAmsterdam(new Date());
-  const morgen = new Date();
-  morgen.setDate(morgen.getDate() + 1);
-  return new Set([today, dagKeyAmsterdam(morgen)]);
-}
-
-export async function fetchHarlingenTides(): Promise<GetijItem[]> {
+export async function fetchHarlingenTidesOpenMeteo(): Promise<GetijItem[]> {
   const params = new URLSearchParams({
     latitude: String(HARLINGEN.latitude),
     longitude: String(HARLINGEN.longitude),
