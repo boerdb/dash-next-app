@@ -2,7 +2,7 @@
 
 import { Fragment } from "react";
 import { HelpCircle, TrendingDown, TrendingUp } from "lucide-react";
-import type { GetijItem } from "@/lib/api/types";
+import type { GetijItem, GetijdenResponse } from "@/lib/api/types";
 import {
   berekenVerschil,
   getActiveTideIndex,
@@ -13,9 +13,24 @@ import { cn } from "@/lib/utils";
 
 interface TideCardProps {
   getijden: GetijItem[];
+  bron?: GetijdenResponse["source"];
 }
 
-export function TideCard({ getijden }: TideCardProps) {
+const BRON_TEKST: Record<
+  NonNullable<TideCardProps["bron"]>,
+  { regel1: string; regel2: string }
+> = {
+  rws: {
+    regel1: "Getij: Rijkswaterstaat · Harlingen Waddenzee",
+    regel2: "Astronomisch getij (NAP)",
+  },
+  "open-meteo": {
+    regel1: "Getij: Open-Meteo · Harlingen (model)",
+    regel2: "Tijden bij benadering (interpolatie uit uurdata)",
+  },
+};
+
+export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
   if (!getijden.length) return null;
 
   const status = getLiveStatus(getijden);
@@ -112,9 +127,9 @@ export function TideCard({ getijden }: TideCardProps) {
         })}
 
         <p className="mt-3 text-center text-[0.65rem] text-zinc-500">
-          Getij: Open-Meteo · Harlingen (voorspeld)
+          {BRON_TEKST[bron].regel1}
           <br />
-          Tijden bij benadering (interpolatie uit uurdata)
+          {BRON_TEKST[bron].regel2}
         </p>
       </CardContent>
     </Card>

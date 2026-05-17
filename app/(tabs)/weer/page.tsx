@@ -17,7 +17,7 @@ import { normalizeOpenWeatherSupplement } from "@/lib/openweather/map";
 import { getWeatherCondition } from "@/lib/utils/weather-condition";
 import type {
   AstronomieApi,
-  GetijItem,
+  GetijdenResponse,
   OpenWeatherSupplement,
   WeerHistorie,
   WeerLive,
@@ -57,11 +57,13 @@ export default function WeerPage() {
     { refreshInterval: 60_000 }
   );
 
-  const { data: getijden = [], mutate: mutateGetijden } = useSWR<GetijItem[]>(
+  const { data: getijdenData, mutate: mutateGetijden } = useSWR<GetijdenResponse>(
     "/api/weer/getijden",
     jsonFetcher,
     { refreshInterval: 3600_000 }
   );
+  const getijden = getijdenData?.items ?? [];
+  const getijBron = getijdenData?.source ?? "rws";
 
   const { data: astro, mutate: mutateAstro } = useSWR<AstronomieApi>(
     "/api/weer/astronomie",
@@ -141,7 +143,7 @@ export default function WeerPage() {
           <MetricGrid data={weer} />
           {openWeather ? <OpenWeatherSection data={openWeather} /> : null}
           {historie?.labels?.length ? <TemperatureChart data={historie} /> : null}
-          <TideCard getijden={getijden} />
+          <TideCard getijden={getijden} bron={getijBron} />
         </div>
       ) : (
         <DataError onRetry={() => mutateWeer()} />

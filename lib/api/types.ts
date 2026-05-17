@@ -40,6 +40,11 @@ export interface GetijItem {
   vorige_hoogte_db?: string;
 }
 
+export interface GetijdenResponse {
+  items: GetijItem[];
+  source: "rws" | "open-meteo";
+}
+
 export interface EnergieApiRaw {
   active_power_w?: number;
   active_tariff?: number;

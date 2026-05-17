@@ -5,10 +5,10 @@ export const revalidate = 3600;
 
 export async function GET() {
   try {
-    const { items } = await fetchHarlingenTides();
-    return NextResponse.json(items);
+    const result = await fetchHarlingenTides();
+    return NextResponse.json(result);
   } catch (e) {
     console.error("Getijden fout:", e);
-    return NextResponse.json([]);
+    return NextResponse.json({ items: [], source: "rws" as const });
   }
 }
