@@ -54,6 +54,7 @@ export function conditionFromOpenWeather(
   if (weatherId === 804) return "cloudy";
 
   if (cloudsPct <= 10) return "sunny";
-  if (cloudsPct <= 40) return "partly-cloudy";
+  // Geen bekende weather-id: wolken% is vaak geleidelijker dan 40% = "half"
+  if (cloudsPct <= 55) return "partly-cloudy";
   return "cloudy";
 }

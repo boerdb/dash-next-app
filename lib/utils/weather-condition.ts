@@ -60,7 +60,10 @@ export function getWeatherCondition(
   if (period === "dawn") return "dawn";
 
   if (openWeather) {
-    return conditionFromOpenWeather(owId, owClouds);
+    const fromOw = conditionFromOpenWeather(owId, owClouds);
+    if (fromOw !== "cloudy") return fromOw;
+    // Model (804 / hoge bewolking%) zegt soms "dicht" terwijl het station nog duidelijk zon ziet.
+    return conditionFromSolar(Number(data.solarradiation) || 0);
   }
 
   return conditionFromSolar(Number(data.solarradiation) || 0);
