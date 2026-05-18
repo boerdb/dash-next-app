@@ -47,8 +47,11 @@ export function conditionFromOpenWeather(
   if (openWeatherImpliesWind(weatherId)) return "wind";
 
   if (weatherId === 800) return "sunny";
-  if (weatherId === 801 || weatherId === 802) return "partly-cloudy";
-  if (weatherId === 803 || weatherId === 804) return "cloudy";
+  if (weatherId === 801 || weatherId === 802 || weatherId === 803) {
+    return "partly-cloudy";
+  }
+  // 804 = overcast; dik bewolkt
+  if (weatherId === 804) return "cloudy";
 
   if (cloudsPct <= 10) return "sunny";
   if (cloudsPct <= 40) return "partly-cloudy";
