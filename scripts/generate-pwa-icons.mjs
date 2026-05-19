@@ -25,7 +25,7 @@ const maskable = await sharp(svg)
     bottom: 51,
     left: 51,
     right: 51,
-    background: { r: 10, g: 10, b: 10, alpha: 1 },
+    background: { r: 12, g: 18, b: 34, alpha: 1 },
   })
   .png()
   .toBuffer();

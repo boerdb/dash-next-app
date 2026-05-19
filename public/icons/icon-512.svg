@@ -1,6 +1,80 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#0a0a0a"/>
-  <circle cx="256" cy="180" r="75" fill="#38bdf8" opacity="0.9"/>
-  <path d="M130 320 Q256 240 382 320 L382 400 L130 400 Z" fill="#4ade80" opacity="0.85"/>
-  <path d="M185 265 L256 190 L327 265" stroke="#fbbf24" stroke-width="16" fill="none" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Weer en Energie">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#111d33"/>
+      <stop offset="100%" stop-color="#0c1222"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="300" y1="70" x2="400" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fef3c7"/>
+      <stop offset="55%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="cloud" x1="120" y1="200" x2="392" y2="360" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#f0f9ff"/>
+      <stop offset="45%" stop-color="#bae6fd"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+    <linearGradient id="bolt" x1="220" y1="300" x2="300" y2="430" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <filter id="sunGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="boltGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+
+  <!-- subtle horizon glow -->
+  <ellipse cx="256" cy="430" rx="200" ry="40" fill="#38bdf8" opacity="0.08"/>
+
+  <!-- sun rays -->
+  <g stroke="url(#sun)" stroke-width="10" stroke-linecap="round" opacity="0.55">
+    <line x1="352" y1="52" x2="352" y2="88"/>
+    <line x1="408" y1="78" x2="382" y2="104"/>
+    <line x1="434" y1="134" x2="398" y2="134"/>
+    <line x1="408" y1="190" x2="382" y2="164"/>
+    <line x1="296" y1="78" x2="322" y2="104"/>
+    <line x1="270" y1="134" x2="306" y2="134"/>
+  </g>
+
+  <!-- sun -->
+  <circle cx="352" cy="134" r="68" fill="url(#sun)" filter="url(#sunGlow)"/>
+
+  <!-- cloud -->
+  <g fill="url(#cloud)">
+    <ellipse cx="188" cy="262" rx="88" ry="68"/>
+    <ellipse cx="278" cy="248" rx="102" ry="76"/>
+    <ellipse cx="358" cy="268" rx="86" ry="64"/>
+    <ellipse cx="256" cy="292" rx="148" ry="58"/>
+  </g>
+
+  <!-- cloud highlight -->
+  <ellipse cx="210" cy="238" rx="36" ry="18" fill="#ffffff" opacity="0.35"/>
+
+  <!-- lightning -->
+  <path
+    d="M262 302 L224 372 H252 L236 418 L304 338 H274 L292 302 Z"
+    fill="url(#bolt)"
+    filter="url(#boltGlow)"
+  />
+  <path
+    d="M262 302 L224 372 H252 L236 418 L304 338 H274 L292 302 Z"
+    fill="none"
+    stroke="#fff7ed"
+    stroke-width="4"
+    stroke-linejoin="round"
+    opacity="0.35"
+  />
 </svg>
