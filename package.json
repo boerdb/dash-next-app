@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "tsx --test lib/tides/tides.test.ts lib/openweather/map.test.ts",
-    "icons:pwa": "node scripts/generate-pwa-icons.mjs"
+    "icons:pwa": "node scripts/generate-pwa-icons.mjs",
+    "verify:db": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-migration/verify-migration.ps1"
   },
   "dependencies": {
     "@serwist/next": "^9.5.11",
