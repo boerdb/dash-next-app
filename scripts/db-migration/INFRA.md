@@ -24,6 +24,14 @@ Voorbeeld URL (als je het later nodig hebt vanaf `.52` of een app-server op het 
 
 ## Next.js dashboard (`192.168.1.32`)
 
+**Publiek:** Cloudflare Tunnel → [https://dash.clvs.nl](https://dash.clvs.nl) (zelfde app als `:3000`).
+
+**Ecowitt** blijft op het **LAN** wijzen (niet via de tunnel):
+
+`http://192.168.1.32:3000/api/weer/ingest`
+
+Na een deploy: op `dash.clvs.nl` sitegegevens wissen of PWA opnieuw installeren (oude service worker cachet anders API’s).
+
 Met `DATABASE_URL` naar `.14`:
 
 | Endpoint | Bron |

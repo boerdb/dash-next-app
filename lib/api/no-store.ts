@@ -7,6 +7,9 @@ export function jsonNoStore<T>(data: T, init?: ResponseInit): NextResponse {
       ...init?.headers,
       "Cache-Control": "no-store, no-cache, must-revalidate",
       Pragma: "no-cache",
+      /** Cloudflare Tunnel / edge — geen API-cache */
+      "CDN-Cache-Control": "no-store",
+      "Cloudflare-CDN-Cache-Control": "no-store",
     },
   });
 }
