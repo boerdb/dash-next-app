@@ -6,12 +6,13 @@ describe("parseEcowittPayload", () => {
   it("converteert Fahrenheit en inches", () => {
     const r = parseEcowittPayload({
       tempf: "71.2",
+      temp2f: "75.6",
       humidity: "71",
       windspeedmph: "1.1",
       windspdmph_avg10m: "1.3",
       dailyrainin: "0",
     });
-    assert.equal(r.temp_c, 21.8);
+    assert.equal(r.temp_c, 24.2);
     assert.equal(r.windspd_avg10m_kmh, 2.1);
     assert.ok(r.server_timestamp);
   });

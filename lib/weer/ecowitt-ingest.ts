@@ -29,6 +29,7 @@ export function parseEcowittPayload(
   const metric: Record<string, unknown> = { ...input };
 
   const tempf = num(input.tempf);
+  const temp2f = num(input.temp2f);
   const tempinf = num(input.tempinf);
   const barom = num(input.baromrelin);
   const wspd = num(input.windspeedmph);
@@ -39,7 +40,9 @@ export function parseEcowittPayload(
   const monthlyrain = num(input.monthlyrainin);
   const yearlyrain = num(input.yearlyrainin);
 
-  if (tempf !== undefined) metric.temp_c = fToC(tempf);
+  // WH25/2e buitensensor (temp2f) is op EasyWeather vaak de getoonde temp; anders tempf.
+  const outdoorF = temp2f ?? tempf;
+  if (outdoorF !== undefined) metric.temp_c = fToC(outdoorF);
   if (tempinf !== undefined) metric.tempin_c = fToC(tempinf);
   if (barom !== undefined) metric.baromrel_hpa = inToHpa(barom);
   if (wspd !== undefined) metric.windspeed_kmh = mphToKmh(wspd);
