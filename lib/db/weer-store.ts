@@ -41,11 +41,17 @@ export async function writeWeerLiveCache(data: WeerLive): Promise<WeerLive> {
 /** Elke 5 min een rij in metingen (zoals save_weather.php cron). */
 export async function maybeInsertMeting(data: WeerLive): Promise<boolean> {
   const pool = getPool();
-  const [recent] = await pool.query<RowDataPacket[]>(
-    `SELECT 1 FROM metingen
-     WHERE meet_moment >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)
-     LIMIT 1`
+  const [gap] = await pool.query<RowDataPacket[]>(
+    `SELECT TIMESTAMPDIFF(
+       MINUTE,
+       (SELECT MAX(meet_moment) FROM metingen),
+       CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+02:00')
+     ) AS mins`
   );
+  const mins = gap[0]?.mins as number | null;
+  if (mins != null && mins < 5) {
+    return false;
+  }
   if (recent.length > 0) {
     return false;
   }

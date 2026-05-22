@@ -65,12 +65,15 @@ export async function maybeInsertEnergieMeting(
   data: EnergieApiRaw
 ): Promise<boolean> {
   const pool = getPool();
-  const [recent] = await pool.query<RowDataPacket[]>(
-    `SELECT 1 FROM energie_metingen
-     WHERE meet_moment >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)
-     LIMIT 1`
+  const [gap] = await pool.query<RowDataPacket[]>(
+    `SELECT TIMESTAMPDIFF(
+       MINUTE,
+       (SELECT MAX(meet_moment) FROM energie_metingen),
+       CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+02:00')
+     ) AS mins`
   );
-  if (recent.length > 0) {
+  const mins = gap[0]?.mins as number | null;
+  if (mins != null && mins < 5) {
     return false;
   }
 
