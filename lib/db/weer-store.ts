@@ -52,9 +52,6 @@ export async function maybeInsertMeting(data: WeerLive): Promise<boolean> {
   if (mins != null && mins < 5) {
     return false;
   }
-  if (recent.length > 0) {
-    return false;
-  }
 
   const temp = data.temp_c != null ? Number(data.temp_c) : 0;
   const humidity = data.humidity != null ? Number(data.humidity) : 0;
