@@ -1,4 +1,6 @@
 export interface WeerLive {
+  dateutc?: string;
+  date_tracked?: string;
   temp_c?: number;
   tempin_c?: number;
   gevoelstemperatuur?: number | string;
@@ -8,6 +10,7 @@ export interface WeerLive {
   humidity?: number | string;
   humidityin?: number | string;
   winddir?: number;
+  windspeed_kmh?: number;
   windspd_avg10m_kmh?: number;
   windgust_kmh?: number;
   dailyrain_mm?: number;
@@ -15,10 +18,12 @@ export interface WeerLive {
   yearlyrain_mm?: number | string;
   rainrate_mm?: number;
   baromrel_hpa?: number;
+  baromabsin?: number;
   uv?: number | string;
   solarradiation?: number | string;
   tide_info?: string;
   server_timestamp?: string;
+  [key: string]: string | number | undefined;
 }
 
 export interface WeerHistorie {
@@ -48,6 +53,8 @@ export interface GetijdenResponse {
 export interface EnergieApiRaw {
   active_power_w?: number;
   active_tariff?: number;
+  total_power_import_kwh?: number;
+  total_power_export_kwh?: number;
   vandaag_stroom_in_kwh?: number | string;
   vandaag_stroom_out_kwh?: number | string;
   vandaag_gas_m3?: number | string;
@@ -55,6 +62,7 @@ export interface EnergieApiRaw {
   vandaag_water_l?: number | string;
   total_liter_m3?: number | string;
   active_liter_lpm?: number | string;
+  error?: string;
 }
 
 export interface EnergieLive {

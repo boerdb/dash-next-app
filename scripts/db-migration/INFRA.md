@@ -8,7 +8,7 @@
 ## MariaDB (.14)
 
 - Database weer/energie: `weerdata` (tabellen o.a. `metingen`, `energie_metingen`, `getijden`)
-- Alleen bereikbaar vanaf PHP-host `.52` (geen directe DB-access vanuit Next.js)
+- Next-app (`192.168.1.32`) via user `dash_app`
 
 ## Redis (.14)
 
@@ -22,11 +22,20 @@ Voorbeeld URL (als je het later nodig hebt vanaf `.52` of een app-server op het 
 # REDIS_URL=redis://192.168.1.14:6379
 ```
 
-## Next.js dashboard
+## Next.js dashboard (`192.168.1.32`)
 
-- Praat alleen met PHP: `WEER_API_BASE=http://192.168.1.52/weer`
-- Personen/labels: `http://192.168.1.52/personen/…`, `http://192.168.1.52/labels/…`
-- Zie `.env.example`
+Met `DATABASE_URL` naar `.14`:
+
+| Endpoint | Bron |
+|----------|------|
+| `/api/weer/ingest` | Ecowitt → `weer_live` + `metingen` |
+| `/api/weer/live` | `weer_live` |
+| `/api/weer/historie` | `metingen` |
+| `/api/energie/live` | P1 `.178` + water `.169` → `energie_metingen` |
+| `/api/energie/historie` | `energie_metingen` |
+| `/api/weer/getijden` | RWS / Open-Meteo (geen PHP) |
+
+Personen/labels (optioneel nog PHP op `.52`): `/personen/`, `/labels/`
 
 ## MariaDB op .52
 
