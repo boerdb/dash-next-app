@@ -3,9 +3,11 @@ import type { WeerLive } from "@/lib/api/types";
 import { env } from "@/lib/env.server";
 import { enrichWeerLive } from "@/lib/weer/enrich-live";
 import { getPool } from "@/lib/db/pool";
-import { getCacheUpdatedAt, readWeerLiveCache, isCacheFresh } from "@/lib/db/weer-store";
+import { getCacheUpdatedAt, ingestWeerLive, readWeerLiveCache } from "@/lib/db/weer-store";
+import { liveDataTime } from "@/lib/weer/live-data-time";
 
-const CACHE_MAX_AGE_MS = 10 * 60 * 1000;
+/** Sync DB-cache als data.json >1 min nieuwer is (Ecowitt nog op .52). */
+const JSON_SYNC_AHEAD_MS = 60_000;
 
 interface MetingRow extends RowDataPacket {
   meet_moment: Date;
@@ -53,26 +55,33 @@ async function fallbackFromMetingen(): Promise<WeerLive | null> {
 }
 
 export async function fetchWeerLiveFromDb(): Promise<WeerLive> {
-  const cached = await readWeerLiveCache();
-  const updatedAt = await getCacheUpdatedAt();
-  if (cached && isCacheFresh(updatedAt)) {
-    return cached;
+  const [cached, updatedAt, stationJson] = await Promise.all([
+    readWeerLiveCache(),
+    getCacheUpdatedAt(),
+    fetchStationJson(),
+  ]);
+
+  if (stationJson && !stationJson.server_timestamp && stationJson.dateutc) {
+    stationJson.server_timestamp = String(stationJson.dateutc);
   }
 
-  let raw = await fetchStationJson();
+  const cacheMs = cached ? liveDataTime(cached, updatedAt) : 0;
+  const jsonMs = stationJson ? liveDataTime(stationJson, null) : 0;
 
-  if (!raw) {
-    if (cached) return enrichWeerLive(cached);
-    raw = await fallbackFromMetingen();
-    if (!raw) {
-      throw new Error("Geen live weerdata (ingest, json of metingen)");
+  if (stationJson && jsonMs > cacheMs) {
+    if (!cached || jsonMs > cacheMs + JSON_SYNC_AHEAD_MS) {
+      return ingestWeerLive(stationJson);
     }
-    return enrichWeerLive(raw);
+    return enrichWeerLive(stationJson);
   }
 
-  if (!raw.server_timestamp && raw.dateutc) {
-    raw.server_timestamp = String(raw.dateutc);
+  if (cached) {
+    return enrichWeerLive(cached);
   }
 
-  return enrichWeerLive(raw);
+  const fromMetingen = await fallbackFromMetingen();
+  if (!fromMetingen) {
+    throw new Error("Geen live weerdata (ingest, json of metingen)");
+  }
+  return enrichWeerLive(fromMetingen);
 }
