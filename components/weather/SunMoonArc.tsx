@@ -23,22 +23,10 @@ function sunPoint(progress: number) {
 const MOON_DARK = "#0f172a";
 const MOON_LIGHT = "#e2e8f0";
 
-/** Afstand tussen maan- en schaduwmiddelpunt (0 = volledig donker, 2r = volledig licht). */
-function litFractionToSeparation(fraction: number, r: number): number {
-  const f = Math.min(1, Math.max(0, fraction));
-  if (f <= 0) return 2 * r;
-  if (f >= 1) return 0;
-
-  const target = f * Math.PI;
-  let lo = 0;
-  let hi = 1;
-  for (let i = 0; i < 40; i++) {
-    const x = (lo + hi) / 2;
-    const lens = Math.acos(x) - x * Math.sqrt(1 - x * x);
-    if (lens < target) lo = x;
-    else hi = x;
-  }
-  return 2 * r * ((lo + hi) / 2);
+/** Schaduwmiddelpunt voor twee-cirkel-maan (fraction = verlicht deel 0–1). */
+function moonShadowCx(fraction: number, r: number, waxing: boolean): number {
+  const t = Math.cos(Math.PI * (1 - fraction));
+  return waxing ? r + r * t : r - r * t;
 }
 
 function MoonPhaseDisc({
@@ -83,8 +71,7 @@ function MoonPhaseDisc({
     );
   }
 
-  const sep = litFractionToSeparation(fraction, r);
-  const shadowCx = waxing ? sep - r : 3 * r - sep;
+  const shadowCx = moonShadowCx(fraction, r, waxing);
 
   return (
     <svg
