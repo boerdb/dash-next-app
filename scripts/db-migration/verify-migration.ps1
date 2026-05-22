@@ -29,7 +29,7 @@ $tnc = Test-NetConnection $DbHost -Port 3306 -WarningAction SilentlyContinue
 if ($tnc.TcpTestSucceeded) { Write-Host "[OK] MariaDB $DbHost`:3306" }
 else { Write-Host "[FAIL] MariaDB port"; $ok = $false }
 
-$base = "http://$PhpHost"
+$base = "http://$PhpHost/weer"
 foreach ($ep in @("api.php", "historie.php", "energie.php", "historie_energie.php")) {
   if (-not (Test-JsonUrl "$base/$ep`?t=1" $ep)) { $ok = $false }
 }
