@@ -9,7 +9,6 @@ import {
 } from "@/lib/energie/dagstart";
 import { getPool } from "@/lib/db/pool";
 
-const METING_INTERVAL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 2_000;
 
 interface DagstartRow extends RowDataPacket {
@@ -66,13 +65,12 @@ export async function maybeInsertEnergieMeting(
   data: EnergieApiRaw
 ): Promise<boolean> {
   const pool = getPool();
-  const [last] = await pool.query<RowDataPacket[]>(
-    "SELECT meet_moment FROM energie_metingen ORDER BY meet_moment DESC LIMIT 1"
+  const [recent] = await pool.query<RowDataPacket[]>(
+    `SELECT 1 FROM energie_metingen
+     WHERE meet_moment >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+     LIMIT 1`
   );
-  const lastMs = last[0]?.meet_moment
-    ? new Date(last[0].meet_moment as Date).getTime()
-    : 0;
-  if (Date.now() - lastMs < METING_INTERVAL_MS) {
+  if (recent.length > 0) {
     return false;
   }
 

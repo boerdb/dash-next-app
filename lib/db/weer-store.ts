@@ -4,7 +4,6 @@ import { enrichWeerLive } from "@/lib/weer/enrich-live";
 import { mergeDailyMinMax } from "@/lib/weer/ecowitt-ingest";
 import { getPool } from "@/lib/db/pool";
 
-const METING_INTERVAL_MS = 5 * 60 * 1000;
 const CACHE_MAX_AGE_MS = 10 * 60 * 1000;
 
 interface CacheRow extends RowDataPacket {
@@ -42,13 +41,12 @@ export async function writeWeerLiveCache(data: WeerLive): Promise<WeerLive> {
 /** Elke 5 min een rij in metingen (zoals save_weather.php cron). */
 export async function maybeInsertMeting(data: WeerLive): Promise<boolean> {
   const pool = getPool();
-  const [last] = await pool.query<RowDataPacket[]>(
-    "SELECT meet_moment FROM metingen ORDER BY meet_moment DESC LIMIT 1"
+  const [recent] = await pool.query<RowDataPacket[]>(
+    `SELECT 1 FROM metingen
+     WHERE meet_moment >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+     LIMIT 1`
   );
-  const lastMs = last[0]?.meet_moment
-    ? new Date(last[0].meet_moment as Date).getTime()
-    : 0;
-  if (Date.now() - lastMs < METING_INTERVAL_MS) {
+  if (recent.length > 0) {
     return false;
   }
 
