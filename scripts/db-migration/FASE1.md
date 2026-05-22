@@ -28,4 +28,4 @@
 
 ## Productie
 
-Voeg op `.14` een grant toe voor het vaste IP van je Next-server als dat niet `192.168.1.120` is.
+Next-server: `192.168.1.32` — extra grants via `grant-dash-app-32.py` (naast subnet `192.168.1.%` in `grant-dash-app-14.py`).

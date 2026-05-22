@@ -5,8 +5,8 @@ import paramiko
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 PASS = "kerkpoort"
-# LAN-subnet + typische Next-dev host
-HOSTS = ["192.168.1.%", "192.168.1.120"]
+# LAN-subnet + Next-server
+HOSTS = ["192.168.1.%", "192.168.1.32"]
 
 
 def main():

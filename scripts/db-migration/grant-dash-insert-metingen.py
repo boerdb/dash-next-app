@@ -11,7 +11,7 @@ for line in (SCRIPT_DIR / ".secrets.local").read_text().splitlines():
 
 sql = (
     "GRANT INSERT ON weerdata.metingen TO 'dash_app'@'192.168.1.%'; "
-    "GRANT INSERT ON weerdata.metingen TO 'dash_app'@'192.168.1.120'; "
+    "GRANT INSERT ON weerdata.metingen TO 'dash_app'@'192.168.1.32'; "
     "FLUSH PRIVILEGES;"
 )
 c = paramiko.SSHClient()
