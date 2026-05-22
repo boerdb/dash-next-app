@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS weerdata.energie_dagstart (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 GRANT SELECT, INSERT, UPDATE ON weerdata.energie_dagstart TO 'dash_app'@'192.168.1.%';
 GRANT SELECT, INSERT, UPDATE ON weerdata.energie_dagstart TO 'dash_app'@'192.168.1.32';
+GRANT SELECT, INSERT ON weerdata.energie_metingen TO 'dash_app'@'192.168.1.%';
+GRANT SELECT, INSERT ON weerdata.energie_metingen TO 'dash_app'@'192.168.1.32';
 FLUSH PRIVILEGES;
 """
 

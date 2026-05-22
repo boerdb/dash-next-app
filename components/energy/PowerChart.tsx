@@ -26,6 +26,8 @@ export function PowerChart({ data }: PowerChartProps) {
     label,
     watt: data.wattage[i],
   }));
+  const pointCount = chartData.filter((d) => d.watt != null).length;
+  const sparse = pointCount > 0 && pointCount < 8;
 
   return (
     <Card variant="energy">
@@ -33,6 +35,16 @@ export function PowerChart({ data }: PowerChartProps) {
         <p className="mb-3 border-l-2 border-amber-500/50 pl-2 text-xs uppercase tracking-wide text-zinc-400">
           Verbruik afgelopen 24 uur (Watt)
         </p>
+        {pointCount === 0 && (
+          <p className="mb-2 text-xs text-zinc-500">
+            Nog geen historie — vult zich elke 5 minuten (ook als dit scherm dicht is).
+          </p>
+        )}
+        {pointCount > 0 && pointCount < 4 && (
+          <p className="mb-2 text-xs text-zinc-500">
+            Beperkte historie — oudere uren zonder data blijven leeg; nieuwe punten komen elke 5 min bij.
+          </p>
+        )}
         <ChartContainer height={CHART_HEIGHT}>
           <ResponsiveContainer width="100%" height={CHART_HEIGHT} minWidth={0}>
             <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
@@ -69,7 +81,8 @@ export function PowerChart({ data }: PowerChartProps) {
                 strokeWidth={2}
                 fill={`url(#${fillId})`}
                 connectNulls={false}
-                dot={false}
+                dot={sparse ? { r: 3, fill: "#ffce00", strokeWidth: 0 } : false}
+                activeDot={{ r: 4, fill: "#fde68a" }}
               />
             </AreaChart>
           </ResponsiveContainer>

@@ -22,6 +22,7 @@ FILES = [
     "lib/energie/historie-24h.ts",
     "package.json",
     "scripts/db-migration/FASE4.md",
+    "scripts/db-migration/grant-energie-metingen-insert.py",
 ]
 
 s: dict[str, str] = {}

@@ -8,14 +8,13 @@ interface HourRow extends RowDataPacket {
   gem_watt: number;
 }
 
-const AMS_NOW = `CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', 'Europe/Amsterdam')`;
-
+/** meet_moment staat als lokale tijd (Amsterdam) in de DB — geen CONVERT_TZ. */
 const QUERY_24H = `
   SELECT
-    DATE_FORMAT(CONVERT_TZ(meet_moment, '+00:00', 'Europe/Amsterdam'), '%Y-%m-%d %H') AS uur_key,
+    DATE_FORMAT(meet_moment, '%Y-%m-%d %H') AS uur_key,
     ROUND(AVG(actueel_vermogen_w), 0) AS gem_watt
   FROM energie_metingen
-  WHERE meet_moment >= DATE_SUB(${AMS_NOW}, INTERVAL 24 HOUR)
+  WHERE meet_moment >= NOW() - INTERVAL 24 HOUR
   GROUP BY uur_key
   ORDER BY MIN(meet_moment) ASC
 `;
@@ -23,7 +22,7 @@ const QUERY_24H = `
 const QUERY_FALLBACK = `
   SELECT uur_key, gem_watt FROM (
     SELECT
-      DATE_FORMAT(CONVERT_TZ(meet_moment, '+00:00', 'Europe/Amsterdam'), '%Y-%m-%d %H') AS uur_key,
+      DATE_FORMAT(meet_moment, '%Y-%m-%d %H') AS uur_key,
       ROUND(AVG(actueel_vermogen_w), 0) AS gem_watt,
       MAX(meet_moment) AS laatste
     FROM energie_metingen
