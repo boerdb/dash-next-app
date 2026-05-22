@@ -7,6 +7,7 @@ import {
   todayAmsterdam,
   type EnergieDagstart,
 } from "@/lib/energie/dagstart";
+import { amsterdamSqlOffset } from "@/lib/energie/amsterdam-sql-offset";
 import { getPool } from "@/lib/db/pool";
 
 const FETCH_TIMEOUT_MS = 2_000;
@@ -65,12 +66,14 @@ export async function maybeInsertEnergieMeting(
   data: EnergieApiRaw
 ): Promise<boolean> {
   const pool = getPool();
+  const offset = amsterdamSqlOffset();
   const [gap] = await pool.query<RowDataPacket[]>(
     `SELECT TIMESTAMPDIFF(
        MINUTE,
        (SELECT MAX(meet_moment) FROM energie_metingen),
-       CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+02:00')
-     ) AS mins`
+       CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', ?)
+     ) AS mins`,
+    [offset]
   );
   const mins = gap[0]?.mins as number | null;
   if (mins != null && mins < 5) {

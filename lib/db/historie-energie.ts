@@ -1,5 +1,6 @@
 import type { RowDataPacket } from "mysql2";
 import type { EnergieHistorie } from "@/lib/api/types";
+import { amsterdamSqlOffset } from "@/lib/energie/amsterdam-sql-offset";
 import { buildHistorie24h } from "@/lib/energie/historie-24h";
 import { getPool } from "@/lib/db/pool";
 
@@ -8,21 +9,25 @@ interface HourRow extends RowDataPacket {
   gem_watt: number;
 }
 
-/** meet_moment staat als lokale tijd (Amsterdam) in de DB — geen CONVERT_TZ. */
-const QUERY_24H = `
+function query24h(offset: string): string {
+  const ams = `CONVERT_TZ(meet_moment, '+00:00', '${offset}')`;
+  return `
   SELECT
-    DATE_FORMAT(meet_moment, '%Y-%m-%d %H') AS uur_key,
+    DATE_FORMAT(${ams}, '%Y-%m-%d %H') AS uur_key,
     ROUND(AVG(actueel_vermogen_w), 0) AS gem_watt
   FROM energie_metingen
-  WHERE meet_moment >= NOW() - INTERVAL 24 HOUR
+  WHERE meet_moment >= UTC_TIMESTAMP() - INTERVAL 24 HOUR
   GROUP BY uur_key
   ORDER BY MIN(meet_moment) ASC
 `;
+}
 
-const QUERY_FALLBACK = `
+function queryFallback(offset: string): string {
+  const ams = `CONVERT_TZ(meet_moment, '+00:00', '${offset}')`;
+  return `
   SELECT uur_key, gem_watt FROM (
     SELECT
-      DATE_FORMAT(meet_moment, '%Y-%m-%d %H') AS uur_key,
+      DATE_FORMAT(${ams}, '%Y-%m-%d %H') AS uur_key,
       ROUND(AVG(actueel_vermogen_w), 0) AS gem_watt,
       MAX(meet_moment) AS laatste
     FROM energie_metingen
@@ -31,6 +36,7 @@ const QUERY_FALLBACK = `
     LIMIT 24
   ) sub ORDER BY laatste ASC
 `;
+}
 
 function rowsToMap(rows: HourRow[]): Map<string, number> {
   const hourly = new Map<string, number>();
@@ -44,11 +50,12 @@ export async function fetchEnergieHistorieFromDb(
   currentWatt?: number
 ): Promise<EnergieHistorie> {
   const pool = getPool();
-  const [rows] = await pool.query<HourRow[]>(QUERY_24H);
+  const offset = amsterdamSqlOffset();
+  const [rows] = await pool.query<HourRow[]>(query24h(offset));
   if (rows.length > 0) {
     return buildHistorie24h(rowsToMap(rows), currentWatt);
   }
-  const [fallback] = await pool.query<HourRow[]>(QUERY_FALLBACK);
+  const [fallback] = await pool.query<HourRow[]>(queryFallback(offset));
   return buildHistorie24h(rowsToMap(fallback), currentWatt);
 }
 
