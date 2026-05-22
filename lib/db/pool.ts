@@ -20,7 +20,8 @@ export function getPool(): mysql.Pool {
     (pool as unknown as { pool: { on: (e: string, cb: (c: Connection) => void) => void } }).pool.on(
       "connection",
       (conn) => {
-        void conn.query("SET time_zone = 'Europe/Amsterdam'");
+        // meet_moment = NL wall clock; CEST +02 (winter +01 handmatig indien nodig)
+        void conn.query("SET time_zone = '+02:00'");
       }
     );
   }
