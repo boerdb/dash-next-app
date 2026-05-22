@@ -4,6 +4,8 @@ import { jsonNoStore } from "@/lib/api/no-store";
 import { fetchWeerHistorieFromDb } from "@/lib/db/historie-weer";
 import { isDirectDbEnabled } from "@/lib/db/pool";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   if (isDirectDbEnabled()) {
     try {

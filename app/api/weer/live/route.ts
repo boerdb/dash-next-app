@@ -5,6 +5,8 @@ import { sanitizeWeerPayload } from "@/lib/api/sanitize";
 import { fetchWeerLiveFromDb } from "@/lib/db/live-weer";
 import { isDirectDbEnabled } from "@/lib/db/pool";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   if (isDirectDbEnabled()) {
     try {

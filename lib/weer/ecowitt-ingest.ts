@@ -40,9 +40,9 @@ export function parseEcowittPayload(
   const monthlyrain = num(input.monthlyrainin);
   const yearlyrain = num(input.yearlyrainin);
 
-  // WH25/2e buitensensor (temp2f) is op EasyWeather vaak de getoonde temp; anders tempf.
-  const outdoorF = temp2f ?? tempf;
-  if (outdoorF !== undefined) metric.temp_c = fToC(outdoorF);
+  // HP2550/EasyWeather toont tempf (hoofdsensor); temp2f = tweede buitensensor (WH25).
+  if (tempf !== undefined) metric.temp_c = fToC(tempf);
+  if (temp2f !== undefined) metric.temp2_c = fToC(temp2f);
   if (tempinf !== undefined) metric.tempin_c = fToC(tempinf);
   if (barom !== undefined) metric.baromrel_hpa = inToHpa(barom);
   if (wspd !== undefined) metric.windspeed_kmh = mphToKmh(wspd);
@@ -61,14 +61,31 @@ export function parseEcowittPayload(
   }
   if (input.uv !== undefined) metric.uv = num(input.uv);
 
-  const now = new Date();
   const tz = "Europe/Amsterdam";
-  const dateStr = now.toLocaleDateString("sv-SE", { timeZone: tz });
-  metric.server_timestamp = now
-    .toLocaleString("sv-SE", { timeZone: tz })
-    .replace("T", " ")
-    .slice(0, 19);
-  metric.date_tracked = dateStr;
+  const dateutc = input.dateutc?.trim();
+  if (dateutc) {
+    const normalized = dateutc.replace(" ", "T");
+    const measured = new Date(
+      normalized.endsWith("Z") ? normalized : `${normalized}Z`
+    );
+    if (!Number.isNaN(measured.getTime())) {
+      metric.server_timestamp = measured
+        .toLocaleString("sv-SE", { timeZone: tz })
+        .replace("T", " ")
+        .slice(0, 19);
+      metric.date_tracked = measured.toLocaleDateString("sv-SE", {
+        timeZone: tz,
+      });
+    }
+  }
+  if (!metric.server_timestamp) {
+    const now = new Date();
+    metric.server_timestamp = now
+      .toLocaleString("sv-SE", { timeZone: tz })
+      .replace("T", " ")
+      .slice(0, 19);
+    metric.date_tracked = now.toLocaleDateString("sv-SE", { timeZone: tz });
+  }
 
   const currentTemp = metric.temp_c != null ? Number(metric.temp_c) : null;
   if (currentTemp !== null && !Number.isNaN(currentTemp)) {

@@ -13,7 +13,10 @@ export async function jsonFetcher<T>(url: string): Promise<T> {
   const timeout = setTimeout(() => controller.abort(), 15_000);
 
   try {
-    const res = await fetch(url, {
+    const fetchUrl = url.startsWith("/api/")
+      ? `${url}${url.includes("?") ? "&" : "?"}_=${Date.now()}`
+      : url;
+    const res = await fetch(fetchUrl, {
       signal: controller.signal,
       cache: "no-store",
     });

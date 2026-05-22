@@ -46,7 +46,7 @@ export default function WeerPage() {
     isLoading: weerLoading,
     mutate: mutateWeer,
   } = useSWR<WeerLive, FetchError>("/api/weer/live", jsonFetcher, {
-    refreshInterval: 60_000,
+    refreshInterval: 30_000,
     shouldRetryOnError: true,
     errorRetryCount: 3,
   });
@@ -54,7 +54,7 @@ export default function WeerPage() {
   const { data: historie, mutate: mutateHistorie } = useSWR<WeerHistorie, FetchError>(
     weer ? "/api/weer/historie" : null,
     jsonFetcher,
-    { refreshInterval: 60_000 }
+    { refreshInterval: 30_000 }
   );
 
   const { data: getijdenData, mutate: mutateGetijden } = useSWR<GetijdenResponse>(

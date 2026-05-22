@@ -2,6 +2,8 @@ export interface WeerLive {
   dateutc?: string;
   date_tracked?: string;
   temp_c?: number;
+  /** Tweede buitensensor (WH25), indien aanwezig */
+  temp2_c?: number;
   tempin_c?: number;
   gevoelstemperatuur?: number | string;
   temp_min_c?: number | string;

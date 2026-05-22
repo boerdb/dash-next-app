@@ -47,11 +47,12 @@ export function MetricGrid({ data }: MetricGridProps) {
             Wind ({getWindDirection(data.winddir)})
           </p>
           <p className="text-2xl font-bold tabular-nums">
-            {Number(data.windspd_avg10m_kmh ?? 0).toFixed(1)}
+            {Number(data.windspeed_kmh ?? data.windspd_avg10m_kmh ?? 0).toFixed(1)}
             <span className="ml-1 text-sm font-normal text-zinc-400">km/u</span>
           </p>
           <p className="text-xs text-zinc-400">
-            Stoot: {Number(data.windgust_kmh ?? 0).toFixed(1)} km/u
+            Gem. 10 min: {Number(data.windspd_avg10m_kmh ?? 0).toFixed(1)} km/u · Stoot:{" "}
+            {Number(data.windgust_kmh ?? 0).toFixed(1)} km/u
           </p>
         </MetricCard>
 
