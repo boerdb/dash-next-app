@@ -30,7 +30,7 @@ Voorbeeld URL (als je het later nodig hebt vanaf `.52` of een app-server op het 
 
 ## MariaDB op .52
 
-Alleen systeem-databases (`mysql`, `phpmyadmin`, …). Alle app-data staat op `.14`.
+**Geen** — MariaDB en phpMyAdmin zijn verwijderd. PHP gebruikt `php8.1-mysql` om naar `.14` te verbinden. Databasebeheer: phpMyAdmin op **192.168.1.14**.
 
 ## Opgeruimd op .52
 
