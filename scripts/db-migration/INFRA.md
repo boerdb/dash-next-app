@@ -51,4 +51,6 @@ Personen/labels (optioneel nog PHP op `.52`): `/personen/`, `/labels/`
 
 ## Opgeruimd op .52
 
-Oude PWA/test-bestanden staan in `/var/www/html/_archief/<datum>/` (script: `archive-52-clutter.py`).
+- **Weer/energie** (dashboard via Next): map `weer/`, symlinks en cron `save_*` / `getijden_beheer` verwijderd → `_archief/weer-naar-next-*` (script: `cleanup-52-weer.py`).
+- **Blijft:** `personen/`, `labels/`.
+- Oudere PWA/test: `_archief/<datum>/` (`archive-52-clutter.py`).
