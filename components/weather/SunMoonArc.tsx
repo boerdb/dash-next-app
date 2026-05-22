@@ -65,7 +65,10 @@ function MoonPhaseDisc({
     );
   }
 
-  const litCx = waxing ? r * (2 * fraction) : r * (2 * (1 - fraction));
+  // Twee-cirkel-methode: schaduwcirkel schuift over lichte basis (gebogen scheidslijn).
+  const shadowCx = waxing
+    ? r * (1 - 2 * fraction)
+    : r * (1 + 2 * fraction);
 
   return (
     <svg
@@ -81,8 +84,8 @@ function MoonPhaseDisc({
         </clipPath>
       </defs>
       <g clipPath={`url(#${clipId})`}>
-        <circle cx={r} cy={r} r={r} fill={MOON_DARK} />
-        <circle cx={litCx} cy={r} r={r} fill={MOON_LIGHT} />
+        <circle cx={r} cy={r} r={r} fill={MOON_LIGHT} />
+        <circle cx={shadowCx} cy={r} r={r} fill={MOON_DARK} />
       </g>
     </svg>
   );
