@@ -3,6 +3,7 @@ import type { WeerLive } from "@/lib/api/types";
 import { enrichWeerLive } from "@/lib/weer/enrich-live";
 import { mergeDailyMinMax } from "@/lib/weer/ecowitt-ingest";
 import { getPool } from "@/lib/db/pool";
+import { meetMomentFromWeer, NL_TZ_OFFSET } from "@/lib/db/nl-time";
 
 const CACHE_MAX_AGE_MS = 10 * 60 * 1000;
 
@@ -60,10 +61,17 @@ export async function maybeInsertMeting(data: WeerLive): Promise<boolean> {
   const rain = data.dailyrain_mm != null ? Number(data.dailyrain_mm) : 0;
   const sun = data.solarradiation != null ? Number(data.solarradiation) : 0;
 
+  const meetMoment =
+    meetMomentFromWeer(data) ??
+    null;
+
   await pool.query(
-    `INSERT INTO metingen (temp_c, luchtvochtigheid, wind_kmh, wind_richting, regen_mm, zon_straling)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [temp, humidity, wind, dir, rain, Math.round(sun)]
+    `INSERT INTO metingen (meet_moment, temp_c, luchtvochtigheid, wind_kmh, wind_richting, regen_mm, zon_straling)
+     VALUES (
+       COALESCE(?, CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '${NL_TZ_OFFSET}')),
+       ?, ?, ?, ?, ?, ?
+     )`,
+    [meetMoment, temp, humidity, wind, dir, rain, Math.round(sun)]
   );
   return true;
 }

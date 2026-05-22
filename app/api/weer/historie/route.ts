@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { fetchBackend } from "@/lib/api/fetch-backend";
+import { jsonNoStore } from "@/lib/api/no-store";
 import { fetchWeerHistorieFromDb } from "@/lib/db/historie-weer";
 import { isDirectDbEnabled } from "@/lib/db/pool";
 
 export async function GET() {
   if (isDirectDbEnabled()) {
     try {
-      return NextResponse.json(await fetchWeerHistorieFromDb());
+      return jsonNoStore(await fetchWeerHistorieFromDb());
     } catch (e) {
       console.error("Weer historie DB:", e);
       return NextResponse.json(

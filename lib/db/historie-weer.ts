@@ -12,9 +12,9 @@ const QUERY_24H = `
     DATE_FORMAT(meet_moment, '%H:00') AS uur,
     ROUND(AVG(temp_c), 1) AS gem_temp
   FROM metingen
-  WHERE meet_moment >= NOW() - INTERVAL 24 HOUR
+  WHERE meet_moment >= DATE_SUB(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+02:00'), INTERVAL 24 HOUR)
   GROUP BY DATE(meet_moment), HOUR(meet_moment)
-  ORDER BY meet_moment ASC
+  ORDER BY MIN(meet_moment) ASC
 `;
 
 const QUERY_FALLBACK = `

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { fetchBackend } from "@/lib/api/fetch-backend";
+import { jsonNoStore } from "@/lib/api/no-store";
 import { sanitizeWeerPayload } from "@/lib/api/sanitize";
 import { fetchWeerLiveFromDb } from "@/lib/db/live-weer";
 import { isDirectDbEnabled } from "@/lib/db/pool";
@@ -8,9 +9,7 @@ export async function GET() {
   if (isDirectDbEnabled()) {
     try {
       const live = await fetchWeerLiveFromDb();
-      return NextResponse.json(
-        sanitizeWeerPayload(live as Record<string, unknown>)
-      );
+      return jsonNoStore(sanitizeWeerPayload(live as Record<string, unknown>));
     } catch (e) {
       console.error("Weer live DB:", e);
       return NextResponse.json(

@@ -109,14 +109,8 @@ export default function WeerPage() {
     ]);
   };
 
-  const updateLabel = weer
-    ? `Update: ${new Date().toLocaleString("nl-NL", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      }).replace(/\//g, "-")}`
+  const updateLabel = weer?.server_timestamp
+    ? `Update: ${String(weer.server_timestamp).replace("T", " ").slice(0, 16)}`
     : undefined;
 
   const condition = useMemo(
