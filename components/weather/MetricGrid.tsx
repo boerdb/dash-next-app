@@ -1,14 +1,9 @@
 "use client";
 
-import {
-  ArrowUp,
-  Droplets,
-  Gauge,
-  Home,
-  Sun,
-} from "lucide-react";
+import { Droplets, Gauge, Home, Sun } from "lucide-react";
 import type { WeerLive } from "@/lib/api/types";
-import { getWindDirection } from "@/lib/utils/wind";
+import { getWindDirection, resolveWindDegrees } from "@/lib/utils/wind";
+import { WindArrow } from "@/components/weather/WindArrow";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface MetricGridProps {
@@ -32,19 +27,16 @@ function MetricCard({
 }
 
 export function MetricGrid({ data }: MetricGridProps) {
-  const windDeg = data.winddir ?? 0;
+  const windDeg = resolveWindDegrees(data);
   const uv = Number(data.uv ?? 0);
 
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <MetricCard>
-          <ArrowUp
-            className="h-8 w-8 text-sky-400 transition-transform duration-700"
-            style={{ transform: `rotate(${windDeg}deg)` }}
-          />
+          <WindArrow degrees={windDeg} className="text-sky-400" size={44} />
           <p className="mt-2 text-xs uppercase tracking-wide text-zinc-400">
-            Wind ({getWindDirection(data.winddir)})
+            Wind ({getWindDirection(windDeg)})
           </p>
           <p className="text-2xl font-bold tabular-nums">
             {Number(data.windspeed_kmh ?? data.windspd_avg10m_kmh ?? 0).toFixed(1)}

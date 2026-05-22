@@ -12,6 +12,7 @@ export interface WeerLive {
   humidity?: number | string;
   humidityin?: number | string;
   winddir?: number;
+  winddir_avg10m?: number | string;
   windspeed_kmh?: number;
   windspd_avg10m_kmh?: number;
   windgust_kmh?: number;
