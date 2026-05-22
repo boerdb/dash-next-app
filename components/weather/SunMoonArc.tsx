@@ -20,6 +20,9 @@ function sunPoint(progress: number) {
   };
 }
 
+const MOON_DARK = "#0f172a";
+const MOON_LIGHT = "#e2e8f0";
+
 function MoonPhaseDisc({
   phase,
   fraction,
@@ -31,21 +34,57 @@ function MoonPhaseDisc({
 }) {
   const waxing = phase < 0.5;
   const litPct = Math.round(fraction * 100);
+  const r = size / 2;
+  const clipId = `moon-clip-${size}-${waxing ? "w" : "n"}-${litPct}`;
 
-  const background =
-    litPct < 3
-      ? "#1e293b"
-      : litPct > 97
-        ? "#e2e8f0"
-        : waxing
-          ? `linear-gradient(90deg, #0f172a 0%, #0f172a ${100 - litPct}%, #e2e8f0 ${100 - litPct}%)`
-          : `linear-gradient(270deg, #0f172a 0%, #0f172a ${100 - litPct}%, #e2e8f0 ${100 - litPct}%)`;
+  if (litPct < 3) {
+    return (
+      <svg
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+        className="shrink-0"
+        aria-hidden
+      >
+        <circle cx={r} cy={r} r={r - 0.5} fill={MOON_DARK} />
+      </svg>
+    );
+  }
+
+  if (litPct > 97) {
+    return (
+      <svg
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+        className="shrink-0"
+        aria-hidden
+      >
+        <circle cx={r} cy={r} r={r - 0.5} fill={MOON_LIGHT} />
+      </svg>
+    );
+  }
+
+  const litCx = waxing ? r * (2 * fraction) : r * (2 * (1 - fraction));
 
   return (
-    <div
-      className="shrink-0 rounded-full border border-white/20"
-      style={{ width: size, height: size, background }}
-    />
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      className="shrink-0"
+      aria-hidden
+    >
+      <defs>
+        <clipPath id={clipId}>
+          <circle cx={r} cy={r} r={r - 0.5} />
+        </clipPath>
+      </defs>
+      <g clipPath={`url(#${clipId})`}>
+        <circle cx={r} cy={r} r={r} fill={MOON_DARK} />
+        <circle cx={litCx} cy={r} r={r} fill={MOON_LIGHT} />
+      </g>
+    </svg>
   );
 }
 
