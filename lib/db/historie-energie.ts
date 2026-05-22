@@ -1,61 +1,63 @@
 import type { RowDataPacket } from "mysql2";
 import type { EnergieHistorie } from "@/lib/api/types";
+import { buildHistorie24h } from "@/lib/energie/historie-24h";
 import { getPool } from "@/lib/db/pool";
 
 interface HourRow extends RowDataPacket {
-  uur: string;
+  uur_key: string;
   gem_watt: number;
 }
 
+const AMS_NOW = `CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', 'Europe/Amsterdam')`;
+
 const QUERY_24H = `
   SELECT
-    DATE_FORMAT(meet_moment, '%H:00') AS uur,
+    DATE_FORMAT(CONVERT_TZ(meet_moment, '+00:00', 'Europe/Amsterdam'), '%Y-%m-%d %H') AS uur_key,
     ROUND(AVG(actueel_vermogen_w), 0) AS gem_watt
   FROM energie_metingen
-  WHERE meet_moment >= NOW() - INTERVAL 24 HOUR
-  GROUP BY DATE(meet_moment), HOUR(meet_moment)
-  ORDER BY meet_moment ASC
+  WHERE meet_moment >= DATE_SUB(${AMS_NOW}, INTERVAL 24 HOUR)
+  GROUP BY uur_key
+  ORDER BY MIN(meet_moment) ASC
 `;
 
 const QUERY_FALLBACK = `
-  SELECT uur, gem_watt FROM (
+  SELECT uur_key, gem_watt FROM (
     SELECT
-      DATE_FORMAT(meet_moment, '%H:00') AS uur,
+      DATE_FORMAT(CONVERT_TZ(meet_moment, '+00:00', 'Europe/Amsterdam'), '%Y-%m-%d %H') AS uur_key,
       ROUND(AVG(actueel_vermogen_w), 0) AS gem_watt,
       MAX(meet_moment) AS laatste
     FROM energie_metingen
-    GROUP BY DATE(meet_moment), HOUR(meet_moment)
+    GROUP BY uur_key
     ORDER BY laatste DESC
     LIMIT 24
   ) sub ORDER BY laatste ASC
 `;
 
-function rowsToHistorie(rows: HourRow[]): EnergieHistorie {
-  const labels: string[] = [];
-  const wattage: number[] = [];
-  let totaal = 0;
-
+function rowsToMap(rows: HourRow[]): Map<string, number> {
+  const hourly = new Map<string, number>();
   for (const row of rows) {
-    labels.push(row.uur);
-    const w = Number(row.gem_watt);
-    wattage.push(w);
-    totaal += w;
+    hourly.set(row.uur_key, Number(row.gem_watt));
   }
-
-  const aantal = rows.length;
-  return {
-    labels,
-    wattage,
-    gemiddelde: aantal > 0 ? Math.round(totaal / aantal) : 0,
-  };
+  return hourly;
 }
 
-export async function fetchEnergieHistorieFromDb(): Promise<EnergieHistorie> {
+export async function fetchEnergieHistorieFromDb(
+  currentWatt?: number
+): Promise<EnergieHistorie> {
   const pool = getPool();
   const [rows] = await pool.query<HourRow[]>(QUERY_24H);
   if (rows.length > 0) {
-    return rowsToHistorie(rows);
+    return buildHistorie24h(rowsToMap(rows), currentWatt);
   }
   const [fallback] = await pool.query<HourRow[]>(QUERY_FALLBACK);
-  return rowsToHistorie(fallback);
+  return buildHistorie24h(rowsToMap(fallback), currentWatt);
+}
+
+export async function fetchLatestWattFromDb(): Promise<number | undefined> {
+  const pool = getPool();
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT actueel_vermogen_w FROM energie_metingen ORDER BY meet_moment DESC LIMIT 1`
+  );
+  const w = rows[0]?.actueel_vermogen_w;
+  return w != null ? Number(w) : undefined;
 }

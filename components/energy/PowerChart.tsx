@@ -24,7 +24,7 @@ export function PowerChart({ data }: PowerChartProps) {
   const fillId = useId().replace(/:/g, "");
   const chartData = data.labels.map((label, i) => ({
     label,
-    watt: data.wattage[i] ?? 0,
+    watt: data.wattage[i],
   }));
 
   return (
@@ -68,6 +68,7 @@ export function PowerChart({ data }: PowerChartProps) {
                 stroke="#ffce00"
                 strokeWidth={2}
                 fill={`url(#${fillId})`}
+                connectNulls={false}
                 dot={false}
               />
             </AreaChart>

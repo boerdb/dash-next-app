@@ -80,7 +80,7 @@ export interface EnergieLive {
 
 export interface EnergieHistorie {
   labels: string[];
-  wattage: number[];
+  wattage: (number | null)[];
   gemiddelde: number;
 }
 

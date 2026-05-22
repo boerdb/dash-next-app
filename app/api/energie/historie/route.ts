@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 import { fetchBackend } from "@/lib/api/fetch-backend";
-import { fetchEnergieHistorieFromDb } from "@/lib/db/historie-energie";
+import {
+  fetchEnergieHistorieFromDb,
+  fetchLatestWattFromDb,
+} from "@/lib/db/historie-energie";
 import { isDirectDbEnabled } from "@/lib/db/pool";
 
 export async function GET() {
   if (isDirectDbEnabled()) {
     try {
-      return NextResponse.json(await fetchEnergieHistorieFromDb());
+      const currentWatt = await fetchLatestWattFromDb();
+      return NextResponse.json(await fetchEnergieHistorieFromDb(currentWatt));
     } catch (e) {
       console.error("Energie historie DB:", e);
       return NextResponse.json(

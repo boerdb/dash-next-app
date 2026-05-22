@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import useSWR from "swr";
 import dynamic from "next/dynamic";
 import { PowerHero } from "@/components/energy/PowerHero";
@@ -9,6 +10,7 @@ import { DataError } from "@/components/shared/DataError";
 import { Skeleton } from "@/components/ui/skeleton";
 import { jsonFetcher, FetchError } from "@/lib/fetcher";
 import type { EnergieHistorie, EnergieLive } from "@/lib/api/types";
+import { applyLiveWattToHistorie } from "@/lib/energie/historie-24h";
 
 const PowerChart = dynamic(
   () =>
@@ -34,7 +36,15 @@ export default function EnergiePage() {
   const { data: historie, mutate: mutateHistorie } = useSWR<EnergieHistorie, FetchError>(
     energie ? "/api/energie/historie" : null,
     jsonFetcher,
-    { refreshInterval: 60_000 }
+    { refreshInterval: 30_000, revalidateOnFocus: true }
+  );
+
+  const chartHistorie = useMemo(
+    () =>
+      historie && energie
+        ? applyLiveWattToHistorie(historie, energie.stroom_nu)
+        : historie,
+    [historie, energie?.stroom_nu]
   );
 
   const refreshAll = async () => {
@@ -66,7 +76,7 @@ export default function EnergiePage() {
         <div className="space-y-4">
           <PowerHero data={energie} />
           <DailyStats data={energie} />
-          {historie?.labels?.length ? <PowerChart data={historie} /> : null}
+          {chartHistorie?.labels?.length ? <PowerChart data={chartHistorie} /> : null}
         </div>
       ) : (
         <DataError onRetry={() => mutateEnergie()} />
