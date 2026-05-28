@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <data>
+    <cube>
+      <timeslice>
+        <timeslice_id>2026-05-29T12:00:00</timeslice_id>
+        <phenomenon>
+          <phenomenon_id>thunderstorm</phenomenon_id>
+          <location>
+            <location_id>FR</location_id>
+            <location_warning_status>1</location_warning_status>
+            <text>
+              <text_data>Onweersbuien. Kans op plaatselijk veel neerslag en windstoten.</text_data>
+            </text>
+          </location>
+          <location>
+            <location_id>ZH</location_id>
+            <location_warning_status>2</location_warning_status>
+            <text>
+              <text_data>Hevige onweersbuien.</text_data>
+            </text>
+          </location>
+        </phenomenon>
+      </timeslice>
+      <timeslice>
+        <timeslice_id>2026-05-29T13:00:00</timeslice_id>
+        <phenomenon>
+          <phenomenon_id>thunderstorm</phenomenon_id>
+          <location>
+            <location_id>FR</location_id>
+            <location_warning_status>1</location_warning_status>
+            <text>
+              <text_data>Onweersbuien. Kans op plaatselijk veel neerslag en windstoten.</text_data>
+            </text>
+          </location>
+        </phenomenon>
+      </timeslice>
+    </cube>
+  </data>
+</root>

@@ -155,21 +155,32 @@ export interface OpenWeatherCurrent {
   snowMm1h: number | null;
 }
 
-export interface OpenWeatherAlert {
-  event: string;
-  senderName: string;
-  startAt: string;
-  endAt: string;
-  description: string;
-}
-
 export interface OpenWeatherSupplement {
   current: OpenWeatherCurrent;
   minutely: OpenWeatherMinutely[];
   hourly: OpenWeatherHourly[];
   daily: OpenWeatherDaily[];
-  alerts: OpenWeatherAlert[];
   dataSource: "onecall-3" | "2.5";
+  updatedAt: string;
+}
+
+/** Officiële KNMI-provinciewaarschuwingen (waarschuwingen_nederland_48h). */
+export interface KnmiWarningItem {
+  level: 1 | 2 | 3;
+  levelLabel: string;
+  phenomenonId: string;
+  phenomenonLabel: string;
+  validFrom: string;
+  validTo: string;
+  texts: string[];
+}
+
+export interface KnmiWaarschuwingenApi {
+  province: string;
+  maxLevel: 0 | 1 | 2 | 3;
+  maxLevelLabel: string;
+  warnings: KnmiWarningItem[];
+  sourceFile: string | null;
   updatedAt: string;
 }
 

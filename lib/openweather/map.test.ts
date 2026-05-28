@@ -59,15 +59,6 @@ const oneCallFixture: OwOneCallResponse = {
     weather: [{ id: 500, description: "lichte regen", icon: "10d" }],
     rain: 2.1,
   })),
-  alerts: [
-    {
-      sender_name: "KNMI",
-      event: "Code geel wind",
-      start: NOW_SEC,
-      end: NOW_SEC + 7200,
-      description: "Zuidwestelijke wind, windstoten 70-80 km/u.",
-    },
-  ],
 };
 
 const weather25: OwWeatherResponse = {
@@ -112,7 +103,7 @@ describe("normalize-metrics", () => {
 });
 
 describe("mapOneCall3", () => {
-  it("maps current, minutely, hourly, daily, alerts and dataSource", () => {
+  it("maps current, minutely, hourly, daily and dataSource", () => {
     const result = mapOneCall3(oneCallFixture);
 
     assert.equal(result.dataSource, "onecall-3");
@@ -127,7 +118,6 @@ describe("mapOneCall3", () => {
     assert.equal(result.daily.length, 5);
     assert.equal(result.daily[0].uviMax, 3.2);
     assert.ok(result.daily[0].sunriseAt);
-    assert.equal(result.alerts.length, 1);
   });
 
   it("uses current.humidity directly when valid", () => {
@@ -229,7 +219,7 @@ describe("mapOneCall3", () => {
 });
 
 describe("normalizeOpenWeatherSupplement", () => {
-  it("fills missing alerts, minutely and arrays from legacy cached payloads", () => {
+  it("fills missing minutely and arrays from legacy cached payloads", () => {
     const legacy = {
       current: {
         description: "helder",
@@ -247,7 +237,6 @@ describe("normalizeOpenWeatherSupplement", () => {
 
     const result = normalizeOpenWeatherSupplement(legacy);
     assert.ok(result);
-    assert.deepEqual(result!.alerts, []);
     assert.deepEqual(result!.minutely, []);
     assert.deepEqual(result!.hourly, []);
     assert.deepEqual(result!.daily, []);
@@ -277,7 +266,6 @@ describe("normalizeOpenWeatherSupplement", () => {
       minutely: [],
       hourly: [],
       daily: [],
-      alerts: [],
       dataSource: "onecall-3",
       updatedAt: "2026-01-01T00:00:00.000Z",
     };

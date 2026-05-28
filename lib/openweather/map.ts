@@ -1,5 +1,4 @@
 import type {
-  OpenWeatherAlert,
   OpenWeatherCurrent,
   OpenWeatherDaily,
   OpenWeatherHourly,
@@ -17,7 +16,6 @@ import {
 import type {
   OwForecastItem,
   OwForecastResponse,
-  OwOneCallAlert,
   OwOneCallCurrent,
   OwOneCallDaily,
   OwOneCallHourly,
@@ -43,16 +41,6 @@ function iconUrl(icon: string): string {
 
 function round1(n: number): number {
   return Math.round(n * 10) / 10;
-}
-
-function formatAlertTime(unixSec: number): string {
-  return new Date(unixSec * 1000).toLocaleString("nl-NL", {
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: TZ,
-  });
 }
 
 function precip1h(vol?: OwPrecipVolume): number | null {
@@ -227,28 +215,13 @@ export function mapOneCall3(data: OwOneCallResponse): OpenWeatherSupplement {
     .slice(0, 60)
     .map((item) => toOneCallMinutely(item));
 
-  const alerts: OpenWeatherAlert[] = (data.alerts ?? []).map(mapAlert);
-
   return {
     current: mapCurrent3(data.current, hourlyRaw),
     minutely,
     hourly,
     daily,
-    alerts,
     dataSource: "onecall-3",
     updatedAt: new Date().toISOString(),
-  };
-}
-
-function mapAlert(a: OwOneCallAlert): OpenWeatherAlert {
-  const start = a.start ?? 0;
-  const end = a.end ?? start;
-  return {
-    event: a.event ?? "Weeralert",
-    senderName: a.sender_name ?? "",
-    startAt: formatAlertTime(start),
-    endAt: formatAlertTime(end),
-    description: a.description ?? "",
   };
 }
 
@@ -317,7 +290,6 @@ export function mapOpenWeatherSupplement(
     minutely: [],
     hourly,
     daily,
-    alerts: [],
     dataSource: "2.5",
     updatedAt: new Date().toISOString(),
   };
@@ -444,7 +416,6 @@ export function normalizeOpenWeatherSupplement(
     minutely: Array.isArray(raw.minutely) ? raw.minutely : [],
     hourly: Array.isArray(raw.hourly) ? raw.hourly : [],
     daily: Array.isArray(raw.daily) ? raw.daily : [],
-    alerts: Array.isArray(raw.alerts) ? raw.alerts : [],
     dataSource: raw.dataSource === "onecall-3" ? "onecall-3" : "2.5",
     updatedAt: raw.updatedAt ?? new Date().toISOString(),
   };

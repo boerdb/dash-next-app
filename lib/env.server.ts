@@ -18,6 +18,10 @@ const envSchema = z.object({
     .default("http://192.168.1.169/api/v1/data"),
   /** Optioneel — voorspelling & aanvullende metingen op het weer-tabblad */
   OPENWEATHER_API_KEY: z.string().min(1).optional(),
+  /** KNMI Data Platform — officiële waarschuwingen (waarschuwingen_nederland_48h) */
+  KNMI_API_KEY: z.string().min(1).optional(),
+  /** Provinciecode voor KNMI-waarschuwingen (standaard FR = Friesland / Harlingen) */
+  KNMI_PROVINCE: z.string().min(2).max(4).optional(),
 });
 
 export const env = envSchema.parse({
@@ -26,4 +30,6 @@ export const env = envSchema.parse({
   ENERGIE_P1_URL: process.env.ENERGIE_P1_URL || undefined,
   ENERGIE_WATER_URL: process.env.ENERGIE_WATER_URL || undefined,
   OPENWEATHER_API_KEY: process.env.OPENWEATHER_API_KEY || undefined,
+  KNMI_API_KEY: process.env.KNMI_API_KEY || undefined,
+  KNMI_PROVINCE: process.env.KNMI_PROVINCE || undefined,
 });

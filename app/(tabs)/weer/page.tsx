@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { WeatherHero } from "@/components/weather/WeatherHero";
 import { MetricGrid } from "@/components/weather/MetricGrid";
 import { TideCard } from "@/components/weather/TideCard";
+import { KnmiWarningsCard } from "@/components/weather/KnmiWarningsCard";
 import { OpenWeatherPanel } from "@/components/weather/OpenWeatherPanel";
 import { PullToRefresh } from "@/components/shared/PullToRefresh";
 import { DataError } from "@/components/shared/DataError";
@@ -19,6 +20,7 @@ import { getWeatherCondition } from "@/lib/utils/weather-condition";
 import type {
   AstronomieApi,
   GetijdenResponse,
+  KnmiWaarschuwingenApi,
   OpenWeatherSupplement,
   WeerHistorie,
   WeerLive,
@@ -80,6 +82,15 @@ export default function WeerPage() {
     { refreshInterval: 300_000, ...swrFreshOnOpen }
   );
 
+  const { data: knmiWaarschuwingen, mutate: mutateKnmi } = useSWR<
+    KnmiWaarschuwingenApi | null,
+    FetchError
+  >("/api/weer/knmi-waarschuwingen", knmiFetcher, {
+    refreshInterval: 600_000,
+    shouldRetryOnError: false,
+    ...swrFreshOnOpen,
+  });
+
   const {
     data: openWeather,
     error: openWeatherError,
@@ -114,8 +125,9 @@ export default function WeerPage() {
       mutateGetijden(),
       mutateAstro(),
       mutateOpenWeather(),
+      mutateKnmi(),
     ]);
-  }, [mutateWeer, mutateHistorie, mutateGetijden, mutateAstro, mutateOpenWeather]);
+  }, [mutateWeer, mutateHistorie, mutateGetijden, mutateAstro, mutateOpenWeather, mutateKnmi]);
 
   useRevalidateOnVisible(refreshAll);
 
@@ -155,6 +167,7 @@ export default function WeerPage() {
             astro={astroData}
             updateLabel={updateLabel}
           />
+          {knmiWaarschuwingen ? <KnmiWarningsCard data={knmiWaarschuwingen} /> : null}
           <MetricGrid data={weer} />
           <OpenWeatherPanel
             data={openWeather}
@@ -171,6 +184,16 @@ export default function WeerPage() {
       )}
     </PullToRefresh>
   );
+}
+
+async function knmiFetcher(url: string): Promise<KnmiWaarschuwingenApi | null> {
+  const res = await fetch(url, { cache: "no-store" });
+  if (res.status === 503) return null;
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new FetchError(body.error ?? "KNMI waarschuwingen niet beschikbaar", res.status);
+  }
+  return (await res.json()) as KnmiWaarschuwingenApi;
 }
 
 async function openWeatherFetcher(
