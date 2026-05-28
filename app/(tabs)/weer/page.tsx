@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import useSWR from "swr";
 import dynamic from "next/dynamic";
 import { WeatherHero } from "@/components/weather/WeatherHero";
@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { getAstronomyInfo, toAstronomieApi } from "@/lib/astronomy/sun-moon";
 import { jsonFetcher, FetchError } from "@/lib/fetcher";
+import { useRevalidateOnVisible } from "@/lib/hooks/use-revalidate-on-visible";
 import { normalizeOpenWeatherSupplement } from "@/lib/openweather/map";
 import { getWeatherCondition } from "@/lib/utils/weather-condition";
 import type {
@@ -28,6 +29,13 @@ const TemperatureChart = dynamic(
     import("@/components/weather/TemperatureChart").then((m) => m.TemperatureChart),
   { ssr: false, loading: () => <Skeleton className="h-48 w-full rounded-2xl" /> }
 );
+
+const swrFreshOnOpen = {
+  revalidateOnMount: true,
+  revalidateOnFocus: true,
+  revalidateIfStale: true,
+  keepPreviousData: true,
+} as const;
 
 const defaultAstro: AstronomieApi = {
   period: "day",
@@ -49,18 +57,19 @@ export default function WeerPage() {
     refreshInterval: 30_000,
     shouldRetryOnError: true,
     errorRetryCount: 3,
+    ...swrFreshOnOpen,
   });
 
   const { data: historie, mutate: mutateHistorie } = useSWR<WeerHistorie, FetchError>(
-    weer ? "/api/weer/historie" : null,
+    "/api/weer/historie",
     jsonFetcher,
-    { refreshInterval: 30_000 }
+    { refreshInterval: 30_000, ...swrFreshOnOpen }
   );
 
   const { data: getijdenData, mutate: mutateGetijden } = useSWR<GetijdenResponse>(
     "/api/weer/getijden",
     jsonFetcher,
-    { refreshInterval: 3600_000 }
+    { refreshInterval: 3600_000, ...swrFreshOnOpen }
   );
   const getijden = getijdenData?.items ?? [];
   const getijBron = getijdenData?.source ?? "rws";
@@ -68,7 +77,7 @@ export default function WeerPage() {
   const { data: astro, mutate: mutateAstro } = useSWR<AstronomieApi>(
     "/api/weer/astronomie",
     jsonFetcher,
-    { refreshInterval: 300_000 }
+    { refreshInterval: 300_000, ...swrFreshOnOpen }
   );
 
   const {
@@ -81,11 +90,10 @@ export default function WeerPage() {
     openWeatherFetcher,
     {
       refreshInterval: 1_800_000,
-      revalidateOnMount: true,
-      revalidateOnFocus: true,
       shouldRetryOnError: true,
       errorRetryCount: 2,
       dedupingInterval: 5_000,
+      ...swrFreshOnOpen,
     }
   );
 
@@ -99,7 +107,7 @@ export default function WeerPage() {
 
   const astroData = astro ?? astroFallback;
 
-  const refreshAll = async () => {
+  const refreshAll = useCallback(async () => {
     await Promise.all([
       mutateWeer(),
       mutateHistorie(),
@@ -107,7 +115,9 @@ export default function WeerPage() {
       mutateAstro(),
       mutateOpenWeather(),
     ]);
-  };
+  }, [mutateWeer, mutateHistorie, mutateGetijden, mutateAstro, mutateOpenWeather]);
+
+  useRevalidateOnVisible(refreshAll);
 
   const updateLabel = weer?.server_timestamp
     ? `Update: ${String(weer.server_timestamp).replace("T", " ").slice(0, 16)}`
