@@ -2,7 +2,6 @@
 
 import dynamic from "next/dynamic";
 import {
-  AlertTriangle,
   Cloud,
   Droplets,
   Eye,
@@ -11,11 +10,7 @@ import {
   Thermometer,
   Wind,
 } from "lucide-react";
-import type {
-  OpenWeatherAlert,
-  OpenWeatherSupplement,
-  WeerLive,
-} from "@/lib/api/types";
+import type { OpenWeatherSupplement, WeerLive } from "@/lib/api/types";
 import { normalizeOpenWeatherSupplement } from "@/lib/openweather/map";
 import {
   parseStationHumidityPct,
@@ -56,7 +51,7 @@ export function OpenWeatherSection({ data, station }: OpenWeatherSectionProps) {
   const normalized = normalizeOpenWeatherSupplement(data);
   if (!normalized) return null;
 
-  const { current, minutely, hourly, daily, alerts, dataSource } = normalized;
+  const { current, minutely, hourly, daily, dataSource } = normalized;
   const stationHumidityPct = parseStationHumidityPct(station?.humidity);
   const showStationRh = shouldShowStationHumidityComparison(
     current.humidityPct,
@@ -101,14 +96,6 @@ export function OpenWeatherSection({ data, station }: OpenWeatherSectionProps) {
             OpenWeather · Harlingen · modeldata, niet je weerstation
           </p>
         </header>
-
-        {alerts.length > 0 && (
-          <section className="space-y-2">
-            {alerts.map((alert, i) => (
-              <WeatherAlertCard key={`${alert.event}-${alert.startAt}-${i}`} alert={alert} />
-            ))}
-          </section>
-        )}
 
         <CurrentStatusBlock current={current} />
 
@@ -190,38 +177,6 @@ export function OpenWeatherSection({ data, station }: OpenWeatherSectionProps) {
         </p>
       </CardContent>
     </Card>
-  );
-}
-
-function WeatherAlertCard({ alert }: { alert: OpenWeatherAlert }) {
-  return (
-    <div className="rounded-xl border border-amber-500/40 bg-amber-950/30 px-3 py-2.5">
-      <div className="flex gap-2">
-        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" aria-hidden />
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-amber-100">{alert.event}</p>
-          <p className="mt-0.5 text-[0.65rem] text-amber-200/80">
-            {alert.startAt} – {alert.endAt}
-            {alert.senderName ? ` · ${alert.senderName}` : null}
-          </p>
-          {alert.description ? (
-            <details className="mt-1.5 group">
-              <summary className="cursor-pointer text-[0.65rem] text-amber-300/90 marker:content-none list-none [&::-webkit-details-marker]:hidden">
-                <span className="underline decoration-amber-500/50 underline-offset-2 group-open:hidden">
-                  Toon melding
-                </span>
-                <span className="hidden underline decoration-amber-500/50 underline-offset-2 group-open:inline">
-                  Verberg melding
-                </span>
-              </summary>
-              <p className="mt-1.5 whitespace-pre-wrap text-[0.7rem] leading-relaxed text-amber-100/90">
-                {alert.description}
-              </p>
-            </details>
-          ) : null}
-        </div>
-      </div>
-    </div>
   );
 }
 
