@@ -43,7 +43,7 @@ async function knmiGet<T>(
 
 export async function fetchKnmiWaarschuwingen(
   apiKey: string,
-  province = KNMI_DEFAULT_PROVINCE
+  province: string = KNMI_DEFAULT_PROVINCE
 ): Promise<KnmiWaarschuwingenApi> {
   const list = await knmiGet<KnmiListFilesResponse>(
     apiKey,
