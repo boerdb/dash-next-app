@@ -1,8 +1,10 @@
 "use client";
 
-import { Fragment } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { HelpCircle, TrendingDown, TrendingUp } from "lucide-react";
 import type { GetijItem, GetijdenResponse } from "@/lib/api/types";
+import { dagKeyAmsterdam } from "@/lib/tides/day-label";
+import { normalizeGetijdenForDisplay } from "@/lib/tides/normalize-display";
 import {
   berekenVerschil,
   getActiveTideIndex,
@@ -31,10 +33,16 @@ const BRON_TEKST: Record<
 };
 
 export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
-  if (!getijden.length) return null;
+  const amsterdamDayKey = useAmsterdamDayKey();
+  const visible = useMemo(
+    () => normalizeGetijdenForDisplay(getijden),
+    [getijden, amsterdamDayKey]
+  );
 
-  const status = getLiveStatus(getijden);
-  const activeIndex = getActiveTideIndex(getijden);
+  if (!visible.length) return null;
+
+  const status = getLiveStatus(visible);
+  const activeIndex = getActiveTideIndex(visible);
   const StatusIcon =
     status.icoon === "up"
       ? TrendingUp
@@ -71,10 +79,10 @@ export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
           <span className="text-right">Hoogte</span>
         </div>
 
-        {getijden.map((g, i) => {
+        {visible.map((g, i) => {
           const isActive = i === activeIndex;
           const showDayHeader =
-            i === 0 || getijden[i - 1].dagKey !== g.dagKey;
+            i === 0 || visible[i - 1].dagKey !== g.dagKey;
           return (
             <Fragment key={`${g.dagKey}-${g.type}-${g.tijd}`}>
               {showDayHeader && (
@@ -111,7 +119,7 @@ export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
                     g.type === "HW" ? "text-emerald-400" : "text-rose-400"
                   )}
                 >
-                  {berekenVerschil(i, getijden)}
+                  {berekenVerschil(i, visible)}
                 </span>
                 <span
                   className={cn(
@@ -134,4 +142,21 @@ export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
       </CardContent>
     </Card>
   );
+}
+
+/** Herberekent labels na middernacht zonder pagina-refresh. */
+function useAmsterdamDayKey(): string {
+  const [dayKey, setDayKey] = useState(() => dagKeyAmsterdam(new Date()));
+
+  useEffect(() => {
+    const tick = () => {
+      const next = dagKeyAmsterdam(new Date());
+      setDayKey((prev) => (prev === next ? prev : next));
+    };
+    tick();
+    const id = window.setInterval(tick, 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  return dayKey;
 }

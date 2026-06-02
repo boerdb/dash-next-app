@@ -71,7 +71,7 @@ export default function WeerPage() {
   const { data: getijdenData, mutate: mutateGetijden } = useSWR<GetijdenResponse>(
     "/api/weer/getijden",
     jsonFetcher,
-    { refreshInterval: 3600_000, ...swrFreshOnOpen }
+    { refreshInterval: 900_000, ...swrFreshOnOpen }
   );
   const getijden = getijdenData?.items ?? [];
   const getijBron = getijdenData?.source ?? "rws";
