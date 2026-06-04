@@ -18,6 +18,7 @@ import paramiko
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+TOKEN_FILE = SCRIPT_DIR / ".homewizard-tokens.json"
 HOST = "192.168.1.32"
 APP = "/var/www/dash-next-app"
 ENV_FILE = f"{APP}/.env.local"
@@ -69,13 +70,37 @@ def try_create_user(ssh: paramiko.SSHClient, ip: str) -> tuple[str | None, str]:
     return None, raw[:100] if raw else "geen antwoord"
 
 
+def save_tokens_file(p1_token: str | None, bat_tokens: list[str]) -> None:
+    TOKEN_FILE.write_text(
+        json.dumps(
+            {"p1_token": p1_token, "battery_tokens": bat_tokens},
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    print(f"  (tussentijds opgeslagen in {TOKEN_FILE.name})")
+
+
 def poll_token(ssh: paramiko.SSHClient, ip: str, name: str) -> str | None:
     print(f"\n{'=' * 50}")
     print(f"  {name}  ({ip})")
     print("=" * 50)
-    print("1. HomeWizard-app → Instellingen → Meters → dit apparaat → Local API → AAN")
-    print("2. P1: kort (~1 s) op de witte knop | Batterij: touchknop")
-    print(f"3. Script pollt nu {POLL_TIMEOUT_S}s — druk op de knop wanneer je klaar bent\n")
+    print("1. HomeWizard-app → Instellingen → Meters → DIT apparaat → Local API → AAN")
+    if "P1" in name:
+        print("2. Kort (~1 s) op de witte knop op de P1-meter")
+    else:
+        print("2. Kort op de zwarte touchknop op de batterij (niet de P1-knop)")
+        print("   Vaak hoor je een piep. Selecteer in de app de batterij, niet de P1.")
+    choice = input(
+        f"Enter = start {POLL_TIMEOUT_S}s polling, s = overslaan, p = plak token: "
+    ).strip().lower()
+    if choice == "s":
+        return None
+    if choice == "p":
+        manual = input("  Plak token: ").strip()
+        return manual or None
+
+    print(f"3. Polling gestart — druk nu op de knop…\n")
 
     deadline = time.time() + POLL_TIMEOUT_S
     last_msg = ""
@@ -131,6 +156,7 @@ def main() -> None:
             p1_token = token
         else:
             bat_tokens.append(token)
+        save_tokens_file(p1_token, bat_tokens)
 
     updates: dict[str, str] = {
         "ENERGIE_BATTERY_URLS": "https://192.168.1.179,https://192.168.1.170",

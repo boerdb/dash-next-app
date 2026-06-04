@@ -10,28 +10,57 @@ export interface HomeWizardBatteryV1Raw {
 export interface HomeWizardBatteryV2Measurement {
   power_w?: number;
   state_of_charge_pct?: number;
+  voltage_v?: number;
+  current_a?: number;
+  frequency_hz?: number;
+  energy_import_kwh?: number;
+  energy_export_kwh?: number;
+  cycles?: number;
 }
 
 export interface HomeWizardP1Batteries {
   mode?: string;
   battery_count?: number;
   power_w?: number;
+  target_power_w?: number;
+  max_consumption_w?: number;
+  max_production_w?: number;
+  permissions?: string[];
+  charge_to_full?: boolean;
 }
 
 export interface BatterijLive {
   id: string;
+  /** Weergavenaam (uit ENERGIE_BATTERY_LABELS of .{id}) */
+  label: string;
   soc: number | null;
   vermogen_w: number;
   bereikbaar: boolean;
-  /** Korte status voor de UI (bijv. ontbrekende token). */
   melding?: string;
+  voltage_v?: number | null;
+  cycles?: number | null;
+  import_start?: number;
+  export_start?: number;
+  vandaag_laden_kwh?: number;
+  vandaag_ontladen_kwh?: number;
 }
 
 export interface BatterijGroep {
   mode: string;
+  mode_label: string;
   aantal: number;
   vermogen_w: number;
+  target_power_w: number | null;
+  max_laden_w: number | null;
+  max_ontladen_w: number | null;
+  permissions: string[];
+  charge_to_full: boolean;
   bereikbaar: boolean;
+}
+
+export interface BatterijHistorie {
+  labels: string[];
+  wattage: (number | null)[];
 }
 
 export interface BatterijFetchResult {
@@ -59,6 +88,29 @@ export function parseBatteryUrls(value: string | undefined): string[] {
     .filter(Boolean);
 }
 
+export function parseBatteryLabels(value: string | undefined): string[] {
+  if (!value?.trim()) return [];
+  return value.split(",").map((s) => s.trim()).filter(Boolean);
+}
+
+export function formatBatterijMode(mode: string): string {
+  const map: Record<string, string> = {
+    zero: "Nul op de meter",
+    standby: "Standby",
+    to_full: "Opladen naar 100%",
+    predictive: "Slim (voorspellend)",
+  };
+  return map[mode] ?? mode;
+}
+
+export function formatPermissions(perms: string[]): string {
+  if (perms.length === 0) return "Geen laden/ontladen";
+  const parts: string[] = [];
+  if (perms.includes("charge_allowed")) parts.push("laden");
+  if (perms.includes("discharge_allowed")) parts.push("ontladen");
+  return parts.join(" + ") || perms.join(", ");
+}
+
 export function parseBatteryTokens(value: string | undefined): string[] {
   if (!value?.trim()) return [];
   return value
@@ -69,6 +121,7 @@ export function parseBatteryTokens(value: string | undefined): string[] {
 
 export interface BatteryEndpoint {
   id: string;
+  label: string;
   v1Url: string | null;
   v2Url: string;
   token: string | undefined;
@@ -112,12 +165,15 @@ export function normalizeBatteryEndpoint(url: string): {
 
 export function buildBatteryEndpoints(
   urls: string[],
-  tokens: string[]
+  tokens: string[],
+  labels: string[] = []
 ): BatteryEndpoint[] {
   return urls.map((url, index) => {
     const { v1Url, v2Url } = normalizeBatteryEndpoint(url);
+    const id = batteryIdFromUrl(url);
     return {
-      id: batteryIdFromUrl(url),
+      id,
+      label: labels[index] ?? `.${id}`,
       v1Url,
       v2Url,
       token: tokens[index] ?? tokens[0],
@@ -148,58 +204,82 @@ export function parseSoc(
   return null;
 }
 
+function baseBattery(
+  id: string,
+  label: string,
+  partial: Partial<BatterijLive>
+): BatterijLive {
+  return {
+    id,
+    label,
+    soc: null,
+    vermogen_w: 0,
+    bereikbaar: false,
+    ...partial,
+  };
+}
+
 export function mapBatteryV1(
   raw: HomeWizardBatteryV1Raw | null,
   id: string,
+  label: string,
   melding?: string
 ): BatterijLive {
   if (!raw) {
-    return {
-      id,
-      soc: null,
-      vermogen_w: 0,
-      bereikbaar: false,
-      melding: melding ?? "Niet bereikbaar",
-    };
+    return baseBattery(id, label, { melding: melding ?? "Niet bereikbaar" });
   }
-  return {
-    id,
+  return baseBattery(id, label, {
     soc: parseSoc(raw),
     vermogen_w: Math.round(Number(raw.active_power_w ?? 0)),
     bereikbaar: true,
-  };
+  });
 }
 
 export function mapBatteryV2(
   raw: HomeWizardBatteryV2Measurement | null,
   id: string,
+  label: string,
   melding?: string
 ): BatterijLive {
   if (!raw) {
-    return {
-      id,
-      soc: null,
-      vermogen_w: 0,
-      bereikbaar: false,
-      melding: melding ?? "Niet bereikbaar",
-    };
+    return baseBattery(id, label, { melding: melding ?? "Niet bereikbaar" });
   }
-  return {
-    id,
+  const cycles = raw.cycles;
+  return baseBattery(id, label, {
     soc: parseSoc(raw),
     vermogen_w: Math.round(Number(raw.power_w ?? 0)),
     bereikbaar: true,
-  };
+    voltage_v:
+      raw.voltage_v != null ? Math.round(Number(raw.voltage_v) * 10) / 10 : null,
+    cycles: cycles != null ? Math.round(Number(cycles)) : null,
+    import_start: Number(raw.energy_import_kwh ?? 0),
+    export_start: Number(raw.energy_export_kwh ?? 0),
+  });
 }
 
 export function mapP1BatteriesGroep(
   raw: HomeWizardP1Batteries | null
 ): BatterijGroep | null {
   if (!raw || raw.battery_count == null) return null;
+  const mode = raw.mode ?? "onbekend";
+  const perms = raw.permissions ?? [];
   return {
-    mode: raw.mode ?? "onbekend",
+    mode,
+    mode_label: formatBatterijMode(mode),
     aantal: Number(raw.battery_count),
     vermogen_w: Math.round(Number(raw.power_w ?? 0)),
+    target_power_w:
+      raw.target_power_w != null ? Math.round(Number(raw.target_power_w)) : null,
+    max_laden_w:
+      raw.max_consumption_w != null
+        ? Math.round(Number(raw.max_consumption_w))
+        : null,
+    max_ontladen_w:
+      raw.max_production_w != null
+        ? Math.round(Number(raw.max_production_w))
+        : null,
+    permissions: perms,
+    charge_to_full: Boolean(raw.charge_to_full),
     bereikbaar: true,
   };
 }
@@ -210,18 +290,19 @@ async function fetchBatteryEndpoint(ep: BatteryEndpoint): Promise<BatterijLive> 
       ep.v2Url,
       V2_HEADERS(ep.token)
     );
-    if (v2) return mapBatteryV2(v2, ep.id);
-    return mapBatteryV2(null, ep.id, "Token ongeldig of apparaat offline");
+    if (v2) return mapBatteryV2(v2, ep.id, ep.label);
+    return mapBatteryV2(null, ep.id, ep.label, "Token ongeldig of apparaat offline");
   }
 
   if (ep.v1Url) {
     const v1 = await fetchJsonLocal<HomeWizardBatteryV1Raw>(ep.v1Url);
-    if (v1) return mapBatteryV1(v1, ep.id);
+    if (v1) return mapBatteryV1(v1, ep.id, ep.label);
   }
 
   return mapBatteryV2(
     null,
     ep.id,
+    ep.label,
     "Token ontbreekt (ENERGIE_BATTERY_TOKENS in .env.local)"
   );
 }

@@ -34,6 +34,7 @@ yarn-error.log*
 .env*
 !.env.example
 scripts/db-migration/.secrets.local
+scripts/db-migration/.homewizard-tokens.json
 scripts/db-migration/weerdata_migrate.sql
 scripts/db-migration/*_migrate.sql
 

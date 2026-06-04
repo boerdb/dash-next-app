@@ -2,6 +2,7 @@ import "server-only";
 import { z } from "zod";
 import {
   buildBatteryEndpoints,
+  parseBatteryLabels,
   parseBatteryTokens,
   parseBatteryUrls,
   p1BatteriesUrl,
@@ -28,6 +29,8 @@ const envSchema = z.object({
   ENERGIE_BATTERY_TOKENS: z.string().optional(),
   /** Bearer-token P1-meter voor /api/batteries (gecombineerd vermogen) */
   ENERGIE_P1_TOKEN: z.string().optional(),
+  /** Optionele namen per batterij (zelfde volgorde als URLs) */
+  ENERGIE_BATTERY_LABELS: z.string().optional(),
   /** Optioneel — voorspelling & aanvullende metingen op het weer-tabblad */
   OPENWEATHER_API_KEY: z.string().min(1).optional(),
   /** KNMI Data Platform — officiële waarschuwingen (waarschuwingen_nederland_48h) */
@@ -44,6 +47,7 @@ export const env = envSchema.parse({
   ENERGIE_BATTERY_URLS: process.env.ENERGIE_BATTERY_URLS,
   ENERGIE_BATTERY_TOKENS: process.env.ENERGIE_BATTERY_TOKENS,
   ENERGIE_P1_TOKEN: process.env.ENERGIE_P1_TOKEN,
+  ENERGIE_BATTERY_LABELS: process.env.ENERGIE_BATTERY_LABELS,
   OPENWEATHER_API_KEY: process.env.OPENWEATHER_API_KEY || undefined,
   KNMI_API_KEY: process.env.KNMI_API_KEY || undefined,
   KNMI_PROVINCE: process.env.KNMI_PROVINCE || undefined,
@@ -51,7 +55,8 @@ export const env = envSchema.parse({
 
 export const energieBatteryEndpoints = buildBatteryEndpoints(
   parseBatteryUrls(env.ENERGIE_BATTERY_URLS),
-  parseBatteryTokens(env.ENERGIE_BATTERY_TOKENS)
+  parseBatteryTokens(env.ENERGIE_BATTERY_TOKENS),
+  parseBatteryLabels(env.ENERGIE_BATTERY_LABELS)
 );
 export const energieP1BatteriesUrl = p1BatteriesUrl(env.ENERGIE_P1_URL);
 export const energieP1Token = env.ENERGIE_P1_TOKEN;

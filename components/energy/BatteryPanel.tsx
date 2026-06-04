@@ -2,6 +2,7 @@
 
 import { Battery, BatteryCharging, BatteryWarning } from "lucide-react";
 import type { EnergieLive } from "@/lib/api/types";
+import { formatPermissions } from "@/lib/homewizard/battery";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -15,11 +16,15 @@ function powerLabel(w: number): string {
 }
 
 function BatteryCard({
-  id,
+  label,
   soc,
   vermogen_w,
   bereikbaar,
   melding,
+  voltage_v,
+  cycles,
+  vandaag_laden_kwh,
+  vandaag_ontladen_kwh,
 }: EnergieLive["batterijen"][number]) {
   const charging = vermogen_w > 5;
   const discharging = vermogen_w < -5;
@@ -47,7 +52,7 @@ function BatteryCard({
           />
         )}
         <p className="mt-2 text-xs uppercase tracking-wide text-zinc-400">
-          Batterij .{id}
+          {label}
         </p>
         {bereikbaar && soc != null ? (
           <p className="mt-1 text-3xl font-bold tabular-nums text-white">
@@ -58,16 +63,30 @@ function BatteryCard({
           <p className="mt-1 text-xs text-zinc-500">{melding ?? "Offline"}</p>
         )}
         {bereikbaar ? (
-          <p
-            className={cn(
-              "mt-2 text-sm font-medium tabular-nums",
-              charging && "text-sky-300",
-              discharging && "text-emerald-400",
-              !charging && !discharging && "text-zinc-400"
+          <>
+            <p
+              className={cn(
+                "mt-2 text-sm font-medium tabular-nums",
+                charging && "text-sky-300",
+                discharging && "text-emerald-400",
+                !charging && !discharging && "text-zinc-400"
+              )}
+            >
+              {powerLabel(vermogen_w)} · {Math.abs(vermogen_w)} W
+            </p>
+            {voltage_v != null ? (
+              <p className="mt-1 text-xs text-zinc-500">{voltage_v} V</p>
+            ) : null}
+            {cycles != null ? (
+              <p className="text-xs text-zinc-500">{cycles} cycli</p>
+            ) : null}
+            {(vandaag_laden_kwh != null || vandaag_ontladen_kwh != null) && (
+              <p className="mt-2 text-xs text-zinc-400">
+                Vandaag: {vandaag_laden_kwh ?? 0} kWh in ·{" "}
+                {vandaag_ontladen_kwh ?? 0} kWh uit
+              </p>
             )}
-          >
-            {powerLabel(vermogen_w)} · {Math.abs(vermogen_w)} W
-          </p>
+          </>
         ) : null}
       </CardContent>
     </Card>
@@ -96,18 +115,39 @@ export function BatteryPanel({ data }: BatteryPanelProps) {
           ) : groep?.bereikbaar ? (
             <p className="text-2xl font-bold text-white">
               {groep.aantal} batterijen via P1
-              <span className="ml-2 text-sm font-normal text-zinc-400">
-                modus {groep.mode}
-              </span>
             </p>
           ) : (
             <p className="text-sm text-zinc-500">Geen batterij bereikbaar</p>
           )}
-          {(hasOnline || groep?.bereikbaar) && (
+          {groep?.bereikbaar ? (
+            <div className="mt-2 space-y-1 text-sm text-violet-200/90">
+              <p>
+                Modus: <span className="text-white">{groep.mode_label}</span>
+                {groep.charge_to_full ? " · opladen naar vol" : null}
+              </p>
+              <p>
+                Totaal: {totaalLabel} · {Math.abs(data.batterij_vermogen_totaal)} W
+                {groep.target_power_w != null
+                  ? ` (doel ${groep.target_power_w} W)`
+                  : null}
+              </p>
+              {(groep.max_laden_w != null || groep.max_ontladen_w != null) && (
+                <p className="text-xs text-zinc-400">
+                  Max {groep.max_laden_w ?? "?"} W laden ·{" "}
+                  {groep.max_ontladen_w ?? "?"} W ontladen
+                </p>
+              )}
+              {groep.permissions.length > 0 ? (
+                <p className="text-xs text-zinc-400">
+                  {formatPermissions(groep.permissions)}
+                </p>
+              ) : null}
+            </div>
+          ) : hasOnline ? (
             <p className="mt-1 text-sm text-violet-200/90">
               Totaal: {totaalLabel} · {Math.abs(data.batterij_vermogen_totaal)} W
             </p>
-          )}
+          ) : null}
           {data.batterij_hint ? (
             <p className="mt-2 text-xs text-amber-200/80">{data.batterij_hint}</p>
           ) : null}

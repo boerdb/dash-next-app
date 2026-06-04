@@ -6,7 +6,16 @@ import {
   energieP1BatteriesUrl,
   energieP1Token,
 } from "@/lib/env.server";
-import { fetchAllBatterijen } from "@/lib/homewizard/battery";
+import {
+  aggregateBatterijen,
+  fetchAllBatterijen,
+} from "@/lib/homewizard/battery";
+import {
+  applyBatteryDagstartTotals,
+  buildBatteryHistorieFromDagstart,
+  mergeDagstartBatteries,
+  updateBatteryHourlySample,
+} from "@/lib/energie/batterij-dagstart";
 import {
   applyDagstartTotals,
   buildDagstartFromMeters,
@@ -56,14 +65,26 @@ async function writeDagstart(start: EnergieDagstart): Promise<void> {
   );
 }
 
-async function resolveDagstart(data: EnergieApiRaw): Promise<EnergieDagstart> {
+async function resolveDagstart(
+  data: EnergieApiRaw,
+  batterijen: NonNullable<EnergieApiRaw["batterijen"]>
+): Promise<EnergieDagstart> {
   const today = todayAmsterdam();
   let start = await readDagstart();
+  let changed = false;
 
   if (!start || start.date !== today) {
     start = buildDagstartFromMeters(data);
-    await writeDagstart(start);
+    changed = true;
   }
+  if (batterijen.length > 0) {
+    const merged = mergeDagstartBatteries(start, batterijen);
+    if (JSON.stringify(merged) !== JSON.stringify(start)) {
+      start = merged;
+      changed = true;
+    }
+  }
+  if (changed) await writeDagstart(start);
 
   return start;
 }
@@ -123,22 +144,45 @@ export async function fetchEnergieLiveRaw(): Promise<EnergieApiRaw> {
     merged.total_liter_m3 = water.total_liter_m3;
   }
 
+  let batterijen: NonNullable<EnergieApiRaw["batterijen"]> = [];
   if (energieBatteryEndpoints.length > 0) {
-    const { batterijen, groep, hint } = await fetchAllBatterijen({
+    const fetched = await fetchAllBatterijen({
       endpoints: energieBatteryEndpoints,
       p1BatteriesUrl: energieP1BatteriesUrl,
       p1Token: energieP1Token,
     });
-    merged.batterijen = batterijen;
-    merged.batterij_groep = groep;
-    merged.batterij_hint = hint;
+    batterijen = fetched.batterijen;
+    merged.batterij_groep = fetched.groep;
+    merged.batterij_hint = fetched.hint;
   }
 
-  const start = await resolveDagstart(merged);
+  let start = await resolveDagstart(merged, batterijen);
+  if (batterijen.length > 0) {
+    batterijen = applyBatteryDagstartTotals(batterijen, start);
+  }
+  merged.batterijen = batterijen;
+
+  const { vermogen_totaal } = aggregateBatterijen(
+    batterijen,
+    merged.batterij_groep ?? null
+  );
+  merged.batterij_historie = buildBatteryHistorieFromDagstart(
+    start,
+    vermogen_totaal
+  );
+
   const withTotals = applyDagstartTotals(merged, start);
 
   try {
-    await maybeInsertEnergieMeting(withTotals);
+    const inserted = await maybeInsertEnergieMeting(withTotals);
+    if (inserted && batterijen.some((b) => b.bereikbaar)) {
+      start = updateBatteryHourlySample(start, vermogen_totaal);
+      await writeDagstart(start);
+      withTotals.batterij_historie = buildBatteryHistorieFromDagstart(
+        start,
+        vermogen_totaal
+      );
+    }
   } catch (e) {
     console.warn("energie_metingen insert:", e);
   }

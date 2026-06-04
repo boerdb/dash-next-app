@@ -6,6 +6,10 @@ export interface EnergieDagstart {
   export_start: number;
   gas_start: number;
   water_start: number;
+  /** Per batterij-id (IP-octet): cumulatieve kWh-totalen bij dagstart */
+  batterijen?: Record<string, { import_start: number; export_start: number }>;
+  /** Uur-sleutel "YYYY-MM-DD HH" → totaal batterijvermogen W (laatste 24 uur) */
+  batterij_uur?: Record<string, number>;
 }
 
 export function todayAmsterdam(): string {

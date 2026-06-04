@@ -35,6 +35,12 @@ bash scripts/homewizard/fetch-tokens.sh
 
 # Controleren:
 python scripts/db-migration/homewizard-verify-tokens.py
+
+# Alleen P1 gelukt? Ctrl+C, dan tokens die al in .homewizard-tokens.json staan deployen:
+python scripts/db-migration/homewizard-push-tokens.py
+```
+
+Bij batterijen: in de app het **batterij-apparaat** selecteren (niet de P1), Local API aan, knop op de **batterij** (touchknop, vaak piep).
 ```
 
 `.env.local` op `192.168.1.32`:
