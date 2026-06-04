@@ -53,9 +53,9 @@ export interface GetijdenResponse {
   source: "rws" | "open-meteo";
 }
 
-import type { BatterijLive } from "@/lib/homewizard/battery";
+import type { BatterijGroep, BatterijLive } from "@/lib/homewizard/battery";
 
-export type { BatterijLive } from "@/lib/homewizard/battery";
+export type { BatterijGroep, BatterijLive } from "@/lib/homewizard/battery";
 
 export interface EnergieApiRaw {
   active_power_w?: number;
@@ -72,6 +72,8 @@ export interface EnergieApiRaw {
   error?: string;
   /** Door energie-store gezet vóór mapEnergieLive */
   batterijen?: BatterijLive[];
+  batterij_groep?: BatterijGroep | null;
+  batterij_hint?: string | null;
 }
 
 export interface EnergieLive {
@@ -83,8 +85,10 @@ export interface EnergieLive {
   water_vandaag: number | string;
   water_actueel: number;
   batterijen: BatterijLive[];
+  batterij_groep: BatterijGroep | null;
   batterij_vermogen_totaal: number;
   batterij_soc_gemiddeld: number | null;
+  batterij_hint: string | null;
 }
 
 export interface EnergieHistorie {

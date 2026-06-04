@@ -19,6 +19,7 @@ function BatteryCard({
   soc,
   vermogen_w,
   bereikbaar,
+  melding,
 }: EnergieLive["batterijen"][number]) {
   const charging = vermogen_w > 5;
   const discharging = vermogen_w < -5;
@@ -54,7 +55,7 @@ function BatteryCard({
             <span className="text-lg font-normal text-zinc-400">%</span>
           </p>
         ) : (
-          <p className="mt-1 text-sm text-zinc-500">Offline</p>
+          <p className="mt-1 text-xs text-zinc-500">{melding ?? "Offline"}</p>
         )}
         {bereikbaar ? (
           <p
@@ -78,6 +79,7 @@ export function BatteryPanel({ data }: BatteryPanelProps) {
 
   const totaalLabel = powerLabel(data.batterij_vermogen_totaal);
   const hasOnline = data.batterijen.some((b) => b.bereikbaar);
+  const groep = data.batterij_groep;
 
   return (
     <div className="space-y-3">
@@ -91,13 +93,23 @@ export function BatteryPanel({ data }: BatteryPanelProps) {
               Gemiddeld {data.batterij_soc_gemiddeld}
               <span className="text-sm font-normal text-zinc-400">% geladen</span>
             </p>
+          ) : groep?.bereikbaar ? (
+            <p className="text-2xl font-bold text-white">
+              {groep.aantal} batterijen via P1
+              <span className="ml-2 text-sm font-normal text-zinc-400">
+                modus {groep.mode}
+              </span>
+            </p>
           ) : (
             <p className="text-sm text-zinc-500">Geen batterij bereikbaar</p>
           )}
-          {hasOnline ? (
+          {(hasOnline || groep?.bereikbaar) && (
             <p className="mt-1 text-sm text-violet-200/90">
               Totaal: {totaalLabel} · {Math.abs(data.batterij_vermogen_totaal)} W
             </p>
+          )}
+          {data.batterij_hint ? (
+            <p className="mt-2 text-xs text-amber-200/80">{data.batterij_hint}</p>
           ) : null}
         </CardContent>
       </Card>

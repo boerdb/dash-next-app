@@ -4,7 +4,7 @@
 
 1. Next haalt **P1** op: `ENERGIE_P1_URL` (default `http://192.168.1.178/api/v1/data`)
 2. Next haalt **water** op: `ENERGIE_WATER_URL` (default `http://192.168.1.169/api/v1/data`)
-3. Next haalt **batterijen** op: `ENERGIE_BATTERY_URLS` (default `.179` + `.170`, komma-gescheiden)
+3. Next haalt **batterijen** op via API v2 (`/api/measurement`, HTTPS + Bearer). Zie `ENERGIE_BATTERY_TOKENS` in `.env.example`
 4. Dagstart (middernacht-totalen) in `energie_dagstart` op MariaDB `.14` (was `dagstart.json`)
 5. Elke 5 min: rij in `energie_metingen` (was `save_energy.php` cron)
 
@@ -19,7 +19,9 @@ Optioneel in `.env`:
 ```env
 ENERGIE_P1_URL=http://192.168.1.178/api/v1/data
 ENERGIE_WATER_URL=http://192.168.1.169/api/v1/data
-ENERGIE_BATTERY_URLS=http://192.168.1.179/api/v1/data,http://192.168.1.170/api/v1/data
+ENERGIE_BATTERY_URLS=https://192.168.1.179,https://192.168.1.170
+ENERGIE_BATTERY_TOKENS=<token-179>,<token-170>
+ENERGIE_P1_TOKEN=<token-p1>
 ```
 
 ## Historie / cron (belangrijk)
