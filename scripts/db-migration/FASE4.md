@@ -22,7 +22,7 @@ Per apparaat (P1 + elke batterij):
 
 1. HomeWizard-app → **Instellingen → Meters → [apparaat] → Local API → Aan**
 2. **Knop** op het apparaat indrukken (60 s geldig)
-3. Token ophalen: `POST http://<IP>/api/v1/token` (of HTTPS)
+3. Token ophalen: `POST https://<IP>/api/user` met `X-Api-Version: 2` en body `{"name":"local/dash-next-app"}` — **niet** `/api/v1/token` (bestaat niet op nieuwere firmware)
 
 Scripts (vanaf je pc, via SSH op `.32`):
 

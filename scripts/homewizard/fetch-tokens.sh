@@ -6,32 +6,36 @@ set -euo pipefail
 fetch_token() {
   local ip="$1"
   local name="$2"
+  local url="https://${ip}/api/user"
+  local body='{"name":"local/dash-next-app"}'
 
   echo ""
   echo "=========================================="
   echo "  $name  ($ip)"
   echo "=========================================="
-  echo "1. HomeWizard-app → Instellingen → Meters → $name → Local API → AAN"
-  echo "2. Druk op de knop op het apparaat"
-  echo "3. Druk hier Enter binnen 60 seconden"
-  read -r
+  echo "1. HomeWizard-app → Local API → AAN"
+  echo "2. Druk kort op de knop (script pollt 120s)"
+  echo ""
 
-  local url resp token
-  for url in "http://${ip}/api/v1/token" "https://${ip}/api/v1/token"; do
-    resp="$(curl -sk -m 15 -X POST "$url" 2>/dev/null || true)"
-    if [[ -n "$resp" ]] && echo "$resp" | grep -q '"token"'; then
-      echo "OK via $url"
-      echo "$resp"
-      token="$(echo "$resp" | sed -n 's/.*"token"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)"
-      if [[ -n "$token" ]]; then
-        echo "TOKEN=$token"
-        printf '%s' "$token"
-        return 0
-      fi
+  local i resp token
+  for i in $(seq 1 60); do
+    resp="$(curl -sk -m 10 -X POST "$url" \
+      -H "Content-Type: application/json" \
+      -H "X-Api-Version: 2" \
+      -d "$body" 2>/dev/null || true)"
+    token="$(echo "$resp" | sed -n 's/.*"token"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)"
+    if [[ -n "$token" ]]; then
+      echo "OK na ${i} pogingen"
+      printf '%s' "$token"
+      return 0
     fi
+    if [[ $((i % 5)) -eq 1 ]]; then
+      echo "  … wacht op knop ($i/60)"
+    fi
+    sleep 2
   done
 
-  echo "Geen token ontvangen. Probeer opnieuw (Local API aan + knop)." >&2
+  echo "Geen token (gebruik POST https://${ip}/api/user, geen v1/token)." >&2
   return 1
 }
 

@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 """
-Interactief: HomeWizard-tokens ophalen via SSH op .32 en in .env.local zetten.
+Interactief: HomeWizard API v2-tokens ophalen via SSH op .32.
 
-Per apparaat: Local API aan in de app → knop op apparaat → Enter in deze terminal.
+Endpoint: POST https://<IP>/api/user  (niet /api/v1/token)
+Body: {"name": "local/dash-next-app"}
+Headers: X-Api-Version: 2
+
+Druk kort op de knop op het apparaat terwijl het script pollt (±2 min venster).
 """
 import json
 import sys
@@ -17,6 +21,9 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 HOST = "192.168.1.32"
 APP = "/var/www/dash-next-app"
 ENV_FILE = f"{APP}/.env.local"
+USER_NAME = "local/dash-next-app"
+POLL_INTERVAL_S = 2
+POLL_TIMEOUT_S = 120
 
 DEVICES = [
     ("192.168.1.178", "P1 meter"),
@@ -34,23 +41,57 @@ def load_secrets() -> dict[str, str]:
     return s
 
 
-def request_token(ssh: paramiko.SSHClient, ip: str) -> str | None:
-    for scheme in ("http", "https"):
-        url = f"{scheme}://{ip}/api/v1/token"
-        cmd = f"curl -sk -m 15 -X POST '{url}'"
-        _, o, e = ssh.exec_command(cmd, timeout=20)
-        raw = (o.read() + e.read()).decode("utf-8", errors="replace").strip()
-        if not raw:
-            continue
+def try_create_user(ssh: paramiko.SSHClient, ip: str) -> tuple[str | None, str]:
+    """Returns (token, status_message)."""
+    body = json.dumps({"name": USER_NAME}).replace("'", "'\\''")
+    cmd = (
+        f"curl -sk -m 10 -w '\\nHTTP_CODE:%{{http_code}}' "
+        f"-X POST 'https://{ip}/api/user' "
+        f"-H 'Content-Type: application/json' "
+        f"-H 'X-Api-Version: 2' "
+        f"-d '{body}'"
+    )
+    _, o, e = ssh.exec_command(cmd, timeout=15)
+    raw = (o.read() + e.read()).decode("utf-8", errors="replace").strip()
+    if "HTTP_CODE:200" in raw:
+        json_part = raw.split("HTTP_CODE:")[0].strip()
         try:
-            data = json.loads(raw)
+            data = json.loads(json_part)
             token = data.get("token")
             if isinstance(token, str) and token:
-                print(f"  Token ontvangen via {url}")
-                return token
+                return token, "token ontvangen"
         except json.JSONDecodeError:
-            print(f"  Antwoord ({url}): {raw[:120]}")
-    return None
+            pass
+    if "user:creation-not-enabled" in raw:
+        return None, "wacht op knop"
+    if "HTTP_CODE:403" in raw:
+        return None, "wacht op knop (403)"
+    return None, raw[:100] if raw else "geen antwoord"
+
+
+def poll_token(ssh: paramiko.SSHClient, ip: str, name: str) -> str | None:
+    print(f"\n{'=' * 50}")
+    print(f"  {name}  ({ip})")
+    print("=" * 50)
+    print("1. HomeWizard-app → Instellingen → Meters → dit apparaat → Local API → AAN")
+    print("2. P1: kort (~1 s) op de witte knop | Batterij: touchknop")
+    print(f"3. Script pollt nu {POLL_TIMEOUT_S}s — druk op de knop wanneer je klaar bent\n")
+
+    deadline = time.time() + POLL_TIMEOUT_S
+    last_msg = ""
+    while time.time() < deadline:
+        token, msg = try_create_user(ssh, ip)
+        if token:
+            print(f"  OK: token ontvangen ({token[:8]}…)")
+            return token
+        if msg != last_msg:
+            print(f"  … {msg}")
+            last_msg = msg
+        time.sleep(POLL_INTERVAL_S)
+
+    print("  Timeout — geen token. Probeer opnieuw of plak token uit de app.")
+    manual = input("  Token handmatig plakken (Enter = overslaan): ").strip()
+    return manual or None
 
 
 def patch_env_local(sftp: paramiko.SFTPClient, updates: dict[str, str]) -> None:
@@ -83,31 +124,13 @@ def main() -> None:
     bat_tokens: list[str] = []
 
     for ip, name in DEVICES:
-        print(f"\n{'=' * 50}")
-        print(f"  {name}  ({ip})")
-        print("=" * 50)
-        print("1. HomeWizard-app → Instellingen → Meters → dit apparaat → Local API → AAN")
-        print("2. Druk op de knop op het apparaat")
-        input("3. Druk Enter hier als de knop is ingedrukt (binnen 60 s)... ")
-
-        token = request_token(c, ip)
+        token = poll_token(c, ip, name)
         if not token:
-            print("  MISLUKT — overslaan of opnieuw proberen.")
-            retry = input("  Opnieuw? (j/N): ").strip().lower()
-            if retry == "j":
-                token = request_token(c, ip)
-        if token:
-            if ip.endswith(".178"):
-                p1_token = token
-            else:
-                bat_tokens.append(token)
+            continue
+        if ip.endswith(".178"):
+            p1_token = token
         else:
-            manual = input("  Token handmatig plakken (Enter = overslaan): ").strip()
-            if manual:
-                if ip.endswith(".178"):
-                    p1_token = manual
-                else:
-                    bat_tokens.append(manual)
+            bat_tokens.append(token)
 
     updates: dict[str, str] = {
         "ENERGIE_BATTERY_URLS": "https://192.168.1.179,https://192.168.1.170",
