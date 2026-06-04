@@ -1,25 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { EnergieApiRaw } from "@/lib/api/types";
 import { buildEnergieMaandResponse } from "@/lib/db/energie-dag-totalen";
-import type { DagTotalenKwh } from "@/lib/energie/compute-dag-totalen";
+import { dagTotalenFromVandaag } from "@/lib/energie/compute-dag-totalen";
 import { fetchEnergieLiveRaw } from "@/lib/db/energie-store";
 import { parseJaarMaand } from "@/lib/energie/maand-labels";
 import { databaseRequiredResponse } from "@/lib/db/require-database";
-
-function liveVandaagFromRaw(raw: EnergieApiRaw): DagTotalenKwh {
-  const batterij_kwh =
-    Math.round(
-      (raw.batterijen ?? []).reduce(
-        (s, b) => s + Number(b.vandaag_ontladen_kwh ?? 0),
-        0
-      ) * 100
-    ) / 100;
-  return {
-    net_in_kwh: Number(raw.vandaag_stroom_in_kwh ?? 0),
-    net_uit_kwh: Number(raw.vandaag_stroom_out_kwh ?? 0),
-    batterij_kwh,
-  };
-}
 
 export async function GET(req: NextRequest) {
   const needDb = databaseRequiredResponse("Energie maand");
@@ -49,10 +33,10 @@ export async function GET(req: NextRequest) {
       })
     );
 
-    let liveVandaag: DagTotalenKwh | null = null;
+    let liveVandaag = null;
     if (jaar === curJaar && maand === curMaand) {
       const raw = await fetchEnergieLiveRaw();
-      liveVandaag = liveVandaagFromRaw(raw);
+      liveVandaag = dagTotalenFromVandaag(raw);
     }
 
     const data = await buildEnergieMaandResponse(jaar, maand, liveVandaag);

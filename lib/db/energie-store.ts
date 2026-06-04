@@ -25,8 +25,11 @@ import {
 import { amsterdamSqlOffset } from "@/lib/energie/amsterdam-sql-offset";
 import {
   archiveDagFromDagstart,
+  maybeBackfillDagTotalen,
   maybePurgeEnergieRetention,
+  syncVandaagDagTotalen,
 } from "@/lib/db/energie-dag-totalen";
+import { dagTotalenFromVandaag } from "@/lib/energie/compute-dag-totalen";
 import { getPool } from "@/lib/db/pool";
 
 const FETCH_TIMEOUT_MS = 2_000;
@@ -137,6 +140,7 @@ export async function maybeInsertEnergieMeting(
 
 export async function fetchEnergieLiveRaw(): Promise<EnergieApiRaw> {
   await maybePurgeEnergieRetention();
+  await maybeBackfillDagTotalen();
 
   const p1Url = env.ENERGIE_P1_URL;
   const waterUrl = env.ENERGIE_WATER_URL;
@@ -185,6 +189,15 @@ export async function fetchEnergieLiveRaw(): Promise<EnergieApiRaw> {
   );
 
   const withTotals = applyDagstartTotals(merged, start);
+
+  try {
+    await syncVandaagDagTotalen(
+      todayAmsterdam(),
+      dagTotalenFromVandaag(withTotals)
+    );
+  } catch (e) {
+    console.warn("energie_dag_totalen sync:", e);
+  }
 
   try {
     const inserted = await maybeInsertEnergieMeting(withTotals);

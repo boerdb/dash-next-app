@@ -1,6 +1,9 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { computeDagTotalenKwh } from "./compute-dag-totalen";
+import {
+  computeDagTotalenKwh,
+  dagTotalenFromVandaag,
+} from "./compute-dag-totalen";
 import type { BatterijLive } from "@/lib/homewizard/battery";
 
 describe("computeDagTotalenKwh", () => {
@@ -32,5 +35,24 @@ describe("computeDagTotalenKwh", () => {
     assert.equal(t.net_in_kwh, 5.5);
     assert.equal(t.net_uit_kwh, 3.2);
     assert.equal(t.batterij_kwh, 4);
+  });
+
+  it("dagTotalenFromVandaag sommeert batterij", () => {
+    const t = dagTotalenFromVandaag({
+      vandaag_stroom_in_kwh: 1.02,
+      vandaag_stroom_out_kwh: 3.13,
+      batterijen: [
+        {
+          id: "179",
+          label: "x",
+          soc: 50,
+          vermogen_w: 0,
+          bereikbaar: true,
+          vandaag_ontladen_kwh: 2.5,
+        },
+      ],
+    });
+    assert.equal(t.net_in_kwh, 1.02);
+    assert.equal(t.batterij_kwh, 2.5);
   });
 });

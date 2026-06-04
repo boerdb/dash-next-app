@@ -27,6 +27,26 @@ export function computeDagTotalenKwh(
   return { net_in_kwh, net_uit_kwh, batterij_kwh };
 }
 
+/** Live vandaag-totalen (zelfde bron als maandgrafiek). */
+export function dagTotalenFromVandaag(
+  data: Pick<
+    EnergieApiRaw,
+    "vandaag_stroom_in_kwh" | "vandaag_stroom_out_kwh" | "batterijen"
+  >
+): DagTotalenKwh {
+  const batterij_kwh = round2(
+    (data.batterijen ?? []).reduce(
+      (s, b) => s + Number(b.vandaag_ontladen_kwh ?? 0),
+      0
+    )
+  );
+  return {
+    net_in_kwh: round2(Number(data.vandaag_stroom_in_kwh ?? 0)),
+    net_uit_kwh: round2(Number(data.vandaag_stroom_out_kwh ?? 0)),
+    batterij_kwh,
+  };
+}
+
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
