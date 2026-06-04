@@ -79,20 +79,18 @@ function DagDetail({ dag }: { dag: EnergieMaandDag }) {
             {formatKwh(dag.batterij_kwh)}
           </span>
         </li>
-        {dag.net_uit_kwh > 0 ? (
-          <li className="flex items-center justify-between gap-2">
-            <span className="flex items-center gap-2 text-zinc-300">
-              <span
-                className="h-2.5 w-2.5 rounded-full"
-                style={{ background: COLOR_EXPORT }}
-              />
-              Terug naar net
-            </span>
-            <span className="font-medium text-amber-200">
-              {formatKwh(dag.net_uit_kwh)}
-            </span>
-          </li>
-        ) : null}
+        <li className="flex items-center justify-between gap-2">
+          <span className="flex items-center gap-2 text-zinc-300">
+            <span
+              className="h-2.5 w-2.5 rounded-full"
+              style={{ background: COLOR_EXPORT }}
+            />
+            Teruglevering
+          </span>
+          <span className="font-medium text-amber-200">
+            {formatKwh(dag.net_uit_kwh)}
+          </span>
+        </li>
       </ul>
     </div>
   );
