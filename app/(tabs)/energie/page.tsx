@@ -25,6 +25,14 @@ const BatteryChart = dynamic(
   { ssr: false, loading: () => <Skeleton className="h-40 w-full rounded-2xl" /> }
 );
 
+const MonthlyEnergyChart = dynamic(
+  () =>
+    import("@/components/energy/MonthlyEnergyChart").then(
+      (m) => m.MonthlyEnergyChart
+    ),
+  { ssr: false, loading: () => <Skeleton className="h-56 w-full rounded-2xl" /> }
+);
+
 export default function EnergiePage() {
   const {
     data: energie,
@@ -85,6 +93,7 @@ export default function EnergiePage() {
           <BatteryPanel data={energie} />
           <BatteryChart data={energie} />
           <DailyStats data={energie} />
+          <MonthlyEnergyChart />
           {chartHistorie?.labels?.length ? <PowerChart data={chartHistorie} /> : null}
         </div>
       ) : (

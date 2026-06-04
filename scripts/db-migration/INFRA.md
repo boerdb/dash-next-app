@@ -34,6 +34,7 @@ Met `DATABASE_URL` naar `.14`:
 | `/api/energie/live` | P1 `.178` + water `.169` + batterijen `.179`/`.170` |
 | `/api/energie/historie` | `energie_metingen` + dagstart JSON |
 | `/api/energie/ingest` | Zelfde bronnen → periodieke metingen |
+| `/api/energie/maand` | `energie_dag_totalen` (net + batterij kWh/dag, max. 2 maanden bewaard) |
 | `/api/weer/getijden` | RWS / Open-Meteo |
 
 ## HomeWizard (LAN)
@@ -55,5 +56,7 @@ API v2 tokens: zie `FASE4.md`, `homewizard-fetch-tokens.py`.
 ## Migratiescripts
 
 Map `scripts/db-migration/` bevat **eenmalige** hulpscripts van de PHP→Next-migratie. Sommige verwijzen nog naar de oude host `192.168.1.52` (uitgefaseerd); gebruik ze alleen als historische referentie, niet voor dagelijks beheer.
+
+Eenmalig maandgrafiek: `python scripts/db-migration/setup-energie-dag-totalen.py`
 
 Deploy naar productie: `deploy-next-pull.py`, `finish-deploy.py` (SSH naar `.32`).

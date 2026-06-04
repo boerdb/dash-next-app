@@ -23,6 +23,10 @@ import {
   type EnergieDagstart,
 } from "@/lib/energie/dagstart";
 import { amsterdamSqlOffset } from "@/lib/energie/amsterdam-sql-offset";
+import {
+  archiveDagFromDagstart,
+  maybePurgeEnergieRetention,
+} from "@/lib/db/energie-dag-totalen";
 import { getPool } from "@/lib/db/pool";
 
 const FETCH_TIMEOUT_MS = 2_000;
@@ -74,6 +78,13 @@ async function resolveDagstart(
   let changed = false;
 
   if (!start || start.date !== today) {
+    if (start && start.date !== today) {
+      try {
+        await archiveDagFromDagstart(start.date, start, data, batterijen);
+      } catch (e) {
+        console.warn("energie_dag_totalen archive:", e);
+      }
+    }
     start = buildDagstartFromMeters(data);
     changed = true;
   }
@@ -125,6 +136,8 @@ export async function maybeInsertEnergieMeting(
 }
 
 export async function fetchEnergieLiveRaw(): Promise<EnergieApiRaw> {
+  await maybePurgeEnergieRetention();
+
   const p1Url = env.ENERGIE_P1_URL;
   const waterUrl = env.ENERGIE_WATER_URL;
 

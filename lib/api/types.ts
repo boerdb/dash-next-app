@@ -103,6 +103,24 @@ export interface EnergieHistorie {
   gemiddelde: number;
 }
 
+export interface EnergieMaandDag {
+  dag: string;
+  label: string;
+  net_in_kwh: number;
+  net_uit_kwh: number;
+  batterij_kwh: number;
+}
+
+export interface EnergieMaandResponse {
+  jaar: number;
+  maand: number;
+  maand_label: string;
+  dagen: EnergieMaandDag[];
+  vandaag: string;
+  kan_vorige_maand: boolean;
+  kan_volgende_maand: boolean;
+}
+
 export type WeatherCondition =
   | "rain"
   | "snow"
