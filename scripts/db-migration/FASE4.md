@@ -14,7 +14,30 @@
 python scripts/db-migration/setup-energie-dagstart.py
 ```
 
-Optioneel in `.env`:
+## HomeWizard-tokens (Local API)
+
+Plug-In batterijen en P1 v2 (`/api/batteries`, `/api/measurement`) vereisen een **Bearer-token**. P1 live data (`/api/v1/data`) werkt zonder token.
+
+Per apparaat (P1 + elke batterij):
+
+1. HomeWizard-app → **Instellingen → Meters → [apparaat] → Local API → Aan**
+2. **Knop** op het apparaat indrukken (60 s geldig)
+3. Token ophalen: `POST http://<IP>/api/v1/token` (of HTTPS)
+
+Scripts (vanaf je pc, via SSH op `.32`):
+
+```bash
+# Interactief: knop → Enter → tokens in .env.local + pm2 restart
+python scripts/db-migration/homewizard-fetch-tokens.py
+
+# Alleen op de server (bash):
+bash scripts/homewizard/fetch-tokens.sh
+
+# Controleren:
+python scripts/db-migration/homewizard-verify-tokens.py
+```
+
+`.env.local` op `192.168.1.32`:
 
 ```env
 ENERGIE_P1_URL=http://192.168.1.178/api/v1/data
