@@ -1,6 +1,11 @@
 import type { RowDataPacket } from "mysql2";
 import type { EnergieApiRaw } from "@/lib/api/types";
-import { env } from "@/lib/env.server";
+import { env, energieBatteryUrls } from "@/lib/env.server";
+import {
+  batteryIdFromUrl,
+  mapBatteryRaw,
+  type HomeWizardBatteryRaw,
+} from "@/lib/homewizard/battery";
 import {
   applyDagstartTotals,
   buildDagstartFromMeters,
@@ -115,6 +120,17 @@ export async function fetchEnergieLiveRaw(): Promise<EnergieApiRaw> {
   if (water) {
     merged.active_liter_lpm = water.active_liter_lpm;
     merged.total_liter_m3 = water.total_liter_m3;
+  }
+
+  if (energieBatteryUrls.length > 0) {
+    const batterijen = await Promise.all(
+      energieBatteryUrls.map(async (url) => {
+        const id = batteryIdFromUrl(url);
+        const raw = await fetchJson<HomeWizardBatteryRaw>(url);
+        return mapBatteryRaw(raw, id);
+      })
+    );
+    merged.batterijen = batterijen;
   }
 
   const start = await resolveDagstart(merged);

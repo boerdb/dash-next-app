@@ -1,6 +1,10 @@
+import { aggregateBatterijen } from "@/lib/homewizard/battery";
 import type { EnergieApiRaw, EnergieLive } from "./types";
 
 export function mapEnergieLive(data: EnergieApiRaw): EnergieLive {
+  const batterijen = data.batterijen ?? [];
+  const { vermogen_totaal, soc_gemiddeld } = aggregateBatterijen(batterijen);
+
   return {
     stroom_nu: Number(data.active_power_w ?? 0),
     tarief: Number(data.active_tariff ?? 0),
@@ -9,5 +13,8 @@ export function mapEnergieLive(data: EnergieApiRaw): EnergieLive {
     gas_vandaag: data.vandaag_gas_m3 ?? 0,
     water_vandaag: data.vandaag_water_l ?? 0,
     water_actueel: Number(data.active_liter_lpm ?? 0),
+    batterijen,
+    batterij_vermogen_totaal: vermogen_totaal,
+    batterij_soc_gemiddeld: soc_gemiddeld,
   };
 }

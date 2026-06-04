@@ -39,7 +39,7 @@ Met `DATABASE_URL` naar `.14`:
 | `/api/weer/ingest` | Ecowitt → `weer_live` + `metingen` |
 | `/api/weer/live` | `weer_live` |
 | `/api/weer/historie` | `metingen` |
-| `/api/energie/live` | P1 `.178` + water `.169` → `energie_metingen` |
+| `/api/energie/live` | P1 `.178` + water `.169` + batterijen `.179`/`.170` → `energie_metingen` |
 | `/api/energie/historie` | `energie_metingen` |
 | `/api/weer/getijden` | RWS / Open-Meteo (geen PHP) |
 

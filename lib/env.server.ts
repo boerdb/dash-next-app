@@ -1,5 +1,6 @@
 import "server-only";
 import { z } from "zod";
+import { parseBatteryUrls } from "@/lib/homewizard/battery";
 
 const envSchema = z.object({
   WEER_API_BASE: z
@@ -16,6 +17,8 @@ const envSchema = z.object({
     .string()
     .url()
     .default("http://192.168.1.169/api/v1/data"),
+  /** Komma-gescheiden HomeWizard batterij-URLs; leeg = geen batterijen */
+  ENERGIE_BATTERY_URLS: z.string().optional(),
   /** Optioneel — voorspelling & aanvullende metingen op het weer-tabblad */
   OPENWEATHER_API_KEY: z.string().min(1).optional(),
   /** KNMI Data Platform — officiële waarschuwingen (waarschuwingen_nederland_48h) */
@@ -29,7 +32,10 @@ export const env = envSchema.parse({
   DATABASE_URL: process.env.DATABASE_URL || undefined,
   ENERGIE_P1_URL: process.env.ENERGIE_P1_URL || undefined,
   ENERGIE_WATER_URL: process.env.ENERGIE_WATER_URL || undefined,
+  ENERGIE_BATTERY_URLS: process.env.ENERGIE_BATTERY_URLS,
   OPENWEATHER_API_KEY: process.env.OPENWEATHER_API_KEY || undefined,
   KNMI_API_KEY: process.env.KNMI_API_KEY || undefined,
   KNMI_PROVINCE: process.env.KNMI_PROVINCE || undefined,
 });
+
+export const energieBatteryUrls = parseBatteryUrls(env.ENERGIE_BATTERY_URLS);

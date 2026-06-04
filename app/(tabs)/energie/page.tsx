@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import useSWR from "swr";
 import dynamic from "next/dynamic";
+import { BatteryPanel } from "@/components/energy/BatteryPanel";
 import { PowerHero } from "@/components/energy/PowerHero";
 import { DailyStats } from "@/components/energy/DailyStats";
 import { PullToRefresh } from "@/components/shared/PullToRefresh";
@@ -75,6 +76,7 @@ export default function EnergiePage() {
       ) : energie ? (
         <div className="space-y-4">
           <PowerHero data={energie} />
+          <BatteryPanel data={energie} />
           <DailyStats data={energie} />
           {chartHistorie?.labels?.length ? <PowerChart data={chartHistorie} /> : null}
         </div>
