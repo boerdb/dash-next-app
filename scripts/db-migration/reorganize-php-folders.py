@@ -200,7 +200,7 @@ crontab -l
         status = "OK" if out.strip() and out.strip() != "FAIL" else "CHECK"
         print(f"  {status} /{path}: {out.strip()[:80]}")
 
-    print("\nKlaar. Zet Next: WEER_API_BASE=http://192.168.1.52/weer")
+    print("\nKlaar. Zet DATABASE_URL op de Next-server (.32); zie INFRA.md.")
     return 0
 
 

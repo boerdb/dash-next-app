@@ -2,7 +2,7 @@
 
 ## Flow
 
-1. Haal `http://192.168.1.52/weer/data.json` op (weerstation → upload.php)
+1. Ecowitt post naar `http://192.168.1.32:3000/api/weer/ingest`
 2. Bereken dauwpunt + gevoelstemperatuur in TypeScript (`lib/weer/enrich-live.ts`)
 3. Sla snapshot op in `weerdata.weer_live` (cache bij DB-storing)
 4. Fallback: cache of laatste rij in `metingen`

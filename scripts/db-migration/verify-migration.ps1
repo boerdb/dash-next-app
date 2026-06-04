@@ -1,7 +1,8 @@
-# Controleer interne migratie (geen wachtwoorden nodig).
+# Controleer Next + MariaDB (geen wachtwoorden nodig).
 param(
-  [string]$PhpHost = "192.168.1.52",
-  [string]$DbHost = "192.168.1.14"
+  [string]$NextHost = "192.168.1.32",
+  [string]$DbHost = "192.168.1.14",
+  [int]$NextPort = 3000
 )
 
 $ok = $true
@@ -20,7 +21,7 @@ function Test-JsonUrl($url, $label) {
   }
 }
 
-foreach ($h in @($PhpHost, $DbHost)) {
+foreach ($h in @($NextHost, $DbHost)) {
   if (Test-Connection $h -Count 1 -Quiet) { Write-Host "[OK] ping $h" }
   else { Write-Host "[FAIL] ping $h"; $ok = $false }
 }
@@ -29,9 +30,9 @@ $tnc = Test-NetConnection $DbHost -Port 3306 -WarningAction SilentlyContinue
 if ($tnc.TcpTestSucceeded) { Write-Host "[OK] MariaDB $DbHost`:3306" }
 else { Write-Host "[FAIL] MariaDB port"; $ok = $false }
 
-$base = "http://$PhpHost/weer"
-foreach ($ep in @("api.php", "historie.php", "energie.php", "historie_energie.php")) {
-  if (-not (Test-JsonUrl "$base/$ep`?t=1" $ep)) { $ok = $false }
+$base = "http://${NextHost}:$NextPort/api"
+foreach ($ep in @("weer/live", "weer/historie", "energie/live", "energie/historie")) {
+  if (-not (Test-JsonUrl "$base/$ep" $ep)) { $ok = $false }
 }
 
 if ($ok) { exit 0 } else { exit 1 }

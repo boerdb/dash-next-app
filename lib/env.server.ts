@@ -9,10 +9,6 @@ import {
 } from "@/lib/homewizard/battery";
 
 const envSchema = z.object({
-  WEER_API_BASE: z
-    .string()
-    .url()
-    .default("https://weer.benswebradio.nl"),
   /**
    * Fase 1+: direct MariaDB (weerdata op .14).
    * mysql://dash_app:...@192.168.1.14:3306/weerdata
@@ -40,7 +36,6 @@ const envSchema = z.object({
 });
 
 export const env = envSchema.parse({
-  WEER_API_BASE: process.env.WEER_API_BASE || undefined,
   DATABASE_URL: process.env.DATABASE_URL || undefined,
   ENERGIE_P1_URL: process.env.ENERGIE_P1_URL || undefined,
   ENERGIE_WATER_URL: process.env.ENERGIE_WATER_URL || undefined,

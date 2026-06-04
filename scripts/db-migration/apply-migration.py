@@ -188,7 +188,7 @@ FLUSH PRIVILEGES;
     print(out[:200] if out else err)
 
     local_dump.unlink(missing_ok=True)
-    print("\nMigratie afgerond. Pas Next WEER_API_BASE=http://192.168.1.52 aan.")
+    print("\nMigratie afgerond. Zet DATABASE_URL in .env.local op de Next-server (.32).")
     return 0
 
 

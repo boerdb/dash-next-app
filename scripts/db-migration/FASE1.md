@@ -4,7 +4,7 @@
 
 - `mysql2` connection pool (`lib/db/pool.ts`)
 - Zelfde SQL als `historie.php` / `historie_energie.php` in `lib/db/historie-*.ts`
-- API-routes gebruiken DB als `DATABASE_URL` gezet is, anders fallback naar PHP
+- API-routes vereisen `DATABASE_URL` (geen PHP-fallback meer)
 
 ## Setup
 
@@ -19,12 +19,8 @@
 
 ## Fase 2 (live weer)
 
-- `/api/weer/live` → `data.json` op `.52` + berekeningen in TS + cache in `weer_live` (geen `api.php`)
+- `/api/weer/live` → `weer_live` + Ecowitt-ingest op `.32`
 - Setup: `python scripts/db-migration/setup-weer-live-table.py`
-
-## Nog via PHP
-
-- `/api/energie/live` → `WEER_API_BASE`
 
 ## Productie
 

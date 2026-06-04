@@ -66,9 +66,8 @@ Op de host waar Next draait (elke 5 min):
 
 Zonder `CRON_SECRET` is de route open — alleen op localhost gebruiken of secret zetten.
 
-## Opruimen op .52
+## PHP-host (.52)
 
-- Cron `save_energy.php` uitzetten (vervangen door ingest hierboven)
-- `energie.php` niet meer nodig voor het dashboard
+Uitgefaseerd. Energie/weer lopen volledig via Next (`.32`) + MariaDB (`.14`).
 
 Historie energie via `/api/energie/historie` → DB (24 uur, Europe/Amsterdam).

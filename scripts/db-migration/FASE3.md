@@ -35,14 +35,9 @@ Bij succes antwoordt de server: `SUCCESS` (platte tekst, zoals voorheen `upload.
 2. Slaat live snapshot op in `weer_live` (MariaDB `.14`)
 3. Voegt elke **5 minuten** een rij toe in `metingen` (was `save_weather.php` cron)
 
-## Opruimen op .52 (optioneel)
+## Oude PHP-host
 
-Als Ecowitt naar Next wijst, kun je op `.52` uitzetten:
-
-- Cron `save_weather.php` (dubbel met Next)
-- `upload.php` hoeft geen data meer te ontvangen
-
-`data.json` wordt dan niet meer bijgewerkt; live/historie komen uit DB via Next.
+Host `192.168.1.52` is uitgefaseerd. Live/historie komen uit MariaDB via Next op `.32`.
 
 ## Vereist
 

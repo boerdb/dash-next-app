@@ -34,7 +34,7 @@ async function fallbackFromMetingen(): Promise<WeerLive | null> {
   };
 }
 
-/** Live uit weer_live (Ecowitt ingest); geen stale data.json van .52. */
+/** Live uit weer_live (Ecowitt ingest), anders laatste rij uit metingen. */
 export async function fetchWeerLiveFromDb(): Promise<WeerLive> {
   const cached = await readWeerLiveCache();
   if (cached) {
