@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   applyBatteryDagstartTotals,
   buildBatteryHistorieFromDagstart,
+  mergeDagstartBatteries,
   updateBatteryHourlySample,
 } from "./batterij-dagstart";
 import type { BatterijLive } from "@/lib/homewizard/battery";
@@ -65,5 +66,31 @@ describe("batterij dagstart", () => {
       100
     );
     assert.ok(Object.keys(start.batterij_uur ?? {}).length <= 24);
+  });
+
+  it("overschrijft batterij-dagstart niet bij elke poll", () => {
+    const bat: BatterijLive[] = [
+      {
+        id: "170",
+        label: ".170",
+        soc: 60,
+        vermogen_w: -280,
+        bereikbaar: true,
+        import_start: 400.6,
+        export_start: 289.5,
+      },
+    ];
+    const start = {
+      date: "2026-06-05",
+      import_start: 0,
+      export_start: 0,
+      gas_start: 0,
+      water_start: 0,
+      batterijen: { "170": { import_start: 400.571, export_start: 288.676 } },
+    };
+    const merged = mergeDagstartBatteries(start, bat);
+    assert.equal(merged.batterijen?.["170"]?.export_start, 288.676);
+    const out = applyBatteryDagstartTotals(bat, merged);
+    assert.equal(out[0]?.vandaag_ontladen_kwh, 0.82);
   });
 });

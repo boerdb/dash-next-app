@@ -46,7 +46,17 @@ export function mergeDagstartBatteries(
 ): EnergieDagstart {
   const built = buildBatteryStarts(batterijen);
   if (Object.keys(built).length === 0) return start;
-  return { ...start, batterijen: { ...start.batterijen, ...built } };
+
+  const existing = start.batterijen ?? {};
+  let added = false;
+  const merged = { ...existing };
+  for (const [id, starts] of Object.entries(built)) {
+    if (id in merged) continue;
+    merged[id] = starts;
+    added = true;
+  }
+  if (!added) return start;
+  return { ...start, batterijen: merged };
 }
 
 export function updateBatteryHourlySample(
