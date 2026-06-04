@@ -72,6 +72,7 @@ export interface EnergieApiRaw {
   total_gas_m3?: number | string;
   vandaag_water_l?: number | string;
   total_liter_m3?: number | string;
+  total_liter_offset_m3?: number | string;
   active_liter_lpm?: number | string;
   error?: string;
   /** Door energie-store gezet vóór mapEnergieLive */
@@ -89,6 +90,9 @@ export interface EnergieLive {
   gas_vandaag: number | string;
   water_vandaag: number | string;
   water_actueel: number;
+  /** Geschatte fysieke meterstand (m³) voor opgave */
+  water_meterstand_m3: number | null;
+  water_meterstand_label: string | null;
   batterijen: BatterijLive[];
   batterij_groep: BatterijGroep | null;
   batterij_vermogen_totaal: number;

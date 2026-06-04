@@ -11,6 +11,7 @@ interface DailyStatsProps {
 
 export function DailyStats({ data }: DailyStatsProps) {
   const waterFlow = Number(data.water_actueel) > 0;
+  const hasMeterstand = data.water_meterstand_label != null;
 
   return (
     <div className="space-y-3">
@@ -30,6 +31,37 @@ export function DailyStats({ data }: DailyStatsProps) {
         </CardContent>
       </Card>
 
+      {hasMeterstand ? (
+        <Card variant="energy" className="border-sky-500/25">
+          <CardContent>
+            <div className="flex items-start gap-3">
+              <Droplets className="mt-0.5 h-7 w-7 shrink-0 text-sky-400" />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs uppercase tracking-wide text-zinc-400">
+                  Watermeter (geschat)
+                </p>
+                <p className="text-3xl font-bold tabular-nums text-sky-100">
+                  {data.water_meterstand_label}{" "}
+                  <span className="text-lg font-normal text-zinc-400">m³</span>
+                </p>
+                <p className="mt-1 text-xs text-zinc-500">
+                  Op basis van opgave 1404 m³ (8-2-2026) + sensorverbruik
+                </p>
+                <p className="mt-2 text-sm text-zinc-400">
+                  Vandaag: {data.water_vandaag} L
+                  {waterFlow ? (
+                    <span className="text-rose-400">
+                      {" "}
+                      · flow {data.water_actueel} L/min
+                    </span>
+                  ) : null}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
+
       <div className="grid grid-cols-2 gap-3">
         <Card variant="energy" className="border-amber-500/15">
           <CardContent className="text-center">
@@ -39,32 +71,41 @@ export function DailyStats({ data }: DailyStatsProps) {
           </CardContent>
         </Card>
 
-        <Card
-          variant="energy"
-          className={cn(waterFlow ? "border-rose-500/40" : "border-sky-500/15")}
-        >
-          <CardContent className="text-center">
-            {waterFlow ? (
-              <AlertCircle className="mx-auto h-7 w-7 text-rose-400" />
-            ) : (
-              <Droplets className="mx-auto h-7 w-7 text-sky-400" />
-            )}
-            <p className="mt-2 text-xs uppercase text-zinc-400">Water vandaag</p>
-            <p
-              className={cn(
-                "text-xl font-bold",
-                waterFlow ? "text-rose-400" : "text-sky-100"
+        {!hasMeterstand ? (
+          <Card
+            variant="energy"
+            className={cn(waterFlow ? "border-rose-500/40" : "border-sky-500/15")}
+          >
+            <CardContent className="text-center">
+              {waterFlow ? (
+                <AlertCircle className="mx-auto h-7 w-7 text-rose-400" />
+              ) : (
+                <Droplets className="mx-auto h-7 w-7 text-sky-400" />
               )}
-            >
-              {data.water_vandaag} L
-            </p>
-            {waterFlow && (
-              <p className="mt-1 text-xs text-rose-400">
-                Actuele flow: {data.water_actueel} L/min
+              <p className="mt-2 text-xs uppercase text-zinc-400">Water vandaag</p>
+              <p
+                className={cn(
+                  "text-xl font-bold",
+                  waterFlow ? "text-rose-400" : "text-sky-100"
+                )}
+              >
+                {data.water_vandaag} L
               </p>
-            )}
-          </CardContent>
-        </Card>
+              {waterFlow && (
+                <p className="mt-1 text-xs text-rose-400">
+                  Actuele flow: {data.water_actueel} L/min
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          <Card variant="energy" className="border-sky-500/10">
+            <CardContent className="flex h-full flex-col justify-center text-center">
+              <p className="text-xs uppercase text-zinc-400">Water vandaag</p>
+              <p className="text-xl font-bold text-sky-100">{data.water_vandaag} L</p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

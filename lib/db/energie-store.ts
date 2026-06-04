@@ -153,12 +153,14 @@ export async function fetchEnergieLiveRaw(): Promise<EnergieApiRaw> {
   const water = await fetchJson<{
     active_liter_lpm?: number;
     total_liter_m3?: number;
+    total_liter_offset_m3?: number;
   }>(waterUrl);
 
   const merged: EnergieApiRaw = { ...p1 };
   if (water) {
     merged.active_liter_lpm = water.active_liter_lpm;
     merged.total_liter_m3 = water.total_liter_m3;
+    merged.total_liter_offset_m3 = water.total_liter_offset_m3;
   }
 
   let batterijen: NonNullable<EnergieApiRaw["batterijen"]> = [];

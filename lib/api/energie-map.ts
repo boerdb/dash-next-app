@@ -1,4 +1,8 @@
 import { aggregateBatterijen } from "@/lib/homewizard/battery";
+import {
+  computeWaterMeterstandM3,
+  formatWaterMeterstandOpgave,
+} from "@/lib/energie/water-meter";
 import type { EnergieApiRaw, EnergieLive } from "./types";
 
 export function mapEnergieLive(data: EnergieApiRaw): EnergieLive {
@@ -9,6 +13,11 @@ export function mapEnergieLive(data: EnergieApiRaw): EnergieLive {
     groep
   );
 
+  const water_meterstand_m3 = computeWaterMeterstandM3(
+    data.total_liter_m3,
+    data.total_liter_offset_m3
+  );
+
   return {
     stroom_nu: Number(data.active_power_w ?? 0),
     tarief: Number(data.active_tariff ?? 0),
@@ -17,6 +26,11 @@ export function mapEnergieLive(data: EnergieApiRaw): EnergieLive {
     gas_vandaag: data.vandaag_gas_m3 ?? 0,
     water_vandaag: data.vandaag_water_l ?? 0,
     water_actueel: Number(data.active_liter_lpm ?? 0),
+    water_meterstand_m3,
+    water_meterstand_label:
+      water_meterstand_m3 != null
+        ? formatWaterMeterstandOpgave(water_meterstand_m3)
+        : null,
     batterijen,
     batterij_groep: groep,
     batterij_vermogen_totaal: vermogen_totaal,

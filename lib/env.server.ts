@@ -33,6 +33,11 @@ const envSchema = z.object({
   KNMI_API_KEY: z.string().min(1).optional(),
   /** Provinciecode voor KNMI-waarschuwingen (standaard FR = Friesland / Harlingen) */
   KNMI_PROVINCE: z.string().min(2).max(4).optional(),
+  /**
+   * Fysieke watermeterstand bij sensor-nul (= laatste opgave vóór/ bij plaatsing).
+   * Meterstand in app = offset + total_liter_m3 (HomeWizard).
+   */
+  WATER_METER_OFFSET_M3: z.coerce.number().default(1404),
 });
 
 export const env = envSchema.parse({
@@ -46,6 +51,7 @@ export const env = envSchema.parse({
   OPENWEATHER_API_KEY: process.env.OPENWEATHER_API_KEY || undefined,
   KNMI_API_KEY: process.env.KNMI_API_KEY || undefined,
   KNMI_PROVINCE: process.env.KNMI_PROVINCE || undefined,
+  WATER_METER_OFFSET_M3: process.env.WATER_METER_OFFSET_M3 || undefined,
 });
 
 export const energieBatteryEndpoints = buildBatteryEndpoints(
