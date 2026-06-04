@@ -99,10 +99,32 @@ export function DailyStats({ data }: DailyStatsProps) {
             </CardContent>
           </Card>
         ) : (
-          <Card variant="energy" className="border-sky-500/10">
-            <CardContent className="flex h-full flex-col justify-center text-center">
-              <p className="text-xs uppercase text-zinc-400">Water vandaag</p>
-              <p className="text-xl font-bold text-sky-100">{data.water_vandaag} L</p>
+          <Card
+            variant="energy"
+            className={cn(
+              waterFlow ? "border-rose-500/40" : "border-sky-500/15"
+            )}
+          >
+            <CardContent className="text-center">
+              {waterFlow ? (
+                <AlertCircle className="mx-auto h-7 w-7 text-rose-400" />
+              ) : (
+                <Droplets className="mx-auto h-7 w-7 text-sky-400" />
+              )}
+              <p className="mt-2 text-xs uppercase text-zinc-400">Water vandaag</p>
+              <p
+                className={cn(
+                  "text-xl font-bold",
+                  waterFlow ? "text-rose-400" : "text-sky-100"
+                )}
+              >
+                {data.water_vandaag} L
+              </p>
+              {waterFlow && (
+                <p className="mt-1 text-xs text-rose-400">
+                  Actuele flow: {data.water_actueel} L/min
+                </p>
+              )}
             </CardContent>
           </Card>
         )}
