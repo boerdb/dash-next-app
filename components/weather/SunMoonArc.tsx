@@ -214,9 +214,9 @@ export function SunMoonArc({ astro }: SunMoonArcProps) {
           x={CX}
           y={BASE_Y + 28}
           textAnchor="middle"
-          fill="rgba(255,255,255,0.8)"
-          fontSize="10"
-          fontWeight="500"
+          fill="#fde68a"
+          fontSize="11"
+          fontWeight="600"
         >
           {astro.daylightHoursLabel} daglicht
         </text>
