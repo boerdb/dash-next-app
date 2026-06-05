@@ -131,7 +131,7 @@ export function SunMoonArc({ astro }: SunMoonArcProps) {
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="w-full overflow-visible"
-        aria-label={`Zonopkomst ${astro.sunriseLabel}, zonondergang ${astro.sunsetLabel}`}
+        aria-label={`Zonopkomst ${astro.sunriseLabel}, ${astro.daylightHoursLabel} daglicht, zonondergang ${astro.sunsetLabel}`}
       >
         <defs>
           <linearGradient id="sunArcGlow" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -192,7 +192,7 @@ export function SunMoonArc({ astro }: SunMoonArcProps) {
 
         <text
           x={CX - R}
-          y={BASE_Y + 16}
+          y={BASE_Y + 14}
           textAnchor="start"
           fill="rgba(255,255,255,0.9)"
           fontSize="11"
@@ -202,13 +202,23 @@ export function SunMoonArc({ astro }: SunMoonArcProps) {
         </text>
         <text
           x={CX + R}
-          y={BASE_Y + 16}
+          y={BASE_Y + 14}
           textAnchor="end"
           fill="rgba(255,255,255,0.9)"
           fontSize="11"
           fontWeight="500"
         >
           {astro.sunsetLabel} ↓
+        </text>
+        <text
+          x={CX}
+          y={BASE_Y + 28}
+          textAnchor="middle"
+          fill="rgba(255,255,255,0.8)"
+          fontSize="10"
+          fontWeight="500"
+        >
+          {astro.daylightHoursLabel} daglicht
         </text>
       </svg>
 

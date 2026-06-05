@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, Droplets, Flame } from "lucide-react";
+import { AlertCircle, Droplets, Flame, Sun } from "lucide-react";
 import type { EnergieLive } from "@/lib/api/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,9 @@ interface DailyStatsProps {
 export function DailyStats({ data }: DailyStatsProps) {
   const waterFlow = Number(data.water_actueel) > 0;
   const hasMeterstand = data.water_meterstand_label != null;
+  const enphase = data.enphase;
+  const showZon =
+    enphase?.bereikbaar && enphase.vandaag_kwh != null;
 
   return (
     <div className="space-y-3">
@@ -20,7 +23,24 @@ export function DailyStats({ data }: DailyStatsProps) {
           <p className="mb-2 border-l-2 border-amber-500/50 pl-2 text-xs uppercase tracking-wide text-zinc-400">
             Vandaag (stroom)
           </p>
-          <p className="text-2xl font-bold text-white">
+          {showZon ? (
+            <p className="text-2xl font-bold text-amber-300">
+              <Sun className="mr-1.5 inline h-6 w-6 -translate-y-0.5" />
+              {enphase.vandaag_kwh}{" "}
+              <span className="text-sm font-normal text-zinc-400">kWh opgewekt</span>
+              {enphase.vermogen_w != null && enphase.vermogen_w > 0 ? (
+                <span className="mt-1 block text-sm font-normal text-amber-200/80">
+                  Nu {enphase.vermogen_w} W
+                </span>
+              ) : null}
+            </p>
+          ) : null}
+          <p
+            className={cn(
+              "text-2xl font-bold text-white",
+              showZon && "mt-2"
+            )}
+          >
             {data.stroom_vandaag_in}{" "}
             <span className="text-sm font-normal text-zinc-400">kWh ingekocht</span>
           </p>

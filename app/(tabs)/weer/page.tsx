@@ -43,6 +43,7 @@ const defaultAstro: AstronomieApi = {
   period: "day",
   sunriseLabel: "—",
   sunsetLabel: "—",
+  daylightHoursLabel: "—",
   sunProgress: 0.5,
   sunBelowHorizon: false,
   sunAltitudeDeg: 0,

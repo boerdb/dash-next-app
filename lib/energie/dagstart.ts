@@ -6,6 +6,8 @@ export interface EnergieDagstart {
   export_start: number;
   gas_start: number;
   water_start: number;
+  /** Enphase whLifetime bij middernacht (fallback als gateway geen whToday geeft) */
+  enphase_wh_lifetime_start?: number;
   /** Per batterij-id (IP-octet): cumulatieve kWh-totalen bij dagstart */
   batterijen?: Record<string, { import_start: number; export_start: number }>;
   /** Uur-sleutel "YYYY-MM-DD HH" → totaal batterijvermogen W (laatste 24 uur) */

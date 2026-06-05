@@ -11,6 +11,8 @@ export interface AstronomyInfo {
   dusk: Date;
   sunriseLabel: string;
   sunsetLabel: string;
+  /** Lengte tussen zonopkomst en -ondergang, bijv. "15u 28m" */
+  daylightHoursLabel: string;
   sunAltitudeDeg: number;
   /** 0 = sunrise (links), 1 = sunset (rechts) — buiten bereik <0 of >1 */
   sunProgress: number;
@@ -29,6 +31,16 @@ function formatTimeNl(date: Date): string {
     minute: "2-digit",
     timeZone: "Europe/Amsterdam",
   });
+}
+
+export function formatDaylightDuration(sunrise: Date, sunset: Date): string {
+  const ms = sunset.getTime() - sunrise.getTime();
+  if (!Number.isFinite(ms) || ms <= 0) return "—";
+  const totalMin = Math.round(ms / 60_000);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  if (m === 0) return `${h} uur`;
+  return `${h}u ${m}m`;
 }
 
 export function getMoonPhaseLabel(phase: number): string {
@@ -61,6 +73,7 @@ export function toAstronomieApi(info: AstronomyInfo) {
     period: info.period,
     sunriseLabel: info.sunriseLabel,
     sunsetLabel: info.sunsetLabel,
+    daylightHoursLabel: info.daylightHoursLabel,
     sunProgress: info.sunProgress,
     sunBelowHorizon: info.sunBelowHorizon,
     sunAltitudeDeg: info.sunAltitudeDeg,
@@ -96,6 +109,7 @@ export function getAstronomyInfo(
     dusk: times.dusk,
     sunriseLabel: formatTimeNl(sunrise),
     sunsetLabel: formatTimeNl(sunset),
+    daylightHoursLabel: formatDaylightDuration(sunrise, sunset),
     sunAltitudeDeg,
     sunProgress,
     sunBelowHorizon,

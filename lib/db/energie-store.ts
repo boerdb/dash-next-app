@@ -2,10 +2,12 @@ import type { RowDataPacket } from "mysql2";
 import type { EnergieApiRaw } from "@/lib/api/types";
 import {
   env,
+  enphaseConfigured,
   energieBatteryEndpoints,
   energieP1BatteriesUrl,
   energieP1Token,
 } from "@/lib/env.server";
+import { fetchEnphaseLive } from "@/lib/enphase/fetch";
 import {
   aggregateBatterijen,
   fetchAllBatterijen,
@@ -100,6 +102,41 @@ async function resolveDagstart(
   }
   if (changed) await writeDagstart(start);
 
+  return start;
+}
+
+async function attachEnphase(
+  withTotals: EnergieApiRaw,
+  start: EnergieDagstart
+): Promise<EnergieDagstart> {
+  let whLifetimeStart = start.enphase_wh_lifetime_start ?? null;
+  let result = await fetchEnphaseLive({
+    gatewayUrl: env.ENPHASE_GATEWAY_URL!,
+    serial: env.ENPHASE_GATEWAY_SERIAL!,
+    token: env.ENPHASE_GATEWAY_TOKEN,
+    enlightenEmail: env.ENPHASE_ENLIGHTEN_USER,
+    enlightenPassword: env.ENPHASE_ENLIGHTEN_PASSWORD,
+    whLifetimeStart,
+  });
+
+  if (
+    result.wh_lifetime != null &&
+    start.enphase_wh_lifetime_start == null
+  ) {
+    start = { ...start, enphase_wh_lifetime_start: result.wh_lifetime };
+    await writeDagstart(start);
+    whLifetimeStart = result.wh_lifetime;
+    result = await fetchEnphaseLive({
+      gatewayUrl: env.ENPHASE_GATEWAY_URL!,
+      serial: env.ENPHASE_GATEWAY_SERIAL!,
+      token: env.ENPHASE_GATEWAY_TOKEN,
+      enlightenEmail: env.ENPHASE_ENLIGHTEN_USER,
+      enlightenPassword: env.ENPHASE_ENLIGHTEN_PASSWORD,
+      whLifetimeStart,
+    });
+  }
+
+  withTotals.enphase = result.live;
   return start;
 }
 
@@ -199,6 +236,20 @@ export async function fetchEnergieLiveRaw(): Promise<EnergieApiRaw> {
     );
   } catch (e) {
     console.warn("energie_dag_totalen sync:", e);
+  }
+
+  if (enphaseConfigured) {
+    try {
+      start = await attachEnphase(withTotals, start);
+    } catch (e) {
+      console.warn("enphase fetch:", e);
+      withTotals.enphase = {
+        vermogen_w: null,
+        vandaag_kwh: null,
+        bereikbaar: false,
+        melding: "Enphase ophalen mislukt",
+      };
+    }
   }
 
   try {

@@ -38,6 +38,14 @@ const envSchema = z.object({
    * Meterstand in app = offset + total_liter_m3 (HomeWizard).
    */
   WATER_METER_OFFSET_M3: z.coerce.number().default(1404),
+  /** Enphase IQ Gateway (HTTPS, JWT Bearer) */
+  ENPHASE_GATEWAY_URL: z.string().url().optional(),
+  ENPHASE_GATEWAY_SERIAL: z.string().min(8).optional(),
+  /** JWT van Enlighten (1 jaar geldig); zie scripts/db-migration/enphase-fetch-token.py */
+  ENPHASE_GATEWAY_TOKEN: z.string().min(20).optional(),
+  /** Optioneel: auto JWT via Enlighten-login (MFA moet uit) */
+  ENPHASE_ENLIGHTEN_USER: z.string().email().optional(),
+  ENPHASE_ENLIGHTEN_PASSWORD: z.string().min(1).optional(),
 });
 
 export const env = envSchema.parse({
@@ -52,7 +60,16 @@ export const env = envSchema.parse({
   KNMI_API_KEY: process.env.KNMI_API_KEY || undefined,
   KNMI_PROVINCE: process.env.KNMI_PROVINCE || undefined,
   WATER_METER_OFFSET_M3: process.env.WATER_METER_OFFSET_M3 || undefined,
+  ENPHASE_GATEWAY_URL: process.env.ENPHASE_GATEWAY_URL || undefined,
+  ENPHASE_GATEWAY_SERIAL: process.env.ENPHASE_GATEWAY_SERIAL || undefined,
+  ENPHASE_GATEWAY_TOKEN: process.env.ENPHASE_GATEWAY_TOKEN || undefined,
+  ENPHASE_ENLIGHTEN_USER: process.env.ENPHASE_ENLIGHTEN_USER || undefined,
+  ENPHASE_ENLIGHTEN_PASSWORD: process.env.ENPHASE_ENLIGHTEN_PASSWORD || undefined,
 });
+
+export const enphaseConfigured = Boolean(
+  env.ENPHASE_GATEWAY_URL && env.ENPHASE_GATEWAY_SERIAL
+);
 
 export const energieBatteryEndpoints = buildBatteryEndpoints(
   parseBatteryUrls(env.ENERGIE_BATTERY_URLS),

@@ -37,5 +37,6 @@ export function mapEnergieLive(data: EnergieApiRaw): EnergieLive {
     batterij_soc_gemiddeld: soc_gemiddeld,
     batterij_hint: data.batterij_hint ?? null,
     batterij_historie: data.batterij_historie ?? { labels: [], wattage: [] },
+    enphase: data.enphase ?? null,
   };
 }

@@ -60,6 +60,7 @@ import type {
 } from "@/lib/homewizard/battery";
 
 export type { BatterijGroep, BatterijHistorie, BatterijLive } from "@/lib/homewizard/battery";
+export type { EnphaseLive } from "@/lib/enphase/types";
 
 export interface EnergieApiRaw {
   active_power_w?: number;
@@ -80,6 +81,7 @@ export interface EnergieApiRaw {
   batterij_groep?: BatterijGroep | null;
   batterij_hint?: string | null;
   batterij_historie?: BatterijHistorie;
+  enphase?: import("@/lib/enphase/types").EnphaseLive;
 }
 
 export interface EnergieLive {
@@ -99,6 +101,7 @@ export interface EnergieLive {
   batterij_soc_gemiddeld: number | null;
   batterij_hint: string | null;
   batterij_historie: BatterijHistorie;
+  enphase: import("@/lib/enphase/types").EnphaseLive | null;
 }
 
 export interface EnergieHistorie {
@@ -229,6 +232,7 @@ export interface AstronomieApi {
   period: "night" | "dawn" | "day" | "evening";
   sunriseLabel: string;
   sunsetLabel: string;
+  daylightHoursLabel: string;
   sunProgress: number;
   sunBelowHorizon: boolean;
   sunAltitudeDeg: number;
