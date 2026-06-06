@@ -1,8 +1,13 @@
 import type { RowDataPacket } from "mysql2";
 import type { WeerLive } from "@/lib/api/types";
+import { amsterdamSqlOffset } from "@/lib/energie/amsterdam-sql-offset";
 import { enrichWeerLive } from "@/lib/weer/enrich-live";
-import { mergeDailyMinMax } from "@/lib/weer/ecowitt-ingest";
 import { getPool } from "@/lib/db/pool";
+import { todayAmsterdamDate } from "@/lib/weer/regen-jaar-labels";
+import {
+  mergeVandaagTempMinMax,
+  type VandaagTempMinMax,
+} from "@/lib/weer/temp-minmax";
 import { meetMomentFromWeer, NL_TZ_OFFSET } from "@/lib/db/nl-time";
 import { syncRegenFromIngest } from "@/lib/db/weer-regen-store";
 import { regenDagSyncFromIngest } from "@/lib/weer/regen-dag";
@@ -12,6 +17,34 @@ const CACHE_MAX_AGE_MS = 10 * 60 * 1000;
 interface CacheRow extends RowDataPacket {
   payload: string | WeerLive;
   updated_at: Date;
+}
+
+interface TempMinMaxRow extends RowDataPacket {
+  tmin: number | null;
+  tmax: number | null;
+}
+
+async function fetchVandaagTempMinMax(dag: string): Promise<VandaagTempMinMax> {
+  const pool = getPool();
+  const offset = amsterdamSqlOffset();
+  const ams = `CONVERT_TZ(meet_moment, '+00:00', '${offset}')`;
+  const [rows] = await pool.query<TempMinMaxRow[]>(
+    `SELECT ROUND(MIN(temp_c), 1) AS tmin, ROUND(MAX(temp_c), 1) AS tmax
+     FROM metingen
+     WHERE DATE(${ams}) = ?`,
+    [dag]
+  );
+  const row = rows[0];
+  return {
+    min: row?.tmin != null ? Number(row.tmin) : null,
+    max: row?.tmax != null ? Number(row.tmax) : null,
+  };
+}
+
+export async function applyVandaagTempMinMax(data: WeerLive): Promise<WeerLive> {
+  const dag = data.date_tracked ?? todayAmsterdamDate();
+  const fromMetingen = await fetchVandaagTempMinMax(dag);
+  return mergeVandaagTempMinMax(data, fromMetingen);
 }
 
 function parsePayload(row: CacheRow): WeerLive {
@@ -80,9 +113,10 @@ export async function maybeInsertMeting(data: WeerLive): Promise<boolean> {
 
 export async function ingestWeerLive(raw: WeerLive): Promise<WeerLive> {
   const previous = await readWeerLiveCache();
-  const withMinMax = mergeDailyMinMax(raw, previous);
+  const enriched = enrichWeerLive(raw);
+  await maybeInsertMeting(enriched);
+  const withMinMax = await applyVandaagTempMinMax(enriched);
   const saved = await writeWeerLiveCache(withMinMax);
-  await maybeInsertMeting(saved);
   try {
     const sync = regenDagSyncFromIngest(saved, previous);
     await syncRegenFromIngest(

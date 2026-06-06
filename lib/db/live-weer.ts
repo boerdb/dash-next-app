@@ -2,7 +2,7 @@ import type { RowDataPacket } from "mysql2";
 import type { WeerLive } from "@/lib/api/types";
 import { enrichWeerLive } from "@/lib/weer/enrich-live";
 import { getPool } from "@/lib/db/pool";
-import { readWeerLiveCache } from "@/lib/db/weer-store";
+import { applyVandaagTempMinMax, readWeerLiveCache } from "@/lib/db/weer-store";
 
 interface MetingRow extends RowDataPacket {
   meet_moment: Date;
@@ -38,7 +38,8 @@ async function fallbackFromMetingen(): Promise<WeerLive | null> {
 export async function fetchWeerLiveFromDb(): Promise<WeerLive> {
   const cached = await readWeerLiveCache();
   if (cached) {
-    return enrichWeerLive(cached);
+    const withMinMax = await applyVandaagTempMinMax(cached);
+    return enrichWeerLive(withMinMax);
   }
 
   const fromMetingen = await fallbackFromMetingen();
