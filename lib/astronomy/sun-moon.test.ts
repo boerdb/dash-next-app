@@ -14,6 +14,20 @@ describe("formatDaylightDuration", () => {
     const sunset = new Date("2026-01-01T16:00:00Z");
     assert.equal(formatDaylightDuration(sunrise, sunset), "8 uur");
   });
+
+  it("komt overeen met getoonde zonop/-onder tijden", () => {
+    const info = getAstronomyInfo(new Date("2026-06-06T12:00:00+02:00"));
+    const parse = (label: string) => {
+      const [h, m] = label.split(/[.:]/).map(Number);
+      return h * 60 + m;
+    };
+    const expectedMin = parse(info.sunsetLabel) - parse(info.sunriseLabel);
+    const match = info.daylightHoursLabel.match(/^(\d+)(?:u (\d+)m| uur)$/);
+    assert.ok(match);
+    const h = Number(match[1]);
+    const m = match[2] ? Number(match[2]) : 0;
+    assert.equal(h * 60 + m, expectedMin);
+  });
 });
 
 describe("getAstronomyInfo", () => {

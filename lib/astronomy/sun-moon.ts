@@ -25,18 +25,31 @@ export interface AstronomyInfo {
   };
 }
 
+const AMS_TIME = new Intl.DateTimeFormat("nl-NL", {
+  timeZone: "Europe/Amsterdam",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+function amsterdamClockMinutes(date: Date): number {
+  const parts = AMS_TIME.formatToParts(date);
+  const h = Number(parts.find((p) => p.type === "hour")?.value ?? NaN);
+  const m = Number(parts.find((p) => p.type === "minute")?.value ?? NaN);
+  if (!Number.isFinite(h) || !Number.isFinite(m)) return NaN;
+  return h * 60 + m;
+}
+
 function formatTimeNl(date: Date): string {
-  return date.toLocaleTimeString("nl-NL", {
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: "Europe/Amsterdam",
-  });
+  return AMS_TIME.format(date);
 }
 
 export function formatDaylightDuration(sunrise: Date, sunset: Date): string {
-  const ms = sunset.getTime() - sunrise.getTime();
-  if (!Number.isFinite(ms) || ms <= 0) return "—";
-  const totalMin = Math.round(ms / 60_000);
+  const startMin = amsterdamClockMinutes(sunrise);
+  const endMin = amsterdamClockMinutes(sunset);
+  if (!Number.isFinite(startMin) || !Number.isFinite(endMin)) return "—";
+  const totalMin = endMin - startMin;
+  if (totalMin <= 0) return "—";
   const h = Math.floor(totalMin / 60);
   const m = totalMin % 60;
   if (m === 0) return `${h} uur`;
