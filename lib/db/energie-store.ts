@@ -125,7 +125,7 @@ async function attachEnphase(
     result.wh_lifetime != null &&
     (start.enphase_wh_lifetime_start == null || start.date !== today);
 
-  if (needsEnphaseDagstart) {
+  if (needsEnphaseDagstart && result.wh_lifetime != null) {
     start = {
       ...start,
       date: today,
