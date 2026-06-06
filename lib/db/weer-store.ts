@@ -1,6 +1,5 @@
 import type { RowDataPacket } from "mysql2";
 import type { WeerLive } from "@/lib/api/types";
-import { amsterdamSqlOffset } from "@/lib/energie/amsterdam-sql-offset";
 import { enrichWeerLive } from "@/lib/weer/enrich-live";
 import { getPool } from "@/lib/db/pool";
 import { todayAmsterdamDate } from "@/lib/weer/regen-jaar-labels";
@@ -26,12 +25,11 @@ interface TempMinMaxRow extends RowDataPacket {
 
 async function fetchVandaagTempMinMax(dag: string): Promise<VandaagTempMinMax> {
   const pool = getPool();
-  const offset = amsterdamSqlOffset();
-  const ams = `CONVERT_TZ(meet_moment, '+00:00', '${offset}')`;
+  // meet_moment = Amsterdam wall clock (server_timestamp), geen UTC.
   const [rows] = await pool.query<TempMinMaxRow[]>(
     `SELECT ROUND(MIN(temp_c), 1) AS tmin, ROUND(MAX(temp_c), 1) AS tmax
      FROM metingen
-     WHERE DATE(${ams}) = ?`,
+     WHERE DATE(meet_moment) = ?`,
     [dag]
   );
   const row = rows[0];
@@ -42,7 +40,7 @@ async function fetchVandaagTempMinMax(dag: string): Promise<VandaagTempMinMax> {
 }
 
 export async function applyVandaagTempMinMax(data: WeerLive): Promise<WeerLive> {
-  const dag = data.date_tracked ?? todayAmsterdamDate();
+  const dag = todayAmsterdamDate();
   const fromMetingen = await fetchVandaagTempMinMax(dag);
   return mergeVandaagTempMinMax(data, fromMetingen);
 }

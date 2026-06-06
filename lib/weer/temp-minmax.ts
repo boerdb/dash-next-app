@@ -11,7 +11,7 @@ function round1(n: number): number {
 
 /**
  * Min/max vandaag uit metingen (5-min samples). Geen live-ingest-spikes.
- * Zonder metingen vandaag: val terug op huidige temp_c.
+ * Zonder metingen vandaag (bv. net na middernacht): val terug op huidige temp_c.
  */
 export function mergeVandaagTempMinMax(
   data: WeerLive,
