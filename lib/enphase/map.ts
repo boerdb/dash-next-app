@@ -42,33 +42,29 @@ export function mapEnphaseProduction(
     vermogen_w = Math.round(Number(inv.wNow));
   }
 
-  let vandaag_kwh: number | null = null;
-  if (v1?.wattHoursToday != null && !Number.isNaN(Number(v1.wattHoursToday))) {
-    vandaag_kwh = whToKwh(Number(v1.wattHoursToday));
-  } else if (inv?.whToday != null && !Number.isNaN(Number(inv.whToday))) {
-    vandaag_kwh = whToKwh(Number(inv.whToday));
-  } else {
-    const lifetime =
-      v1?.wattHoursLifetime != null
-        ? Number(v1.wattHoursLifetime)
-        : inv?.whLifetime != null
-          ? Number(inv.whLifetime)
-          : null;
-    if (
-      lifetime != null &&
-      whLifetimeStart != null &&
-      lifetime >= whLifetimeStart
-    ) {
-      vandaag_kwh = whToKwh(lifetime - whLifetimeStart);
-    }
-  }
-
   const wh_lifetime =
     v1?.wattHoursLifetime != null
       ? Number(v1.wattHoursLifetime)
       : inv?.whLifetime != null
         ? Number(inv.whLifetime)
         : null;
+
+  let vandaag_kwh: number | null = null;
+  // Amsterdam-dag via whLifetime-delta (gateway whToday reset op UTC-middernacht).
+  if (
+    wh_lifetime != null &&
+    whLifetimeStart != null &&
+    wh_lifetime >= whLifetimeStart
+  ) {
+    vandaag_kwh = whToKwh(wh_lifetime - whLifetimeStart);
+  } else if (
+    v1?.wattHoursToday != null &&
+    !Number.isNaN(Number(v1.wattHoursToday))
+  ) {
+    vandaag_kwh = whToKwh(Number(v1.wattHoursToday));
+  } else if (inv?.whToday != null && !Number.isNaN(Number(inv.whToday))) {
+    vandaag_kwh = whToKwh(Number(inv.whToday));
+  }
 
   return { vermogen_w, vandaag_kwh, wh_lifetime };
 }

@@ -110,6 +110,8 @@ async function attachEnphase(
   start: EnergieDagstart
 ): Promise<EnergieDagstart> {
   let whLifetimeStart = start.enphase_wh_lifetime_start ?? null;
+  const today = todayAmsterdam();
+
   let result = await fetchEnphaseLive({
     gatewayUrl: env.ENPHASE_GATEWAY_URL!,
     serial: env.ENPHASE_GATEWAY_SERIAL!,
@@ -119,11 +121,16 @@ async function attachEnphase(
     whLifetimeStart,
   });
 
-  if (
+  const needsEnphaseDagstart =
     result.wh_lifetime != null &&
-    start.enphase_wh_lifetime_start == null
-  ) {
-    start = { ...start, enphase_wh_lifetime_start: result.wh_lifetime };
+    (start.enphase_wh_lifetime_start == null || start.date !== today);
+
+  if (needsEnphaseDagstart) {
+    start = {
+      ...start,
+      date: today,
+      enphase_wh_lifetime_start: result.wh_lifetime,
+    };
     await writeDagstart(start);
     whLifetimeStart = result.wh_lifetime;
     result = await fetchEnphaseLive({

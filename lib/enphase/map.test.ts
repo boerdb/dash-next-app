@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mapEnphaseProduction, toEnphaseLive } from "./map";
 
 describe("enphase map", () => {
-  it("gebruikt api/v1 voor vandaag en vermogen", () => {
+  it("gebruikt api/v1 voor vandaag en vermogen zonder dagstart", () => {
     const mapped = mapEnphaseProduction(
       {
         wattHoursToday: 8353,
@@ -15,6 +15,19 @@ describe("enphase map", () => {
     );
     assert.equal(mapped.vandaag_kwh, 8.35);
     assert.equal(mapped.vermogen_w, 2154);
+  });
+
+  it("negeert wattHoursToday bij Amsterdam-dagstart (UTC-reset gateway)", () => {
+    const mapped = mapEnphaseProduction(
+      {
+        wattHoursToday: 8353,
+        wattsNow: 0,
+        wattHoursLifetime: 6_084_000,
+      },
+      null,
+      6_084_000
+    );
+    assert.equal(mapped.vandaag_kwh, 0);
   });
 
   it("berekent vandaag uit whLifetime-delta bij unmetered gateway", () => {
