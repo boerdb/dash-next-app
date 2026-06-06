@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, Droplets, Flame, Sun } from "lucide-react";
+import { AlertCircle, ArrowDownLeft, ArrowUpRight, Droplets, Flame, Sun } from "lucide-react";
 import type { EnergieLive } from "@/lib/api/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -41,10 +41,12 @@ export function DailyStats({ data }: DailyStatsProps) {
               showZon && "mt-2"
             )}
           >
+            <ArrowDownLeft className="mr-1.5 inline h-6 w-6 -translate-y-0.5 text-zinc-300" />
             {data.stroom_vandaag_in}{" "}
             <span className="text-sm font-normal text-zinc-400">kWh ingekocht</span>
           </p>
           <p className="mt-1 text-2xl font-bold text-emerald-400">
+            <ArrowUpRight className="mr-1.5 inline h-6 w-6 -translate-y-0.5" />
             {data.stroom_vandaag_uit}{" "}
             <span className="text-sm font-normal text-zinc-400">kWh teruggeleverd</span>
           </p>

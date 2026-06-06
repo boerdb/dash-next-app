@@ -148,6 +148,8 @@ export function RainYearChart() {
                   borderRadius: 8,
                   fontSize: 12,
                 }}
+                labelStyle={{ color: "#a1a1aa" }}
+                itemStyle={{ color: "#7dd3fc" }}
                 formatter={(value) => [formatMm(Number(value)), "Regen"]}
               />
               <Bar dataKey="regen_mm" radius={[4, 4, 0, 0]}>
