@@ -33,6 +33,12 @@ const TemperatureChart = dynamic(
   { ssr: false, loading: () => <Skeleton className="h-48 w-full rounded-2xl" /> }
 );
 
+const RainYearChart = dynamic(
+  () =>
+    import("@/components/weather/RainYearChart").then((m) => m.RainYearChart),
+  { ssr: false, loading: () => <Skeleton className="h-52 w-full rounded-2xl" /> }
+);
+
 const swrFreshOnOpen = {
   revalidateOnMount: true,
   revalidateOnFocus: true,
@@ -169,6 +175,7 @@ export default function WeerPage() {
             updateLabel={updateLabel}
           />
           <MetricGrid data={weer} />
+          <RainYearChart />
           {historie?.labels?.length ? <TemperatureChart data={historie} /> : null}
           <OpenWeatherPanel
             data={openWeather}
@@ -230,6 +237,7 @@ function WeerSkeleton() {
         <Skeleton className="h-28" />
         <Skeleton className="h-28" />
       </div>
+      <Skeleton className="h-52 w-full rounded-2xl" />
       <Skeleton className="h-48 w-full rounded-2xl" />
       <Card>
         <CardContent>

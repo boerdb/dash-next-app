@@ -4,6 +4,8 @@ import { enrichWeerLive } from "@/lib/weer/enrich-live";
 import { mergeDailyMinMax } from "@/lib/weer/ecowitt-ingest";
 import { getPool } from "@/lib/db/pool";
 import { meetMomentFromWeer, NL_TZ_OFFSET } from "@/lib/db/nl-time";
+import { syncRegenFromIngest } from "@/lib/db/weer-regen-store";
+import { regenDagSyncFromIngest } from "@/lib/weer/regen-dag";
 
 const CACHE_MAX_AGE_MS = 10 * 60 * 1000;
 
@@ -81,6 +83,17 @@ export async function ingestWeerLive(raw: WeerLive): Promise<WeerLive> {
   const withMinMax = mergeDailyMinMax(raw, previous);
   const saved = await writeWeerLiveCache(withMinMax);
   await maybeInsertMeting(saved);
+  try {
+    const sync = regenDagSyncFromIngest(saved, previous);
+    await syncRegenFromIngest(
+      sync.archiveDag,
+      sync.archiveMm,
+      sync.vandaagDag,
+      sync.vandaagMm
+    );
+  } catch (e) {
+    console.warn("weer_regen_dag sync:", e);
+  }
   return saved;
 }
 

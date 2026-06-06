@@ -35,6 +35,21 @@ export interface WeerHistorie {
   gemiddelde: number;
 }
 
+export interface WeerRegenJaarMaand {
+  maand: number;
+  label: string;
+  regen_mm: number;
+}
+
+export interface WeerRegenJaarResponse {
+  jaar: number;
+  maanden: WeerRegenJaarMaand[];
+  jaar_totaal_mm: number;
+  vandaag: string;
+  kan_vorige_jaar: boolean;
+  kan_volgende_jaar: boolean;
+}
+
 export interface GetijItem {
   type: "HW" | "LW";
   tijd: string;
