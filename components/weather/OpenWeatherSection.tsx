@@ -79,7 +79,7 @@ export function OpenWeatherSection({ data, station }: OpenWeatherSectionProps) {
         <header>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="border-l-2 border-sky-500/50 pl-2 text-xs font-semibold uppercase tracking-widest text-zinc-400">
-              Voorspelling & aanvulling
+              Weersvoorspelling
             </p>
             <span
               className={cn(
@@ -93,7 +93,7 @@ export function OpenWeatherSection({ data, station }: OpenWeatherSectionProps) {
             </span>
           </div>
           <p className="mt-1 text-[0.65rem] text-zinc-500">
-            OpenWeather · Harlingen · modeldata, niet je weerstation
+            Modeldata van OpenWeather · geen weerstation
           </p>
         </header>
 
@@ -140,7 +140,7 @@ export function OpenWeatherSection({ data, station }: OpenWeatherSectionProps) {
         {minutely.length > 0 && (
           <section>
             <p className="mb-2 border-l-2 border-sky-500/50 pl-2 text-[0.65rem] uppercase tracking-wide text-zinc-500">
-              Neerslag komende 60 min (model)
+              Neerslag komende 60 minuten
             </p>
             <OpenWeatherMinutelyChart data={minutely} />
           </section>

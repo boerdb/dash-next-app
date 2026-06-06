@@ -101,8 +101,7 @@ export function WeatherHero({
           Min: {data.temp_min_c}°C · Max: {data.temp_max_c}°C
         </p>
         <p className="text-sm text-white/80">
-          Vocht (weerstation): {data.humidity}% · Dauwpunt (weerstation):{" "}
-          {data.dauwpunt} °C
+          Luchtvochtigheid: {data.humidity}% · Dauwpunt: {data.dauwpunt} °C
         </p>
       </div>
     </section>

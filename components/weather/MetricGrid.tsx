@@ -72,7 +72,7 @@ export function MetricGrid({ data }: MetricGridProps) {
 
         <MetricCard>
           <Sun className="h-8 w-8 text-amber-400" />
-          <p className="mt-2 text-xs uppercase tracking-wide text-zinc-400">Zon & UV</p>
+          <p className="mt-2 text-xs uppercase tracking-wide text-zinc-400">Zonnestraling & UV</p>
           <p className={`text-2xl font-bold ${uv >= 3 ? "text-amber-400" : ""}`}>{data.uv}</p>
           <p className="text-xs text-zinc-400">
             Straling: {Number(data.solarradiation ?? 0).toFixed(0)} W/m²
@@ -83,7 +83,7 @@ export function MetricGrid({ data }: MetricGridProps) {
       <Card variant="weather">
         <CardContent className="flex flex-wrap items-center justify-center gap-3 text-center">
           <Home className="h-5 w-5 text-emerald-400" />
-          <span className="text-xs uppercase text-zinc-400">Binnen:</span>
+          <span className="text-xs uppercase text-zinc-400">Binnenklimaat</span>
           <strong className="text-lg text-sky-100">{data.tempin_c}°C</strong>
           <span className="text-zinc-600">|</span>
           <span className="text-xs uppercase text-zinc-400">Vocht:</span>

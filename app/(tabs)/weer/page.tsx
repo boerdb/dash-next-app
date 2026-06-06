@@ -17,6 +17,7 @@ import { jsonFetcher, FetchError } from "@/lib/fetcher";
 import { useRevalidateOnVisible } from "@/lib/hooks/use-revalidate-on-visible";
 import { normalizeOpenWeatherSupplement } from "@/lib/openweather/map";
 import { getWeatherCondition } from "@/lib/utils/weather-condition";
+import { formatWeerUpdateLabel } from "@/lib/weer/update-label";
 import type {
   AstronomieApi,
   GetijdenResponse,
@@ -132,9 +133,7 @@ export default function WeerPage() {
 
   useRevalidateOnVisible(refreshAll);
 
-  const updateLabel = weer?.server_timestamp
-    ? `Update: ${String(weer.server_timestamp).replace("T", " ").slice(0, 16)}`
-    : undefined;
+  const updateLabel = formatWeerUpdateLabel(weer?.server_timestamp);
 
   const condition = useMemo(
     () =>
@@ -162,14 +161,15 @@ export default function WeerPage() {
         <DataError message={weerError.message} onRetry={() => mutateWeer()} />
       ) : weer ? (
         <div className="space-y-4">
+          {knmiWaarschuwingen ? <KnmiWarningsCard data={knmiWaarschuwingen} /> : null}
           <WeatherHero
             data={weer}
             condition={condition}
             astro={astroData}
             updateLabel={updateLabel}
           />
-          {knmiWaarschuwingen ? <KnmiWarningsCard data={knmiWaarschuwingen} /> : null}
           <MetricGrid data={weer} />
+          {historie?.labels?.length ? <TemperatureChart data={historie} /> : null}
           <OpenWeatherPanel
             data={openWeather}
             station={weer}
@@ -177,7 +177,6 @@ export default function WeerPage() {
             isLoading={openWeatherLoading}
             onRetry={() => mutateOpenWeather()}
           />
-          {historie?.labels?.length ? <TemperatureChart data={historie} /> : null}
           <TideCard getijden={getijden} bron={getijBron} />
         </div>
       ) : (
@@ -223,6 +222,7 @@ async function openWeatherFetcher(
 function WeerSkeleton() {
   return (
     <div className="space-y-4">
+      <Skeleton className="h-14 w-full rounded-2xl" />
       <Skeleton className="h-80 w-full rounded-3xl" />
       <div className="grid grid-cols-2 gap-3">
         <Skeleton className="h-28" />
@@ -230,6 +230,7 @@ function WeerSkeleton() {
         <Skeleton className="h-28" />
         <Skeleton className="h-28" />
       </div>
+      <Skeleton className="h-48 w-full rounded-2xl" />
       <Card>
         <CardContent>
           <Skeleton className="h-40 w-full" />

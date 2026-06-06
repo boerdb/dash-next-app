@@ -33,7 +33,10 @@ export function TemperatureChart({ data }: TemperatureChartProps) {
         <p className="mb-1 border-l-2 border-sky-500/50 pl-2 text-xs uppercase tracking-wide text-zinc-400">
           Temperatuur afgelopen 24 uur
         </p>
-        <p className="mb-3 text-sm text-zinc-500">
+        <p className="mb-1 pl-2 text-[10px] text-zinc-500">
+          Eigen weerstation · Ecowitt
+        </p>
+        <p className="mb-3 pl-2 text-sm text-zinc-500">
           Gemiddelde: <span className="font-semibold text-sky-400">{data.gemiddelde}°C</span>
         </p>
         <ChartContainer height={CHART_HEIGHT}>
