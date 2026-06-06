@@ -32,8 +32,11 @@ export function PowerChart({ data }: PowerChartProps) {
   return (
     <Card variant="energy">
       <CardContent>
-        <p className="mb-3 border-l-2 border-amber-500/50 pl-2 text-xs uppercase tracking-wide text-zinc-400">
-          Verbruik afgelopen 24 uur (Watt)
+        <p className="mb-1 border-l-2 border-amber-500/50 pl-2 text-xs uppercase tracking-wide text-zinc-400">
+          Netvermogen afgelopen 24 uur (W)
+        </p>
+        <p className="mb-3 pl-2 text-[10px] text-zinc-500">
+          Positief = afname uit net · negatief = teruglevering
         </p>
         {pointCount === 0 && (
           <p className="mb-2 text-xs text-zinc-500">

@@ -90,9 +90,9 @@ export default function EnergiePage() {
       ) : energie ? (
         <div className="space-y-4">
           <PowerHero data={energie} />
+          <DailyStats data={energie} />
           <BatteryPanel data={energie} />
           <BatteryChart data={energie} />
-          <DailyStats data={energie} />
           <MonthlyEnergyChart />
           {chartHistorie?.labels?.length ? <PowerChart data={chartHistorie} /> : null}
         </div>

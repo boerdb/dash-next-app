@@ -24,7 +24,7 @@ export function PowerHero({ data }: PowerHeroProps) {
       <CardContent className="flex items-center justify-between">
         <div>
           <p className="text-xs uppercase tracking-wide text-zinc-400">
-            {exporting ? "Nu terugleveren" : "Nu verbruiken"}
+            {exporting ? "Nu terugleveren" : "Netafname nu"}
           </p>
           <h1 className={cn("text-5xl font-bold tabular-nums", powerColor)}>
             {data.stroom_nu}

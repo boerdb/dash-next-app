@@ -5,6 +5,7 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -34,8 +35,11 @@ export function BatteryChart({ data }: BatteryChartProps) {
   return (
     <Card variant="energy" className="border-violet-500/15">
       <CardContent>
-        <p className="mb-3 border-l-2 border-violet-500/50 pl-2 text-xs uppercase tracking-wide text-zinc-400">
-          Batterijvermogen (24 uur, W)
+        <p className="mb-1 border-l-2 border-violet-500/50 pl-2 text-xs uppercase tracking-wide text-zinc-400">
+          Batterijvermogen afgelopen 24 uur (W)
+        </p>
+        <p className="mb-3 pl-2 text-[10px] text-zinc-500">
+          Positief = laden · negatief = ontladen
         </p>
         {pointCount < 2 && (
           <p className="mb-2 text-xs text-zinc-500">
@@ -52,6 +56,7 @@ export function BatteryChart({ data }: BatteryChartProps) {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+              <ReferenceLine y={0} stroke="rgba(167,139,250,0.3)" />
               <XAxis
                 dataKey="label"
                 tick={{ fill: "#a1a1aa", fontSize: 10 }}

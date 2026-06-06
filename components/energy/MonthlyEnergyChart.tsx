@@ -177,7 +177,7 @@ export function MonthlyEnergyChart() {
       <CardContent>
         <div className="mb-3 flex items-center justify-between gap-2">
           <p className="border-l-2 border-amber-500/50 pl-2 text-xs uppercase tracking-wide text-zinc-400">
-            Verbruik per dag (kWh)
+            Dagbalans stroom (kWh)
           </p>
           <div className="flex items-center gap-1">
             <button
@@ -299,7 +299,7 @@ export function MonthlyEnergyChart() {
         <div className="mt-2 flex flex-wrap gap-3 text-[10px] text-zinc-500">
           <span className="flex items-center gap-1">
             <span className="h-2 w-2 rounded-full" style={{ background: COLOR_NET }} />
-            Net
+            Van net
           </span>
           <span className="flex items-center gap-1">
             <span className="h-2 w-2 rounded-full" style={{ background: COLOR_BAT }} />
@@ -307,7 +307,7 @@ export function MonthlyEnergyChart() {
           </span>
           <span className="flex items-center gap-1">
             <span className="h-2 w-2 rounded-full" style={{ background: COLOR_EXPORT }} />
-            Teruglevering
+            Teruglevering (↑ afname · ↓ terug)
           </span>
         </div>
 
