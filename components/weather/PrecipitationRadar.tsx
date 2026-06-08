@@ -20,10 +20,12 @@ import {
   BASE_TILE_ATTRIBUTION,
   BASE_TILE_URL,
   HARLINGEN_MARKER,
+  LABELS_TILE_URL,
   NL_MAP_CENTER,
   NL_MAP_MAX_ZOOM,
   NL_MAP_MIN_ZOOM,
   NL_MAP_ZOOM,
+  RADAR_LAYER_OPACITY,
 } from "@/lib/radar/map-config";
 import { radarTileUrlTemplate } from "@/lib/radar/rainviewer";
 import { jsonFetcher } from "@/lib/fetcher";
@@ -105,9 +107,22 @@ export function PrecipitationRadar() {
         attributionControl: true,
       });
 
+      map.createPane("radarPane");
+      const radarPane = map.getPane("radarPane");
+      if (radarPane) radarPane.style.zIndex = "350";
+
+      map.createPane("labelsPane");
+      const labelsPane = map.getPane("labelsPane");
+      if (labelsPane) labelsPane.style.zIndex = "450";
+
       L.tileLayer(BASE_TILE_URL, {
         maxZoom: NL_MAP_MAX_ZOOM,
         attribution: BASE_TILE_ATTRIBUTION,
+      }).addTo(map);
+
+      L.tileLayer(LABELS_TILE_URL, {
+        maxZoom: NL_MAP_MAX_ZOOM,
+        pane: "labelsPane",
       }).addTo(map);
 
       L.circleMarker(
@@ -174,9 +189,10 @@ export function PrecipitationRadar() {
     const layer = L.tileLayer(
       radarTileUrlTemplate(data.host, currentFrame.tilePath),
       {
+        pane: "radarPane",
         minZoom: NL_MAP_MIN_ZOOM,
         maxZoom: NL_MAP_MAX_ZOOM,
-        opacity: 0.72,
+        opacity: RADAR_LAYER_OPACITY,
         attribution:
           '<a href="https://www.rainviewer.com/">RainViewer</a>',
       }
@@ -219,7 +235,7 @@ export function PrecipitationRadar() {
           Neerslagradar
         </p>
         <p className="mb-3 pl-2 text-[10px] text-zinc-500">
-          Nederland · gele stip = Harlingen · blauw = neerslag
+          Nederland · kustlijnen door neerslag · gele stip = Harlingen
         </p>
 
         <div
