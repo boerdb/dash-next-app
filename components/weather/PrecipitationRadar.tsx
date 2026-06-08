@@ -34,6 +34,8 @@ import "leaflet/dist/leaflet.css";
 
 const FRAME_MS = 600;
 const MAP_HEIGHT = 280;
+/** RainViewer ververst elke ~10 min; poll elke minuut voor nieuwste frame. */
+const RADAR_POLL_MS = 60_000;
 
 export function PrecipitationRadar() {
   const mapInstance = useRef<LeafletMap | null>(null);
@@ -43,12 +45,18 @@ export function PrecipitationRadar() {
 
   const [frameIndex, setFrameIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
+  const [followLive, setFollowLive] = useState(true);
   const [mapReady, setMapReady] = useState(false);
 
-  const { data, error, isLoading } = useSWR<WeerRadarResponse>(
+  const { data, error, isLoading, mutate } = useSWR<WeerRadarResponse>(
     "/api/weer/radar",
     jsonFetcher,
-    { refreshInterval: 300_000, revalidateOnFocus: true }
+    {
+      refreshInterval: RADAR_POLL_MS,
+      refreshWhenHidden: true,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+    }
   );
 
   const frames = data?.frames ?? [];
@@ -68,6 +76,7 @@ export function PrecipitationRadar() {
   const startPlay = useCallback(() => {
     if (frames.length < 2) return;
     stopPlay();
+    setFollowLive(false);
     setPlaying(true);
     playTimer.current = setInterval(() => {
       setFrameIndex((i) => (i >= lastIndex ? 0 : i + 1));
@@ -177,10 +186,9 @@ export function PrecipitationRadar() {
   }, [mapReady, data?.host, currentFrame, safeIndex]);
 
   useEffect(() => {
-    if (hasFrames) {
-      setFrameIndex(lastIndex);
-    }
-  }, [hasFrames, lastIndex, data?.updatedAt]);
+    if (playing || !followLive || !hasFrames) return;
+    setFrameIndex(lastIndex);
+  }, [playing, followLive, hasFrames, lastIndex, data?.generated]);
 
   useEffect(() => () => stopPlay(), [stopPlay]);
 
@@ -225,6 +233,7 @@ export function PrecipitationRadar() {
             type="button"
             onClick={() => {
               stopPlay();
+              setFollowLive(false);
               setFrameIndex((i) => Math.max(0, i - 1));
             }}
             disabled={!hasFrames || safeIndex <= 0}
@@ -258,7 +267,12 @@ export function PrecipitationRadar() {
             type="button"
             onClick={() => {
               stopPlay();
-              setFrameIndex((i) => Math.min(lastIndex, i + 1));
+              setFrameIndex((i) => {
+                const next = Math.min(lastIndex, i + 1);
+                if (next >= lastIndex) setFollowLive(true);
+                else setFollowLive(false);
+                return next;
+              });
             }}
             disabled={!hasFrames || safeIndex >= lastIndex}
             className="rounded-lg p-2 text-zinc-400 hover:bg-white/10 disabled:opacity-30"
@@ -268,12 +282,28 @@ export function PrecipitationRadar() {
           </button>
         </div>
 
-        <p className="mt-2 text-center text-xs text-zinc-400">
-          {currentFrame?.label ?? "Laden…"}
-          {hasFrames && safeIndex === lastIndex ? (
-            <span className="text-sky-300/90"> · nu</span>
+        <div className="mt-2 flex items-center justify-center gap-2 text-xs text-zinc-400">
+          <span>
+            {currentFrame?.label ?? "Laden…"}
+            {followLive && safeIndex === lastIndex ? (
+              <span className="text-sky-300/90"> · live</span>
+            ) : null}
+          </span>
+          {!followLive ? (
+            <button
+              type="button"
+              onClick={() => {
+                stopPlay();
+                setFollowLive(true);
+                setFrameIndex(lastIndex);
+                void mutate();
+              }}
+              className="rounded-md bg-sky-500/20 px-2 py-0.5 text-sky-200 hover:bg-sky-500/30"
+            >
+              Nu
+            </button>
           ) : null}
-        </p>
+        </div>
       </CardContent>
     </Card>
   );

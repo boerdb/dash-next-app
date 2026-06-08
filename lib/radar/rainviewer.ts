@@ -88,7 +88,7 @@ export function radarTileUrl(
 
 export async function fetchRainviewerRadar(): Promise<WeerRadarResponse> {
   const res = await fetch(RAINVIEWER_MAPS_URL, {
-    next: { revalidate: 300 },
+    cache: "no-store",
   });
   if (!res.ok) {
     throw new Error(`RainViewer: ${res.status}`);
