@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import useSWR from "swr";
+import useSWR, { mutate as swrMutate } from "swr";
 import dynamic from "next/dynamic";
 import { WeatherHero } from "@/components/weather/WeatherHero";
 import { MetricGrid } from "@/components/weather/MetricGrid";
@@ -37,6 +37,14 @@ const RainYearChart = dynamic(
   () =>
     import("@/components/weather/RainYearChart").then((m) => m.RainYearChart),
   { ssr: false, loading: () => <Skeleton className="h-52 w-full rounded-2xl" /> }
+);
+
+const PrecipitationRadar = dynamic(
+  () =>
+    import("@/components/weather/PrecipitationRadar").then(
+      (m) => m.PrecipitationRadar
+    ),
+  { ssr: false, loading: () => <Skeleton className="h-[280px] w-full rounded-2xl" /> }
 );
 
 const swrFreshOnOpen = {
@@ -134,6 +142,7 @@ export default function WeerPage() {
       mutateAstro(),
       mutateOpenWeather(),
       mutateKnmi(),
+      swrMutate("/api/weer/radar"),
     ]);
   }, [mutateWeer, mutateHistorie, mutateGetijden, mutateAstro, mutateOpenWeather, mutateKnmi]);
 
@@ -176,6 +185,7 @@ export default function WeerPage() {
           />
           <MetricGrid data={weer} />
           <RainYearChart />
+          <PrecipitationRadar />
           {historie?.labels?.length ? <TemperatureChart data={historie} /> : null}
           <OpenWeatherPanel
             data={openWeather}
@@ -238,6 +248,7 @@ function WeerSkeleton() {
         <Skeleton className="h-28" />
       </div>
       <Skeleton className="h-52 w-full rounded-2xl" />
+      <Skeleton className="h-[280px] w-full rounded-2xl" />
       <Skeleton className="h-48 w-full rounded-2xl" />
       <Card>
         <CardContent>

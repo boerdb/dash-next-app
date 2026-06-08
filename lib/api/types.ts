@@ -50,6 +50,19 @@ export interface WeerRegenJaarResponse {
   kan_volgende_jaar: boolean;
 }
 
+export interface WeerRadarFrame {
+  time: number;
+  label: string;
+  tilePath: string;
+}
+
+export interface WeerRadarResponse {
+  host: string;
+  frames: WeerRadarFrame[];
+  generated: number | null;
+  updatedAt: string;
+}
+
 export interface GetijItem {
   type: "HW" | "LW";
   tijd: string;
