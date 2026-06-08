@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import useSWR from "swr";
 import {
   ChevronLeft,
@@ -8,22 +14,36 @@ import {
   Pause,
   Play,
 } from "lucide-react";
+import L, { type Map as LeafletMap, type TileLayer } from "leaflet";
 import type { WeerRadarResponse } from "@/lib/api/types";
-import { HARLINGEN } from "@/lib/location";
-import { radarCenterImageUrl } from "@/lib/radar/rainviewer";
+import {
+  BASE_TILE_ATTRIBUTION,
+  BASE_TILE_URL,
+  HARLINGEN_MARKER,
+  NL_MAP_CENTER,
+  NL_MAP_MAX_ZOOM,
+  NL_MAP_MIN_ZOOM,
+  NL_MAP_ZOOM,
+} from "@/lib/radar/map-config";
+import { radarTileUrlTemplate } from "@/lib/radar/rainviewer";
 import { jsonFetcher } from "@/lib/fetcher";
 import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-const RADAR_ZOOM = 6;
+import "leaflet/dist/leaflet.css";
+
 const FRAME_MS = 600;
+const MAP_HEIGHT = 280;
 
 export function PrecipitationRadar() {
+  const mapInstance = useRef<LeafletMap | null>(null);
+  const radarLayer = useRef<TileLayer | null>(null);
   const playTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const mapContainer = useRef<HTMLDivElement | null>(null);
 
   const [frameIndex, setFrameIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
+  const [mapReady, setMapReady] = useState(false);
 
   const { data, error, isLoading } = useSWR<WeerRadarResponse>(
     "/api/weer/radar",
@@ -36,21 +56,6 @@ export function PrecipitationRadar() {
   const lastIndex = Math.max(0, frames.length - 1);
   const safeIndex = hasFrames ? Math.min(frameIndex, lastIndex) : 0;
   const currentFrame = frames[safeIndex];
-
-  const frameUrls = useMemo(() => {
-    if (!data?.host || !hasFrames) return [];
-    return frames.map((f) =>
-      radarCenterImageUrl(
-        data.host,
-        f.tilePath,
-        HARLINGEN.latitude,
-        HARLINGEN.longitude,
-        RADAR_ZOOM
-      )
-    );
-  }, [data?.host, frames, hasFrames]);
-
-  const currentUrl = frameUrls[safeIndex] ?? null;
 
   const stopPlay = useCallback(() => {
     if (playTimer.current) {
@@ -69,17 +74,113 @@ export function PrecipitationRadar() {
     }, FRAME_MS);
   }, [frames.length, lastIndex, stopPlay]);
 
-  useEffect(() => {
-    if (!hasFrames) return;
-    setFrameIndex(lastIndex);
-  }, [hasFrames, lastIndex, data?.updatedAt]);
+  const destroyMap = useCallback(() => {
+    if (mapInstance.current) {
+      mapInstance.current.remove();
+      mapInstance.current = null;
+      radarLayer.current = null;
+      setMapReady(false);
+    }
+  }, []);
+
+  const initMap = useCallback(
+    (container: HTMLDivElement) => {
+      if (mapInstance.current) return;
+
+      const map = L.map(container, {
+        center: [NL_MAP_CENTER.lat, NL_MAP_CENTER.lng],
+        zoom: NL_MAP_ZOOM,
+        minZoom: NL_MAP_MIN_ZOOM,
+        maxZoom: NL_MAP_MAX_ZOOM,
+        zoomControl: true,
+        attributionControl: true,
+      });
+
+      L.tileLayer(BASE_TILE_URL, {
+        maxZoom: NL_MAP_MAX_ZOOM,
+        attribution: BASE_TILE_ATTRIBUTION,
+      }).addTo(map);
+
+      L.circleMarker(
+        [HARLINGEN_MARKER.latitude, HARLINGEN_MARKER.longitude],
+        {
+          radius: 7,
+          color: "#1e293b",
+          weight: 2,
+          fillColor: "#fbbf24",
+          fillOpacity: 1,
+        }
+      )
+        .addTo(map)
+        .bindTooltip("Harlingen", { permanent: false, direction: "top" });
+
+      mapInstance.current = map;
+      setMapReady(true);
+
+      requestAnimationFrame(() => {
+        map.invalidateSize();
+      });
+    },
+    []
+  );
+
+  const setMapContainerRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      mapContainer.current = node;
+      if (!node) {
+        destroyMap();
+        return;
+      }
+      initMap(node);
+    },
+    [destroyMap, initMap]
+  );
+
+  useLayoutEffect(() => {
+    const map = mapInstance.current;
+    const el = mapContainer.current;
+    if (!map || !el) return;
+
+    map.invalidateSize();
+
+    const ro = new ResizeObserver(() => {
+      map.invalidateSize();
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [mapReady]);
 
   useEffect(() => {
-    for (const url of frameUrls) {
-      const img = new Image();
-      img.src = url;
+    if (!mapReady || !data?.host || !currentFrame || !mapInstance.current) {
+      return;
     }
-  }, [frameUrls]);
+
+    const map = mapInstance.current;
+
+    if (radarLayer.current) {
+      map.removeLayer(radarLayer.current);
+      radarLayer.current = null;
+    }
+
+    const layer = L.tileLayer(
+      radarTileUrlTemplate(data.host, currentFrame.tilePath),
+      {
+        minZoom: NL_MAP_MIN_ZOOM,
+        maxZoom: NL_MAP_MAX_ZOOM,
+        opacity: 0.72,
+        attribution:
+          '<a href="https://www.rainviewer.com/">RainViewer</a>',
+      }
+    );
+    layer.addTo(map);
+    radarLayer.current = layer;
+  }, [mapReady, data?.host, currentFrame, safeIndex]);
+
+  useEffect(() => {
+    if (hasFrames) {
+      setFrameIndex(lastIndex);
+    }
+  }, [hasFrames, lastIndex, data?.updatedAt]);
 
   useEffect(() => () => stopPlay(), [stopPlay]);
 
@@ -110,35 +211,14 @@ export function PrecipitationRadar() {
           Neerslagradar
         </p>
         <p className="mb-3 pl-2 text-[10px] text-zinc-500">
-          Laatste 2 uur · regio Harlingen
+          Nederland · gele stip = Harlingen · blauw = neerslag
         </p>
 
-        <div className="relative h-[220px] w-full overflow-hidden rounded-xl border border-white/10 bg-[#0f172a]">
-          {currentUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={currentUrl}
-              src={currentUrl}
-              alt="Neerslagradar Harlingen"
-              className="h-full w-full object-cover"
-              loading="eager"
-              decoding="async"
-            />
-          ) : (
-            <Skeleton className="h-full w-full rounded-none" />
-          )}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-2 pb-1 pt-6 text-[9px] text-zinc-400">
-            Bron:{" "}
-            <a
-              href="https://www.rainviewer.com/"
-              className="pointer-events-auto text-sky-300/90 underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              RainViewer
-            </a>
-          </div>
-        </div>
+        <div
+          ref={setMapContainerRef}
+          className="radar-map z-0 w-full overflow-hidden rounded-xl border border-white/10"
+          style={{ height: MAP_HEIGHT }}
+        />
 
         <div className="mt-3 flex items-center justify-between gap-2">
           <button

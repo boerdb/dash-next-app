@@ -44,7 +44,7 @@ const PrecipitationRadar = dynamic(
     import("@/components/weather/PrecipitationRadar").then(
       (m) => m.PrecipitationRadar
     ),
-  { ssr: false, loading: () => <Skeleton className="h-[280px] w-full rounded-2xl" /> }
+  { ssr: false, loading: () => <Skeleton className="h-[300px] w-full rounded-2xl" /> }
 );
 
 const swrFreshOnOpen = {
@@ -248,7 +248,7 @@ function WeerSkeleton() {
         <Skeleton className="h-28" />
       </div>
       <Skeleton className="h-52 w-full rounded-2xl" />
-      <Skeleton className="h-[280px] w-full rounded-2xl" />
+      <Skeleton className="h-[300px] w-full rounded-2xl" />
       <Skeleton className="h-48 w-full rounded-2xl" />
       <Card>
         <CardContent>

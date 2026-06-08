@@ -34,3 +34,20 @@ body {
 * {
   -webkit-tap-highlight-color: transparent;
 }
+
+.radar-map .leaflet-container {
+  height: 100%;
+  width: 100%;
+  z-index: 0;
+  font-family: inherit;
+}
+
+.radar-map .leaflet-control-attribution {
+  font-size: 9px;
+  background: rgba(0, 0, 0, 0.55) !important;
+  color: #a1a1aa !important;
+}
+
+.radar-map .leaflet-control-attribution a {
+  color: #7dd3fc !important;
+}
