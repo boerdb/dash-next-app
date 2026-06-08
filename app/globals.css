@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "leaflet/dist/leaflet.css";
 
 :root {
   --background: #0c1222;
@@ -34,11 +33,4 @@ body {
 
 * {
   -webkit-tap-highlight-color: transparent;
-}
-
-.leaflet-container {
-  height: 100%;
-  width: 100%;
-  z-index: 0;
-  background: #0f172a;
 }

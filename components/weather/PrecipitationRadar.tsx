@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import {
   ChevronLeft,
@@ -8,27 +8,22 @@ import {
   Pause,
   Play,
 } from "lucide-react";
-import L, { type Map as LeafletMap, type TileLayer } from "leaflet";
 import type { WeerRadarResponse } from "@/lib/api/types";
 import { HARLINGEN } from "@/lib/location";
-import { radarTileUrlTemplate } from "@/lib/radar/rainviewer";
+import { radarCenterImageUrl } from "@/lib/radar/rainviewer";
 import { jsonFetcher } from "@/lib/fetcher";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-const MAP_ZOOM = 7;
+const RADAR_ZOOM = 6;
 const FRAME_MS = 600;
 
 export function PrecipitationRadar() {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<LeafletMap | null>(null);
-  const radarLayer = useRef<TileLayer | null>(null);
   const playTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [frameIndex, setFrameIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [mapReady, setMapReady] = useState(false);
 
   const { data, error, isLoading } = useSWR<WeerRadarResponse>(
     "/api/weer/radar",
@@ -41,6 +36,21 @@ export function PrecipitationRadar() {
   const lastIndex = Math.max(0, frames.length - 1);
   const safeIndex = hasFrames ? Math.min(frameIndex, lastIndex) : 0;
   const currentFrame = frames[safeIndex];
+
+  const frameUrls = useMemo(() => {
+    if (!data?.host || !hasFrames) return [];
+    return frames.map((f) =>
+      radarCenterImageUrl(
+        data.host,
+        f.tilePath,
+        HARLINGEN.latitude,
+        HARLINGEN.longitude,
+        RADAR_ZOOM
+      )
+    );
+  }, [data?.host, frames, hasFrames]);
+
+  const currentUrl = frameUrls[safeIndex] ?? null;
 
   const stopPlay = useCallback(() => {
     if (playTimer.current) {
@@ -60,70 +70,16 @@ export function PrecipitationRadar() {
   }, [frames.length, lastIndex, stopPlay]);
 
   useEffect(() => {
-    if (!hasFrames || !mapRef.current || mapInstance.current) return;
-
-    const map = L.map(mapRef.current, {
-      center: [HARLINGEN.latitude, HARLINGEN.longitude],
-      zoom: MAP_ZOOM,
-      zoomControl: false,
-      attributionControl: true,
-    });
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    }).addTo(map);
-
-    L.control.zoom({ position: "topright" }).addTo(map);
-
-    mapInstance.current = map;
-    setMapReady(true);
-
-    requestAnimationFrame(() => {
-      map.invalidateSize();
-    });
-
-    return () => {
-      stopPlay();
-      if (mapInstance.current) {
-        mapInstance.current.remove();
-        mapInstance.current = null;
-        radarLayer.current = null;
-      }
-      setMapReady(false);
-    };
-  }, [hasFrames, stopPlay]);
-
-  useEffect(() => {
-    if (!mapReady || !data?.host || !currentFrame || !mapInstance.current) {
-      return;
-    }
-
-    const map = mapInstance.current;
-
-    if (radarLayer.current) {
-      map.removeLayer(radarLayer.current);
-      radarLayer.current = null;
-    }
-
-    const layer = L.tileLayer(
-      radarTileUrlTemplate(data.host, currentFrame.tilePath),
-      {
-        maxZoom: 7,
-        opacity: 0.75,
-        attribution: '<a href="https://www.rainviewer.com/">RainViewer</a>',
-      }
-    );
-    layer.addTo(map);
-    radarLayer.current = layer;
-  }, [mapReady, data?.host, currentFrame, safeIndex]);
-
-  useEffect(() => {
-    if (hasFrames) {
-      setFrameIndex(lastIndex);
-    }
+    if (!hasFrames) return;
+    setFrameIndex(lastIndex);
   }, [hasFrames, lastIndex, data?.updatedAt]);
+
+  useEffect(() => {
+    for (const url of frameUrls) {
+      const img = new Image();
+      img.src = url;
+    }
+  }, [frameUrls]);
 
   useEffect(() => () => stopPlay(), [stopPlay]);
 
@@ -157,14 +113,32 @@ export function PrecipitationRadar() {
           Laatste 2 uur · regio Harlingen
         </p>
 
-        {hasFrames ? (
-          <div
-            ref={mapRef}
-            className="h-[220px] w-full overflow-hidden rounded-xl border border-white/10 [&_.leaflet-control-attribution]:!bg-black/60 [&_.leaflet-control-attribution]:!text-[9px] [&_.leaflet-control-attribution]:!text-zinc-400"
-          />
-        ) : (
-          <Skeleton className="h-[220px] w-full rounded-xl" />
-        )}
+        <div className="relative h-[220px] w-full overflow-hidden rounded-xl border border-white/10 bg-[#0f172a]">
+          {currentUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={currentUrl}
+              src={currentUrl}
+              alt="Neerslagradar Harlingen"
+              className="h-full w-full object-cover"
+              loading="eager"
+              decoding="async"
+            />
+          ) : (
+            <Skeleton className="h-full w-full rounded-none" />
+          )}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-2 pb-1 pt-6 text-[9px] text-zinc-400">
+            Bron:{" "}
+            <a
+              href="https://www.rainviewer.com/"
+              className="pointer-events-auto text-sky-300/90 underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              RainViewer
+            </a>
+          </div>
+        </div>
 
         <div className="mt-3 flex items-center justify-between gap-2">
           <button

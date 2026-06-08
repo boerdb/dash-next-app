@@ -59,6 +59,19 @@ export function radarTileUrlTemplate(host: string, tilePath: string): string {
   return `${base}${path}/512/{z}/{x}/{y}/2/1_1.png`;
 }
 
+/** Eén composiet-radarafbeelding gecentreerd op lat/lon (betrouwbaarder dan Leaflet-tiles). */
+export function radarCenterImageUrl(
+  host: string,
+  tilePath: string,
+  lat: number,
+  lon: number,
+  zoom = 6
+): string {
+  const base = host.replace(/\/$/, "");
+  const path = tilePath.startsWith("/") ? tilePath : `/${tilePath}`;
+  return `${base}${path}/512/${zoom}/${lat}/${lon}/2/1_1.png`;
+}
+
 /** Voor tests: concrete tile-URL op zoom/x/y. */
 export function radarTileUrl(
   host: string,

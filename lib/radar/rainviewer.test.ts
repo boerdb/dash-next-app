@@ -1,6 +1,10 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { parseRainviewerMaps, radarTileUrl } from "./rainviewer";
+import {
+  parseRainviewerMaps,
+  radarCenterImageUrl,
+  radarTileUrl,
+} from "./rainviewer";
 
 const FIXTURE = {
   version: "2.0",
@@ -43,6 +47,22 @@ describe("radarTileUrl", () => {
     assert.equal(
       url,
       "https://tilecache.rainviewer.com/v2/radar/abc/512/7/65/42/2/1_1.png"
+    );
+  });
+});
+
+describe("radarCenterImageUrl", () => {
+  it("bouwt center-image URL op coördinaten", () => {
+    const url = radarCenterImageUrl(
+      "https://tilecache.rainviewer.com",
+      "/v2/radar/abc",
+      53.1754,
+      5.4145,
+      6
+    );
+    assert.equal(
+      url,
+      "https://tilecache.rainviewer.com/v2/radar/abc/512/6/53.1754/5.4145/2/1_1.png"
     );
   });
 });
