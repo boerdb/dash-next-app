@@ -15,7 +15,7 @@ c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 c.connect("192.168.1.32", username=s["SSH_USER"], password=s["SSH_PASS"], timeout=15)
 APP = "/var/www/dash-next-app"
 for cmd in [
-    f"cd {APP} && git pull && npm run build && pm2 restart dash-next-app --update-env",
+    f"cd {APP} && git pull && npm install && npm run build && pm2 restart dash-next-app --update-env",
 ]:
     _, o, e = c.exec_command(cmd, timeout=600)
     print((o.read() + e.read()).decode("utf-8", errors="replace")[-800:])

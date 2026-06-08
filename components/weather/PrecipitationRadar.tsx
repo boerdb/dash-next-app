@@ -8,15 +8,13 @@ import {
   Pause,
   Play,
 } from "lucide-react";
-import type { Map as LeafletMap, TileLayer } from "leaflet";
+import L, { type Map as LeafletMap, type TileLayer } from "leaflet";
 import type { WeerRadarResponse } from "@/lib/api/types";
 import { HARLINGEN } from "@/lib/location";
 import { radarTileUrlTemplate } from "@/lib/radar/rainviewer";
 import { jsonFetcher } from "@/lib/fetcher";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-
-import "leaflet/dist/leaflet.css";
 
 const MAP_ZOOM = 7;
 const FRAME_MS = 600;
@@ -64,27 +62,25 @@ export function PrecipitationRadar() {
 
     let cancelled = false;
 
-    void import("leaflet").then((L) => {
-      if (cancelled || !mapRef.current || mapInstance.current) return;
+    if (cancelled || !mapRef.current || mapInstance.current) return;
 
-      const map = L.map(mapRef.current, {
-        center: [HARLINGEN.latitude, HARLINGEN.longitude],
-        zoom: MAP_ZOOM,
-        zoomControl: false,
-        attributionControl: true,
-      });
-
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      }).addTo(map);
-
-      L.control.zoom({ position: "topright" }).addTo(map);
-
-      mapInstance.current = map;
-      setMapReady(true);
+    const map = L.map(mapRef.current, {
+      center: [HARLINGEN.latitude, HARLINGEN.longitude],
+      zoom: MAP_ZOOM,
+      zoomControl: false,
+      attributionControl: true,
     });
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
+
+    L.control.zoom({ position: "topright" }).addTo(map);
+
+    mapInstance.current = map;
+    setMapReady(true);
 
     return () => {
       cancelled = true;
@@ -103,27 +99,24 @@ export function PrecipitationRadar() {
       return;
     }
 
-    void import("leaflet").then((L) => {
-      const map = mapInstance.current;
-      if (!map) return;
+    const map = mapInstance.current;
+    if (!map) return;
 
-      if (radarLayer.current) {
-        map.removeLayer(radarLayer.current);
-        radarLayer.current = null;
+    if (radarLayer.current) {
+      map.removeLayer(radarLayer.current);
+      radarLayer.current = null;
+    }
+
+    const layer = L.tileLayer(
+      radarTileUrlTemplate(data.host, currentFrame.tilePath),
+      {
+        maxZoom: 7,
+        opacity: 0.75,
+        attribution: '<a href="https://www.rainviewer.com/">RainViewer</a>',
       }
-
-      const layer = L.tileLayer(
-        radarTileUrlTemplate(data.host, currentFrame.tilePath),
-        {
-          maxZoom: 7,
-          opacity: 0.75,
-          attribution:
-            '<a href="https://www.rainviewer.com/">RainViewer</a>',
-        }
-      );
-      layer.addTo(map);
-      radarLayer.current = layer;
-    });
+    );
+    layer.addTo(map);
+    radarLayer.current = layer;
   }, [mapReady, data?.host, currentFrame, safeIndex]);
 
   useEffect(() => {
