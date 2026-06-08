@@ -14,6 +14,7 @@ import { HARLINGEN } from "@/lib/location";
 import { radarTileUrlTemplate } from "@/lib/radar/rainviewer";
 import { jsonFetcher } from "@/lib/fetcher";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 const MAP_ZOOM = 7;
@@ -36,8 +37,9 @@ export function PrecipitationRadar() {
   );
 
   const frames = data?.frames ?? [];
+  const hasFrames = frames.length > 0;
   const lastIndex = Math.max(0, frames.length - 1);
-  const safeIndex = frames.length ? Math.min(frameIndex, lastIndex) : 0;
+  const safeIndex = hasFrames ? Math.min(frameIndex, lastIndex) : 0;
   const currentFrame = frames[safeIndex];
 
   const stopPlay = useCallback(() => {
@@ -58,11 +60,7 @@ export function PrecipitationRadar() {
   }, [frames.length, lastIndex, stopPlay]);
 
   useEffect(() => {
-    if (!mapRef.current || mapInstance.current) return;
-
-    let cancelled = false;
-
-    if (cancelled || !mapRef.current || mapInstance.current) return;
+    if (!hasFrames || !mapRef.current || mapInstance.current) return;
 
     const map = L.map(mapRef.current, {
       center: [HARLINGEN.latitude, HARLINGEN.longitude],
@@ -82,8 +80,11 @@ export function PrecipitationRadar() {
     mapInstance.current = map;
     setMapReady(true);
 
+    requestAnimationFrame(() => {
+      map.invalidateSize();
+    });
+
     return () => {
-      cancelled = true;
       stopPlay();
       if (mapInstance.current) {
         mapInstance.current.remove();
@@ -92,7 +93,7 @@ export function PrecipitationRadar() {
       }
       setMapReady(false);
     };
-  }, [stopPlay]);
+  }, [hasFrames, stopPlay]);
 
   useEffect(() => {
     if (!mapReady || !data?.host || !currentFrame || !mapInstance.current) {
@@ -100,7 +101,6 @@ export function PrecipitationRadar() {
     }
 
     const map = mapInstance.current;
-    if (!map) return;
 
     if (radarLayer.current) {
       map.removeLayer(radarLayer.current);
@@ -120,16 +120,12 @@ export function PrecipitationRadar() {
   }, [mapReady, data?.host, currentFrame, safeIndex]);
 
   useEffect(() => {
-    if (frames.length) {
+    if (hasFrames) {
       setFrameIndex(lastIndex);
     }
-  }, [frames.length, lastIndex, data?.updatedAt]);
+  }, [hasFrames, lastIndex, data?.updatedAt]);
 
   useEffect(() => () => stopPlay(), [stopPlay]);
-
-  if (isLoading && !data) {
-    return null;
-  }
 
   if (error && !data) {
     return (
@@ -141,7 +137,7 @@ export function PrecipitationRadar() {
     );
   }
 
-  if (!data || frames.length === 0) {
+  if (!isLoading && (!data || !hasFrames)) {
     return (
       <Card variant="weather">
         <CardContent>
@@ -161,10 +157,14 @@ export function PrecipitationRadar() {
           Laatste 2 uur · regio Harlingen
         </p>
 
-        <div
-          ref={mapRef}
-          className="h-[220px] w-full overflow-hidden rounded-xl border border-white/10 [&_.leaflet-control-attribution]:!bg-black/60 [&_.leaflet-control-attribution]:!text-[9px] [&_.leaflet-control-attribution]:!text-zinc-400"
-        />
+        {hasFrames ? (
+          <div
+            ref={mapRef}
+            className="h-[220px] w-full overflow-hidden rounded-xl border border-white/10 [&_.leaflet-control-attribution]:!bg-black/60 [&_.leaflet-control-attribution]:!text-[9px] [&_.leaflet-control-attribution]:!text-zinc-400"
+          />
+        ) : (
+          <Skeleton className="h-[220px] w-full rounded-xl" />
+        )}
 
         <div className="mt-3 flex items-center justify-between gap-2">
           <button
@@ -173,7 +173,7 @@ export function PrecipitationRadar() {
               stopPlay();
               setFrameIndex((i) => Math.max(0, i - 1));
             }}
-            disabled={safeIndex <= 0}
+            disabled={!hasFrames || safeIndex <= 0}
             className="rounded-lg p-2 text-zinc-400 hover:bg-white/10 disabled:opacity-30"
             aria-label="Vorig frame"
           >
@@ -206,7 +206,7 @@ export function PrecipitationRadar() {
               stopPlay();
               setFrameIndex((i) => Math.min(lastIndex, i + 1));
             }}
-            disabled={safeIndex >= lastIndex}
+            disabled={!hasFrames || safeIndex >= lastIndex}
             className="rounded-lg p-2 text-zinc-400 hover:bg-white/10 disabled:opacity-30"
             aria-label="Volgend frame"
           >
@@ -215,8 +215,8 @@ export function PrecipitationRadar() {
         </div>
 
         <p className="mt-2 text-center text-xs text-zinc-400">
-          {currentFrame?.label}
-          {safeIndex === lastIndex ? (
+          {currentFrame?.label ?? "Laden…"}
+          {hasFrames && safeIndex === lastIndex ? (
             <span className="text-sky-300/90"> · nu</span>
           ) : null}
         </p>
