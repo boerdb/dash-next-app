@@ -91,7 +91,7 @@ export default function EnergiePage() {
         <div className="space-y-4">
           <PowerHero data={energie} />
           <DailyStats data={energie} />
-          <BatteryPanel data={energie} />
+          <BatteryPanel data={energie} onRefresh={() => mutateEnergie()} />
           <BatteryChart data={energie} />
           <MonthlyEnergyChart />
           {chartHistorie?.labels?.length ? <PowerChart data={chartHistorie} /> : null}

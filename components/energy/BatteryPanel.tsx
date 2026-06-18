@@ -1,6 +1,7 @@
 "use client";
 
 import { Battery, BatteryCharging, BatteryWarning } from "lucide-react";
+import { BatteryControls } from "@/components/energy/BatteryControls";
 import type { EnergieLive } from "@/lib/api/types";
 import { formatPermissions } from "@/lib/homewizard/battery";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 interface BatteryPanelProps {
   data: EnergieLive;
+  onRefresh?: () => void;
 }
 
 function powerLabel(w: number): string {
@@ -93,7 +95,7 @@ function BatteryCard({
   );
 }
 
-export function BatteryPanel({ data }: BatteryPanelProps) {
+export function BatteryPanel({ data, onRefresh }: BatteryPanelProps) {
   if (data.batterijen.length === 0) return null;
 
   const totaalLabel = powerLabel(data.batterij_vermogen_totaal);
@@ -150,6 +152,9 @@ export function BatteryPanel({ data }: BatteryPanelProps) {
           ) : null}
           {data.batterij_hint ? (
             <p className="mt-2 text-xs text-amber-200/80">{data.batterij_hint}</p>
+          ) : null}
+          {groep?.bereikbaar ? (
+            <BatteryControls groep={groep} onUpdated={onRefresh} />
           ) : null}
         </CardContent>
       </Card>

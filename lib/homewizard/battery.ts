@@ -1,4 +1,7 @@
-import { fetchJsonLocal } from "@/lib/homewizard/http-insecure";
+import {
+  fetchJsonLocal,
+  putJsonLocal,
+} from "@/lib/homewizard/http-insecure";
 
 export interface HomeWizardBatteryV1Raw {
   active_power_w?: number;
@@ -93,14 +96,45 @@ export function parseBatteryLabels(value: string | undefined): string[] {
   return value.split(",").map((s) => s.trim()).filter(Boolean);
 }
 
+export const BATTERIJ_MODI = ["zero", "predictive", "standby", "to_full"] as const;
+export type BatterijMode = (typeof BATTERIJ_MODI)[number];
+
+export const BATTERIJ_PERMISSIONS = [
+  "charge_allowed",
+  "discharge_allowed",
+] as const;
+export type BatterijPermission = (typeof BATTERIJ_PERMISSIONS)[number];
+
+export interface BatterijControlRequest {
+  mode?: BatterijMode;
+  permissions?: BatterijPermission[];
+  charge_to_full?: boolean;
+}
+
 export function formatBatterijMode(mode: string): string {
   const map: Record<string, string> = {
     zero: "Nul op de meter",
     standby: "Standby",
     to_full: "Opladen naar 100%",
-    predictive: "Slim (voorspellend)",
+    predictive: "Dynamisch tarief (per uur)",
   };
   return map[mode] ?? mode;
+}
+
+export function isBatterijStandby(groep: BatterijGroep): boolean {
+  return (
+    groep.mode === "standby" ||
+    (groep.permissions.length === 0 && !groep.charge_to_full)
+  );
+}
+
+export function isBatterijZeroMode(groep: BatterijGroep): boolean {
+  return (
+    groep.mode === "zero" &&
+    groep.permissions.includes("charge_allowed") &&
+    groep.permissions.includes("discharge_allowed") &&
+    !groep.charge_to_full
+  );
 }
 
 export function formatPermissions(perms: string[]): string {
@@ -342,6 +376,42 @@ export async function fetchAllBatterijen(options: {
   }
 
   return { batterijen, groep, hint };
+}
+
+export async function updateBatterijGroep(
+  p1BatteriesUrl: string,
+  p1Token: string,
+  request: BatterijControlRequest
+): Promise<
+  | { ok: true; groep: BatterijGroep }
+  | { ok: false; status: number; message: string }
+> {
+  const result = await putJsonLocal<HomeWizardP1Batteries>(
+    p1BatteriesUrl,
+    request,
+    V2_HEADERS(p1Token)
+  );
+
+  if (!result.ok) {
+    const message =
+      result.status === 0
+        ? result.body || "P1-meter niet bereikbaar"
+        : result.status === 401 || result.status === 403
+          ? "P1-token ongeldig"
+          : `HomeWizard weigerde aanpassing (${result.status})`;
+    return { ok: false, status: result.status || 502, message };
+  }
+
+  const groep = mapP1BatteriesGroep(result.data);
+  if (!groep) {
+    return {
+      ok: false,
+      status: 502,
+      message: "Onverwacht antwoord van P1-meter",
+    };
+  }
+
+  return { ok: true, groep };
 }
 
 export function aggregateBatterijen(

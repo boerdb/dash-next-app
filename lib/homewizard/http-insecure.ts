@@ -3,17 +3,24 @@ import https from "node:https";
 
 const TIMEOUT_MS = 2_000;
 
-/** Lokale HomeWizard-apparaten gebruiken vaak een zelfondertekend HTTPS-certificaat. */
-export function fetchJsonLocal<T>(
+export type LocalJsonResult<T> =
+  | { ok: true; data: T; status: number }
+  | { ok: false; status: number; body: string };
+
+function requestJsonLocal<T>(
   url: string,
-  headers?: Record<string, string>
-): Promise<T | null> {
+  options: {
+    method: "GET" | "PUT";
+    headers?: Record<string, string>;
+    body?: string;
+  }
+): Promise<LocalJsonResult<T>> {
   return new Promise((resolve) => {
     let parsed: URL;
     try {
       parsed = new URL(url);
     } catch {
-      resolve(null);
+      resolve({ ok: false, status: 0, body: "Ongeldige URL" });
       return;
     }
 
@@ -23,8 +30,8 @@ export function fetchJsonLocal<T>(
         hostname: parsed.hostname,
         port: parsed.port || (parsed.protocol === "https:" ? 443 : 80),
         path: `${parsed.pathname}${parsed.search}`,
-        method: "GET",
-        headers,
+        method: options.method,
+        headers: options.headers,
         timeout: TIMEOUT_MS,
         ...(parsed.protocol === "https:"
           ? { rejectUnauthorized: false }
@@ -36,23 +43,53 @@ export function fetchJsonLocal<T>(
           body += chunk;
         });
         res.on("end", () => {
-          if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 300) {
-            resolve(null);
+          const status = res.statusCode ?? 0;
+          if (!status || status < 200 || status >= 300) {
+            resolve({ ok: false, status, body });
             return;
           }
           try {
-            resolve(JSON.parse(body) as T);
+            resolve({ ok: true, data: JSON.parse(body) as T, status });
           } catch {
-            resolve(null);
+            resolve({ ok: false, status, body });
           }
         });
       }
     );
-    req.on("error", () => resolve(null));
+    req.on("error", (err) =>
+      resolve({
+        ok: false,
+        status: 0,
+        body: err instanceof Error ? err.message : "Verzoek mislukt",
+      })
+    );
     req.on("timeout", () => {
       req.destroy();
-      resolve(null);
+      resolve({ ok: false, status: 0, body: "Timeout" });
     });
+    if (options.body) req.write(options.body);
     req.end();
+  });
+}
+
+/** Lokale HomeWizard-apparaten gebruiken vaak een zelfondertekend HTTPS-certificaat. */
+export function fetchJsonLocal<T>(
+  url: string,
+  headers?: Record<string, string>
+): Promise<T | null> {
+  return requestJsonLocal<T>(url, { method: "GET", headers }).then((r) =>
+    r.ok ? r.data : null
+  );
+}
+
+export function putJsonLocal<T>(
+  url: string,
+  payload: unknown,
+  headers?: Record<string, string>
+): Promise<LocalJsonResult<T>> {
+  return requestJsonLocal<T>(url, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...headers },
+    body: JSON.stringify(payload),
   });
 }
