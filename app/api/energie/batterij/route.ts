@@ -3,9 +3,12 @@ import { z } from "zod";
 import {
   BATTERIJ_MODI,
   BATTERIJ_PERMISSIONS,
+  parseLaadstrategie,
   updateBatterijGroep,
+  type BatterijLaadstrategie,
 } from "@/lib/homewizard/battery";
 import {
+  energieBatteryLaadstrategie,
   energieP1BatteriesUrl,
   energieP1Token,
 } from "@/lib/env.server";
@@ -15,6 +18,7 @@ const controlSchema = z
     mode: z.enum(BATTERIJ_MODI).optional(),
     permissions: z.array(z.enum(BATTERIJ_PERMISSIONS)).optional(),
     charge_to_full: z.boolean().optional(),
+    laadstrategie: z.enum(["dynamic_hourly", "grid_friendly", "zero"]).optional(),
   })
   .refine(
     (data) =>
@@ -47,10 +51,19 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const { laadstrategie: requestedLaadstrategie, ...control } = parsed.data;
+  const laadstrategie: BatterijLaadstrategie =
+    requestedLaadstrategie === "zero"
+      ? "zero"
+      : requestedLaadstrategie
+        ? parseLaadstrategie(requestedLaadstrategie)
+        : energieBatteryLaadstrategie;
+
   const result = await updateBatterijGroep(
     energieP1BatteriesUrl,
     energieP1Token,
-    parsed.data
+    control,
+    laadstrategie === "zero" ? energieBatteryLaadstrategie : laadstrategie
   );
 
   if (!result.ok) {

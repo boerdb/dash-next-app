@@ -4,6 +4,7 @@ import {
   env,
   enphaseConfigured,
   energieBatteryEndpoints,
+  energieBatteryLaadstrategie,
   energieP1BatteriesUrl,
   energieP1Token,
 } from "@/lib/env.server";
@@ -213,6 +214,7 @@ export async function fetchEnergieLiveRaw(): Promise<EnergieApiRaw> {
       endpoints: energieBatteryEndpoints,
       p1BatteriesUrl: energieP1BatteriesUrl,
       p1Token: energieP1Token,
+      laadstrategie: energieBatteryLaadstrategie,
     });
     batterijen = fetched.batterijen;
     merged.batterij_groep = fetched.groep;

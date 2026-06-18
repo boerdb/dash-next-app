@@ -51,6 +51,8 @@ export interface BatterijLive {
 export interface BatterijGroep {
   mode: string;
   mode_label: string;
+  /** Geconfigureerde slim-laden variant (uit ENERGIE_BATTERY_LAADSTRATEGIE). */
+  laadstrategie?: BatterijLaadstrategie;
   aantal: number;
   vermogen_w: number;
   target_power_w: number | null;
@@ -96,6 +98,15 @@ export function parseBatteryLabels(value: string | undefined): string[] {
   return value.split(",").map((s) => s.trim()).filter(Boolean);
 }
 
+export type BatterijLaadstrategie = "zero" | "grid_friendly" | "dynamic_hourly";
+
+export const BATTERIJ_LAADSTRATEGIE_LABELS: Record<BatterijLaadstrategie, string> =
+  {
+    zero: "Nul op de meter",
+    grid_friendly: "Slim en wijkvriendelijk",
+    dynamic_hourly: "Slim met dynamisch tarief",
+  };
+
 export const BATTERIJ_MODI = ["zero", "predictive", "standby", "to_full"] as const;
 export type BatterijMode = (typeof BATTERIJ_MODI)[number];
 
@@ -111,12 +122,34 @@ export interface BatterijControlRequest {
   charge_to_full?: boolean;
 }
 
-export function formatBatterijMode(mode: string): string {
+export function parseLaadstrategie(
+  value: string | undefined
+): BatterijLaadstrategie {
+  if (value === "grid_friendly" || value === "dynamic_hourly") return value;
+  return "dynamic_hourly";
+}
+
+export function formatBatterijMode(
+  mode: string,
+  options?: {
+    laadstrategie?: BatterijLaadstrategie;
+    charge_to_full?: boolean;
+  }
+): string {
+  if (options?.charge_to_full || mode === "to_full") {
+    return "Eenmalig volladen";
+  }
+  if (mode === "predictive" && options?.laadstrategie) {
+    const label = BATTERIJ_LAADSTRATEGIE_LABELS[options.laadstrategie];
+    return options.laadstrategie === "dynamic_hourly"
+      ? `${label} · Per uur`
+      : label;
+  }
   const map: Record<string, string> = {
     zero: "Nul op de meter",
     standby: "Standby",
-    to_full: "Opladen naar 100%",
-    predictive: "Dynamisch tarief (per uur)",
+    to_full: "Eenmalig volladen",
+    predictive: "Slim laden",
   };
   return map[mode] ?? mode;
 }
@@ -135,6 +168,16 @@ export function isBatterijZeroMode(groep: BatterijGroep): boolean {
     groep.permissions.includes("discharge_allowed") &&
     !groep.charge_to_full
   );
+}
+
+export function resolveLaadstrategieFromGroep(
+  groep: BatterijGroep
+): BatterijLaadstrategie {
+  if (isBatterijZeroMode(groep)) return "zero";
+  if (groep.mode === "predictive" && groep.laadstrategie) {
+    return groep.laadstrategie;
+  }
+  return groep.laadstrategie ?? "dynamic_hourly";
 }
 
 export function formatPermissions(perms: string[]): string {
@@ -292,14 +335,17 @@ export function mapBatteryV2(
 }
 
 export function mapP1BatteriesGroep(
-  raw: HomeWizardP1Batteries | null
+  raw: HomeWizardP1Batteries | null,
+  laadstrategie: BatterijLaadstrategie = "dynamic_hourly"
 ): BatterijGroep | null {
   if (!raw || raw.battery_count == null) return null;
   const mode = raw.mode ?? "onbekend";
   const perms = raw.permissions ?? [];
+  const charge_to_full = Boolean(raw.charge_to_full);
   return {
     mode,
-    mode_label: formatBatterijMode(mode),
+    mode_label: formatBatterijMode(mode, { laadstrategie, charge_to_full }),
+    laadstrategie,
     aantal: Number(raw.battery_count),
     vermogen_w: Math.round(Number(raw.power_w ?? 0)),
     target_power_w:
@@ -313,7 +359,7 @@ export function mapP1BatteriesGroep(
         ? Math.round(Number(raw.max_production_w))
         : null,
     permissions: perms,
-    charge_to_full: Boolean(raw.charge_to_full),
+    charge_to_full,
     bereikbaar: true,
   };
 }
@@ -345,8 +391,10 @@ export async function fetchAllBatterijen(options: {
   endpoints: BatteryEndpoint[];
   p1BatteriesUrl: string | null;
   p1Token: string | undefined;
+  laadstrategie?: BatterijLaadstrategie;
 }): Promise<BatterijFetchResult> {
-  const { endpoints, p1BatteriesUrl, p1Token } = options;
+  const { endpoints, p1BatteriesUrl, p1Token, laadstrategie = "dynamic_hourly" } =
+    options;
 
   if (endpoints.length === 0) {
     return { batterijen: [], groep: null, hint: null };
@@ -362,7 +410,7 @@ export async function fetchAllBatterijen(options: {
       p1BatteriesUrl,
       V2_HEADERS(p1Token)
     );
-    groep = mapP1BatteriesGroep(raw);
+    groep = mapP1BatteriesGroep(raw, laadstrategie);
   }
 
   const hasOnline = batterijen.some((b) => b.bereikbaar);
@@ -381,7 +429,8 @@ export async function fetchAllBatterijen(options: {
 export async function updateBatterijGroep(
   p1BatteriesUrl: string,
   p1Token: string,
-  request: BatterijControlRequest
+  request: BatterijControlRequest,
+  laadstrategie: BatterijLaadstrategie = "dynamic_hourly"
 ): Promise<
   | { ok: true; groep: BatterijGroep }
   | { ok: false; status: number; message: string }
@@ -402,7 +451,7 @@ export async function updateBatterijGroep(
     return { ok: false, status: result.status || 502, message };
   }
 
-  const groep = mapP1BatteriesGroep(result.data);
+  const groep = mapP1BatteriesGroep(result.data, laadstrategie);
   if (!groep) {
     return {
       ok: false,

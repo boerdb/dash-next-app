@@ -57,8 +57,16 @@ describe("homewizard battery", () => {
   it("formatBatterijMode", () => {
     assert.equal(formatBatterijMode("zero"), "Nul op de meter");
     assert.equal(
-      formatBatterijMode("predictive"),
-      "Dynamisch tarief (per uur)"
+      formatBatterijMode("predictive", { laadstrategie: "dynamic_hourly" }),
+      "Slim met dynamisch tarief · Per uur"
+    );
+    assert.equal(
+      formatBatterijMode("predictive", { laadstrategie: "grid_friendly" }),
+      "Slim en wijkvriendelijk"
+    );
+    assert.equal(
+      formatBatterijMode("to_full", { charge_to_full: true }),
+      "Eenmalig volladen"
     );
   });
 

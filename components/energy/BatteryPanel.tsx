@@ -124,8 +124,8 @@ export function BatteryPanel({ data, onRefresh }: BatteryPanelProps) {
           {groep?.bereikbaar ? (
             <div className="mt-2 space-y-1 text-sm text-violet-200/90">
               <p>
-                Modus: <span className="text-white">{groep.mode_label}</span>
-                {groep.charge_to_full ? " · opladen naar vol" : null}
+                Laadstrategie:{" "}
+                <span className="text-white">{groep.mode_label}</span>
               </p>
               <p>
                 Totaal: {totaalLabel} · {Math.abs(data.batterij_vermogen_totaal)} W
