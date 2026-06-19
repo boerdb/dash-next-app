@@ -5,8 +5,6 @@ import {
   batteryIdFromUrl,
   buildBatteryEndpoints,
   formatBatterijMode,
-  isBatterijStandby,
-  isBatterijZeroMode,
   mapBatteryV2,
   mapP1BatteriesGroep,
   normalizeBatteryEndpoint,
@@ -68,23 +66,6 @@ describe("homewizard battery", () => {
       formatBatterijMode("to_full", { charge_to_full: true }),
       "Eenmalig volladen"
     );
-  });
-
-  it("herkent zero- en standby-modus", () => {
-    const zero = mapP1BatteriesGroep({
-      mode: "zero",
-      battery_count: 2,
-      permissions: ["charge_allowed", "discharge_allowed"],
-    });
-    assert.ok(zero && isBatterijZeroMode(zero));
-    assert.ok(!isBatterijStandby(zero));
-
-    const standby = mapP1BatteriesGroep({
-      mode: "standby",
-      battery_count: 2,
-      permissions: [],
-    });
-    assert.ok(standby && isBatterijStandby(standby));
   });
 
   it("bouwt endpoints met labels", () => {
