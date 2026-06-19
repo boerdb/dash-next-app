@@ -9,6 +9,7 @@ import {
   openWeatherImpliesWind,
   openWeatherThunderCondition,
 } from "@/lib/openweather/condition";
+import { isRecentLightningStrike } from "@/lib/weer/lightning-time";
 
 function conditionFromSolar(solar: number): WeatherCondition {
   if (solar > 300) return "sunny";
@@ -28,6 +29,12 @@ function isStationWindy(data: WeerLive): boolean {
   return wind >= 40 || gust >= 55;
 }
 
+function isStationLightning(data: WeerLive): boolean {
+  const km = data.lightning_km;
+  if (km == null || km <= 0) return false;
+  return isRecentLightningStrike(data.lightning_time ?? undefined);
+}
+
 export function getWeatherCondition(
   data: WeerLive | null,
   period: DayPeriod = "day",
@@ -41,6 +48,7 @@ export function getWeatherCondition(
   const owClouds = openWeather?.cloudsPct ?? 0;
 
   if (openWeather && openWeatherImpliesSnow(owId)) return "snow";
+  if (isStationLightning(data)) return "thunder";
   if (openWeather && openWeatherImpliesThunder(owId)) {
     return openWeatherThunderCondition(owId);
   }

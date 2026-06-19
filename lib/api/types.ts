@@ -4,11 +4,15 @@ export interface WeerLive {
   temp_c?: number;
   /** Tweede buitensensor (WH25), indien aanwezig */
   temp2_c?: number;
+  /** WH25 luchtvochtigheid buiten */
+  humidity2?: number | string;
   tempin_c?: number;
   gevoelstemperatuur?: number | string;
   temp_min_c?: number | string;
   temp_max_c?: number | string;
   dauwpunt?: number | string;
+  /** Vapor pressure deficit (kPa), nieuwere firmware */
+  vpd?: number | string;
   humidity?: number | string;
   humidityin?: number | string;
   winddir?: number;
@@ -16,17 +20,43 @@ export interface WeerLive {
   windspeed_kmh?: number;
   windspd_avg10m_kmh?: number;
   windgust_kmh?: number;
+  maxdailygust_kmh?: number;
   dailyrain_mm?: number;
+  /** WS90 piezo-regen (mm), naast of i.p.v. WH65 */
+  dailyrain_piezo_mm?: number;
+  rainrate_piezo_mm?: number;
+  weeklyrain_mm?: number;
+  hourlyrain_mm?: number;
+  last24hrain_mm?: number;
   monthlyrain_mm?: number | string;
   yearlyrain_mm?: number | string;
   rainrate_mm?: number;
   baromrel_hpa?: number;
-  baromabsin?: number;
+  baromabs_hpa?: number;
+  /** WH57 / gateway: afstand laatste inslag (km) */
+  lightning_km?: number | null;
+  /** Aantal inslagen vandaag */
+  lightning_num?: number | null;
+  /** Laatste inslag (Amsterdam wall clock) */
+  lightning_time?: string | null;
+  lightning_time_raw?: number | null;
+  /** WS90 batterijspanning (V) */
+  ws90_voltage_v?: number;
+  ws90_cap_voltage_v?: number;
+  /** Ecowitt batterijvelden (ruw) */
+  wh65batt?: number | string;
+  wh25batt?: number | string;
+  wh57batt?: number | string;
+  wh90batt?: number | string;
+  batt2?: number | string;
+  stationtype?: string;
+  model?: string;
+  freq?: string;
   uv?: number | string;
   solarradiation?: number | string;
   tide_info?: string;
   server_timestamp?: string;
-  [key: string]: string | number | undefined;
+  [key: string]: string | number | null | undefined;
 }
 
 export interface WeerHistorie {

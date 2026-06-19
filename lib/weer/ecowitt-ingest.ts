@@ -1,4 +1,5 @@
 import type { WeerLive } from "@/lib/api/types";
+import { parseLightningTime } from "@/lib/weer/lightning-time";
 
 function fToC(f: number): number {
   return Math.round(((f - 32) * 5) / 9 * 10) / 10;
@@ -22,6 +23,12 @@ function num(raw: string | undefined): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
+function optionalNum(raw: string | undefined): number | null {
+  if (raw === undefined || raw === "") return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
+}
+
 /** Ecowitt POST/GET velden → WeerLive (zelfde logica als upload.php). */
 export function parseEcowittPayload(
   input: Record<string, string>
@@ -32,11 +39,18 @@ export function parseEcowittPayload(
   const temp2f = num(input.temp2f);
   const tempinf = num(input.tempinf);
   const barom = num(input.baromrelin);
+  const baromAbs = num(input.baromabsin);
   const wspd = num(input.windspeedmph);
   const wavg = num(input.windspdmph_avg10m);
   const wgust = num(input.windgustmph);
+  const maxGust = num(input.maxdailygust);
   const rainrate = num(input.rainratein);
+  const rainratePiezo = num(input.rrain_piezo);
   const dailyrain = num(input.dailyrainin);
+  const dailyrainPiezo = num(input.drain_piezo);
+  const weeklyrain = num(input.weeklyrainin);
+  const hourlyrain = num(input.hourlyrainin);
+  const last24hrain = num(input.last24hrainin);
   const monthlyrain = num(input.monthlyrainin);
   const yearlyrain = num(input.yearlyrainin);
 
@@ -45,21 +59,55 @@ export function parseEcowittPayload(
   if (temp2f !== undefined) metric.temp2_c = fToC(temp2f);
   if (tempinf !== undefined) metric.tempin_c = fToC(tempinf);
   if (barom !== undefined) metric.baromrel_hpa = inToHpa(barom);
+  if (baromAbs !== undefined) metric.baromabs_hpa = inToHpa(baromAbs);
   if (wspd !== undefined) metric.windspeed_kmh = mphToKmh(wspd);
   if (wavg !== undefined) metric.windspd_avg10m_kmh = mphToKmh(wavg);
   if (wgust !== undefined) metric.windgust_kmh = mphToKmh(wgust);
+  if (maxGust !== undefined) metric.maxdailygust_kmh = mphToKmh(maxGust);
   if (rainrate !== undefined) metric.rainrate_mm = inToMm(rainrate);
+  if (rainratePiezo !== undefined) metric.rainrate_piezo_mm = inToMm(rainratePiezo);
   if (dailyrain !== undefined) metric.dailyrain_mm = inToMm(dailyrain);
+  if (dailyrainPiezo !== undefined) {
+    metric.dailyrain_piezo_mm = inToMm(dailyrainPiezo);
+  }
+  if (weeklyrain !== undefined) metric.weeklyrain_mm = inToMm(weeklyrain);
+  if (hourlyrain !== undefined) metric.hourlyrain_mm = inToMm(hourlyrain);
+  if (last24hrain !== undefined) metric.last24hrain_mm = inToMm(last24hrain);
   if (monthlyrain !== undefined) metric.monthlyrain_mm = inToMm(monthlyrain);
   if (yearlyrain !== undefined) metric.yearlyrain_mm = inToMm(yearlyrain);
 
   if (input.humidity !== undefined) metric.humidity = num(input.humidity);
+  if (input.humidity2 !== undefined) metric.humidity2 = num(input.humidity2);
   if (input.humidityin !== undefined) metric.humidityin = num(input.humidityin);
   if (input.winddir !== undefined) metric.winddir = num(input.winddir);
+  if (input.winddir_avg10m !== undefined) {
+    metric.winddir_avg10m = num(input.winddir_avg10m);
+  }
+  if (input.vpd !== undefined) metric.vpd = num(input.vpd);
   if (input.solarradiation !== undefined) {
     metric.solarradiation = num(input.solarradiation);
   }
   if (input.uv !== undefined) metric.uv = num(input.uv);
+
+  metric.lightning_km = optionalNum(input.lightning);
+  metric.lightning_num = optionalNum(input.lightning_num);
+  const lightningParsed = parseLightningTime(input.lightning_time, input.dateutc);
+  if (lightningParsed) {
+    metric.lightning_time = lightningParsed.isoAmsterdam;
+    metric.lightning_time_raw = lightningParsed.raw;
+  } else if (input.lightning_time === "" || input.lightning_time === undefined) {
+    metric.lightning_time = null;
+    metric.lightning_time_raw = null;
+  }
+
+  const wh90 = num(input.wh90batt);
+  if (wh90 !== undefined) {
+    metric.ws90_voltage_v = Math.round(wh90 * 0.02 * 100) / 100;
+  }
+  const ws90Cap = num(input.ws90cap_volt);
+  if (ws90Cap !== undefined) {
+    metric.ws90_cap_voltage_v = Math.round(ws90Cap * 0.02 * 100) / 100;
+  }
 
   const tz = "Europe/Amsterdam";
   const dateutc = input.dateutc?.trim();

@@ -5,6 +5,7 @@ import useSWR, { mutate as swrMutate } from "swr";
 import dynamic from "next/dynamic";
 import { WeatherHero } from "@/components/weather/WeatherHero";
 import { MetricGrid } from "@/components/weather/MetricGrid";
+import { SensorExtrasCard } from "@/components/weather/SensorExtrasCard";
 import { TideCard } from "@/components/weather/TideCard";
 import { KnmiWarningsCard } from "@/components/weather/KnmiWarningsCard";
 import { OpenWeatherPanel } from "@/components/weather/OpenWeatherPanel";
@@ -184,6 +185,7 @@ export default function WeerPage() {
             updateLabel={updateLabel}
           />
           <MetricGrid data={weer} />
+          <SensorExtrasCard data={weer} />
           <RainYearChart />
           <PrecipitationRadar />
           {historie?.labels?.length ? <TemperatureChart data={historie} /> : null}
