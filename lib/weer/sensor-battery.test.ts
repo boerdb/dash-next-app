@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { collectSensorBatteries, formatEcowittBattery } from "./sensor-battery";
+import { formatEcowittBattery, getLightningBattery } from "./sensor-battery";
 
 describe("formatEcowittBattery", () => {
   it("flag: 0 ok, 1 laag", () => {
@@ -18,10 +18,9 @@ describe("formatEcowittBattery", () => {
   });
 });
 
-describe("collectSensorBatteries", () => {
-  it("verzamelt aanwezige velden", () => {
-    const list = collectSensorBatteries({ wh65batt: "0", wh25batt: "0" });
-    assert.equal(list.length, 2);
-    assert.equal(list[0]?.label, "Hoofdsensor");
+describe("getLightningBattery", () => {
+  it("leest alleen WH57", () => {
+    assert.equal(getLightningBattery({ wh57batt: "5" })?.detail, "5/5");
+    assert.equal(getLightningBattery({ wh65batt: "0", wh25batt: "0" }), null);
   });
 });

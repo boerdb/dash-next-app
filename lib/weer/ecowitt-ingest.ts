@@ -54,7 +54,7 @@ export function parseEcowittPayload(
   const monthlyrain = num(input.monthlyrainin);
   const yearlyrain = num(input.yearlyrainin);
 
-  // HP2550/EasyWeather toont tempf (hoofdsensor); temp2f = tweede buitensensor (WH25).
+  // tempf = hoofdbuiten (WH65); temp2f = Ecowitt kanaal 2 (bijv. WH25 slaapkamer).
   if (tempf !== undefined) metric.temp_c = fToC(tempf);
   if (temp2f !== undefined) metric.temp2_c = fToC(temp2f);
   if (tempinf !== undefined) metric.tempin_c = fToC(tempinf);

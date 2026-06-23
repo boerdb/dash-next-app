@@ -1,5 +1,4 @@
 import type { WeerLive } from "@/lib/api/types";
-import { collectSensorBatteries } from "@/lib/weer/sensor-battery";
 
 function fieldPresent(data: WeerLive, key: string): boolean {
   const v = data[key];
@@ -26,15 +25,6 @@ export function hasWs90Sensor(data: WeerLive): boolean {
   );
 }
 
-export function hasWh25Secondary(data: WeerLive): boolean {
-  return data.temp2_c != null || fieldPresent(data, "humidity2");
-}
-
 export function hasSensorExtras(data: WeerLive): boolean {
-  return (
-    hasLightningSensor(data) ||
-    hasWs90Sensor(data) ||
-    hasWh25Secondary(data) ||
-    collectSensorBatteries(data).length > 0
-  );
+  return hasLightningSensor(data) || hasWs90Sensor(data);
 }

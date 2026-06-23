@@ -2,9 +2,8 @@ export interface WeerLive {
   dateutc?: string;
   date_tracked?: string;
   temp_c?: number;
-  /** Tweede buitensensor (WH25), indien aanwezig */
+  /** Ecowitt kanaal 2 (bijv. WH25 slaapkamer), niet de bliksemsensor */
   temp2_c?: number;
-  /** WH25 luchtvochtigheid buiten */
   humidity2?: number | string;
   tempin_c?: number;
   gevoelstemperatuur?: number | string;

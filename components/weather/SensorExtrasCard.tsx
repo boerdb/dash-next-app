@@ -1,17 +1,13 @@
 "use client";
 
-import { Battery, BatteryWarning, CloudLightning, Gauge, Thermometer } from "lucide-react";
+import { Battery, BatteryWarning, CloudLightning, Gauge } from "lucide-react";
 import type { WeerLive } from "@/lib/api/types";
 import { isRecentLightningStrike } from "@/lib/weer/lightning-time";
-import {
-  collectSensorBatteries,
-  type SensorBatteryStatus,
-} from "@/lib/weer/sensor-battery";
+import { getLightningBattery } from "@/lib/weer/sensor-battery";
 import {
   hasLightningSensor,
   hasSensorExtras,
   hasWs90Sensor,
-  hasWh25Secondary,
 } from "@/lib/weer/sensor-status";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -26,44 +22,12 @@ function formatStrikeTime(iso: string): string {
   return parts[1]?.slice(0, 5) ?? iso;
 }
 
-function BatteryChip({ item }: { item: SensorBatteryStatus }) {
-  const low = item.state === "low";
-  return (
-    <div
-      className={cn(
-        "flex min-w-[7rem] flex-col items-center rounded-xl border px-3 py-2 text-center",
-        low
-          ? "border-amber-500/30 bg-amber-950/20"
-          : "border-zinc-600/30 bg-zinc-900/30"
-      )}
-    >
-      {low ? (
-        <BatteryWarning className="h-5 w-5 text-amber-400" />
-      ) : (
-        <Battery className="h-5 w-5 text-emerald-400" />
-      )}
-      <p className="mt-1 text-[0.65rem] uppercase tracking-wide text-zinc-400">
-        {item.label}
-      </p>
-      <p
-        className={cn(
-          "text-sm font-semibold tabular-nums",
-          low ? "text-amber-300" : "text-zinc-200"
-        )}
-      >
-        {item.detail}
-      </p>
-    </div>
-  );
-}
-
 export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
   if (!hasSensorExtras(data)) return null;
 
-  const batteries = collectSensorBatteries(data);
   const showLightning = hasLightningSensor(data);
   const showWs90 = hasWs90Sensor(data);
-  const showWh25 = hasWh25Secondary(data);
+  const lightningBattery = getLightningBattery(data);
   const lightningKm = data.lightning_km;
   const recentStrike =
     lightningKm != null &&
@@ -125,6 +89,26 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
                 Geen inslagen gedetecteerd · sensor actief
               </p>
             )}
+            {lightningBattery ? (
+              <div
+                className={cn(
+                  "mt-3 flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm",
+                  lightningBattery.state === "low"
+                    ? "border-amber-500/30 bg-amber-950/20 text-amber-200"
+                    : "border-zinc-600/30 bg-zinc-900/30 text-zinc-300"
+                )}
+              >
+                {lightningBattery.state === "low" ? (
+                  <BatteryWarning className="h-4 w-4 shrink-0 text-amber-400" />
+                ) : (
+                  <Battery className="h-4 w-4 shrink-0 text-emerald-400" />
+                )}
+                <span className="text-xs uppercase tracking-wide text-zinc-400">
+                  Batterij WH57
+                </span>
+                <strong className="tabular-nums">{lightningBattery.detail}</strong>
+              </div>
+            ) : null}
           </section>
         ) : null}
 
@@ -165,38 +149,6 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
                   </strong>
                 </span>
               ) : null}
-            </div>
-          </section>
-        ) : null}
-
-        {showWh25 ? (
-          <section className="flex flex-wrap items-center gap-2 text-sm text-zinc-300">
-            <Thermometer className="h-4 w-4 text-sky-400" />
-            <span className="text-xs uppercase tracking-wide text-zinc-500">
-              WH25 buiten
-            </span>
-            {data.temp2_c != null ? (
-              <strong className="tabular-nums">{Number(data.temp2_c).toFixed(1)}°C</strong>
-            ) : null}
-            {data.humidity2 != null ? (
-              <>
-                <span className="text-zinc-600">·</span>
-                <strong className="tabular-nums">{data.humidity2}%</strong>
-                <span className="text-xs text-zinc-500">vocht</span>
-              </>
-            ) : null}
-          </section>
-        ) : null}
-
-        {batteries.length > 0 ? (
-          <section>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">
-              Sensorbatterijen
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {batteries.map((b) => (
-                <BatteryChip key={b.label} item={b} />
-              ))}
             </div>
           </section>
         ) : null}

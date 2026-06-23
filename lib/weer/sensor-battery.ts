@@ -56,16 +56,9 @@ export interface WeerBatteryFields {
   batt2?: string | number;
 }
 
-/** Bekende Ecowitt-batterijvelden → compacte statuslijst. */
-export function collectSensorBatteries(
-  data: WeerBatteryFields
-): SensorBatteryStatus[] {
-  const items: (SensorBatteryStatus | null)[] = [
-    formatEcowittBattery(data.wh65batt, "flag", "Hoofdsensor"),
-    formatEcowittBattery(data.wh25batt, "flag", "WH25 buiten"),
-    formatEcowittBattery(data.wh57batt, "bars", "Bliksem WH57"),
-    formatEcowittBattery(data.wh90batt, "voltage", "WS90"),
-    formatEcowittBattery(data.batt2, "flag", "Kanaal 2"),
-  ];
-  return items.filter((x): x is SensorBatteryStatus => x != null);
+/** WH57 bliksemsensor — enige batterij in de bliksem-kaart. */
+export function getLightningBattery(
+  data: Pick<WeerBatteryFields, "wh57batt">
+): SensorBatteryStatus | null {
+  return formatEcowittBattery(data.wh57batt, "bars", "Bliksem");
 }
