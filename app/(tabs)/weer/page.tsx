@@ -199,12 +199,22 @@ export default function WeerPage() {
             <PrecipitationRadar />
           </WeerSection>
 
-          <WeerSection title="Historie" subtitle="Eigen weerstation">
+          <WeerSection
+            title="Historie"
+            subtitle="Eigen weerstation"
+            collapsible
+            defaultOpen={false}
+          >
             {historie?.labels?.length ? <TemperatureChart data={historie} /> : null}
             <RainYearChart />
           </WeerSection>
 
-          <WeerSection title="Getij" subtitle="Harlingen · Waddenzee">
+          <WeerSection
+            title="Getij"
+            subtitle="Harlingen · Waddenzee"
+            collapsible
+            defaultOpen={false}
+          >
             <TideCard getijden={getijden} bron={getijBron} />
           </WeerSection>
         </div>
