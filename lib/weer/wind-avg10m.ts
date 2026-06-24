@@ -8,6 +8,12 @@ export interface WindSample {
   kmh: number;
 }
 
+type WeerLiveWindBuffer = WeerLive & { _wind_samples?: WindSample[] };
+
+export function readWindSamples(data: WeerLive | null): WindSample[] | undefined {
+  return (data as WeerLiveWindBuffer | null)?._wind_samples;
+}
+
 export function updateWindSamples(
   previous: WindSample[] | undefined,
   windspeedKmh: number | undefined,
@@ -34,7 +40,7 @@ export function applyWindAvg10m(
 ): WeerLive {
   const speed =
     fresh.windspeed_kmh != null ? Number(fresh.windspeed_kmh) : undefined;
-  const samples = updateWindSamples(previous?._wind_samples, speed);
+  const samples = updateWindSamples(readWindSamples(previous), speed);
   const computed = averageWindSamples(samples);
   const gateway =
     fresh.windspd_avg10m_kmh != null
@@ -45,5 +51,5 @@ export function applyWindAvg10m(
     ...fresh,
     _wind_samples: samples,
     windspd_avg10m_kmh: computed ?? gateway ?? speed,
-  };
+  } as WeerLiveWindBuffer;
 }

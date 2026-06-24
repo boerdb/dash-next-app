@@ -18,8 +18,6 @@ export interface WeerLive {
   winddir_avg10m?: number | string;
   windspeed_kmh?: number;
   windspd_avg10m_kmh?: number;
-  /** Intern: rolling wind samples voor 10-min gemiddelde; niet in API. */
-  _wind_samples?: { t: number; kmh: number }[];
   windgust_kmh?: number;
   maxdailygust_kmh?: number;
   dailyrain_mm?: number;

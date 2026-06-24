@@ -4,6 +4,7 @@ import {
   WIND_AVG_WINDOW_MS,
   averageWindSamples,
   applyWindAvg10m,
+  readWindSamples,
   updateWindSamples,
 } from "./wind-avg10m";
 
@@ -27,15 +28,12 @@ describe("wind avg 10m", () => {
   it("applyWindAvg10m valt terug op gateway zonder windspeed", () => {
     const r = applyWindAvg10m({ windspd_avg10m_kmh: 8 }, null);
     assert.equal(r.windspd_avg10m_kmh, 8);
-    assert.equal(r._wind_samples?.length, 0);
+    assert.equal(readWindSamples(r)?.length, 0);
   });
 
   it("applyWindAvg10m berekent gemiddelde uit vorige samples", () => {
     const prev = applyWindAvg10m({ windspeed_kmh: 10 }, null);
-    const next = applyWindAvg10m(
-      { windspeed_kmh: 20 },
-      { ...prev, _wind_samples: prev._wind_samples }
-    );
+    const next = applyWindAvg10m({ windspeed_kmh: 20 }, prev);
     assert.equal(next.windspd_avg10m_kmh, 15);
   });
 });
