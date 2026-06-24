@@ -21,4 +21,13 @@ describe("enrichWeerLive", () => {
     });
     assert.ok(Number(r.gevoelstemperatuur) < 5);
   });
+
+  it("gevoelstemperatuur met alleen windspeed_kmh (GW1100)", () => {
+    const r = enrichWeerLive({
+      temp_c: 27.1,
+      humidity: 62,
+      windspeed_kmh: 0,
+    });
+    assert.equal(r.gevoelstemperatuur, 27.1);
+  });
 });

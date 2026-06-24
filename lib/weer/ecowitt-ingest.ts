@@ -68,6 +68,7 @@ export function parseEcowittPayload(
   if (baromAbs !== undefined) metric.baromabs_hpa = inToHpa(baromAbs);
   if (wspd !== undefined) metric.windspeed_kmh = mphToKmh(wspd);
   if (wavg !== undefined) metric.windspd_avg10m_kmh = mphToKmh(wavg);
+  else if (wspd !== undefined) metric.windspd_avg10m_kmh = mphToKmh(wspd);
   if (wgust !== undefined) metric.windgust_kmh = mphToKmh(wgust);
   if (maxGust !== undefined) metric.maxdailygust_kmh = mphToKmh(maxGust);
   if (rainrate !== undefined) metric.rainrate_mm = inToMm(rainrate);

@@ -89,7 +89,12 @@ export async function maybeInsertMeting(data: WeerLive): Promise<boolean> {
 
   const temp = data.temp_c != null ? Number(data.temp_c) : 0;
   const humidity = data.humidity != null ? Number(data.humidity) : 0;
-  const wind = data.windspd_avg10m_kmh != null ? Number(data.windspd_avg10m_kmh) : 0;
+  const wind =
+    data.windspd_avg10m_kmh != null
+      ? Number(data.windspd_avg10m_kmh)
+      : data.windspeed_kmh != null
+        ? Number(data.windspeed_kmh)
+        : 0;
   const dir = data.winddir != null ? Number(data.winddir) : 0;
   const rain = data.dailyrain_mm != null ? Number(data.dailyrain_mm) : 0;
   const sun = data.solarradiation != null ? Number(data.solarradiation) : 0;

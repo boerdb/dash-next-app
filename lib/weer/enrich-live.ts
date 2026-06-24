@@ -6,7 +6,9 @@ export function enrichWeerLive(data: WeerLive): WeerLive {
 
   const temp = out.temp_c != null ? Number(out.temp_c) : NaN;
   const humidity = out.humidity != null ? Number(out.humidity) : NaN;
-  const windKmh = out.windspd_avg10m_kmh != null ? Number(out.windspd_avg10m_kmh) : NaN;
+  const windKmh = Number(
+    out.windspd_avg10m_kmh ?? out.windspeed_kmh ?? NaN
+  );
 
   if (!Number.isNaN(temp) && !Number.isNaN(humidity) && humidity > 0) {
     const a = 17.27;
