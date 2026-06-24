@@ -4,6 +4,7 @@ const SENSITIVE_KEYS = new Set([
   "password",
   "api_key",
   "apikey",
+  "_wind_samples",
 ]);
 
 export function sanitizeWeerPayload<T extends Record<string, unknown>>(

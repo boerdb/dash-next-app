@@ -1,6 +1,7 @@
 import type { RowDataPacket } from "mysql2";
 import type { WeerLive } from "@/lib/api/types";
 import { enrichWeerLive } from "@/lib/weer/enrich-live";
+import { applyWindAvg10m } from "@/lib/weer/wind-avg10m";
 import { getPool } from "@/lib/db/pool";
 import { todayAmsterdamDate } from "@/lib/weer/regen-jaar-labels";
 import {
@@ -120,7 +121,8 @@ export async function maybeInsertMeting(data: WeerLive): Promise<boolean> {
 
 export async function ingestWeerLive(raw: WeerLive): Promise<WeerLive> {
   const previous = await readWeerLiveCache();
-  const enriched = enrichWeerLive(raw);
+  const withWindAvg = applyWindAvg10m(raw, previous);
+  const enriched = enrichWeerLive(withWindAvg);
   await maybeInsertMeting(enriched);
   const withMinMax = await applyVandaagTempMinMax(enriched);
   const saved = await writeWeerLiveCache(withMinMax);
