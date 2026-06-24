@@ -9,6 +9,7 @@ import { DailyStats } from "@/components/energy/DailyStats";
 import { PullToRefresh } from "@/components/shared/PullToRefresh";
 import { DataError } from "@/components/shared/DataError";
 import { Skeleton } from "@/components/ui/skeleton";
+import { WeerSection } from "@/components/weather/WeerSection";
 import { jsonFetcher, FetchError } from "@/lib/fetcher";
 import type { EnergieHistorie, EnergieLive } from "@/lib/api/types";
 import { applyLiveWattToHistorie } from "@/lib/energie/historie-24h";
@@ -67,38 +68,65 @@ export default function EnergiePage() {
   };
 
   const showSkeleton = isLoading && !energie && !energieError;
+  const showBatteries =
+    energie != null &&
+    (energie.batterijen.length > 0 || (energie.batterij_historie?.labels?.length ?? 0) > 0);
 
   return (
     <PullToRefresh onRefresh={refreshAll}>
-      <header className="mb-4">
-        <h1 className="bg-gradient-to-r from-amber-300 to-orange-200 bg-clip-text text-xl font-semibold text-transparent">
-          Energie dashboard
-        </h1>
-      </header>
-
       {showSkeleton ? (
-        <div className="space-y-4">
-          <Skeleton className="h-36 w-full rounded-2xl" />
-          <Skeleton className="h-28 w-full rounded-2xl" />
-          <Skeleton className="h-48 w-full rounded-2xl" />
-        </div>
+        <EnergieSkeleton />
       ) : energieError && !energie ? (
         <DataError
           message={energieError.message}
           onRetry={() => mutateEnergie()}
         />
       ) : energie ? (
-        <div className="space-y-4">
+        <div className="space-y-8 pb-2">
           <PowerHero data={energie} />
-          <DailyStats data={energie} />
-          <BatteryPanel data={energie} />
-          <BatteryChart data={energie} />
-          <MonthlyEnergyChart />
-          {chartHistorie?.labels?.length ? <PowerChart data={chartHistorie} /> : null}
+
+          <WeerSection title="Vandaag" subtitle="Stroom · gas · water">
+            <DailyStats data={energie} />
+          </WeerSection>
+
+          {showBatteries ? (
+            <WeerSection title="Batterijen" subtitle="HomeWizard · laadstrategie">
+              <BatteryPanel data={energie} />
+              <BatteryChart data={energie} />
+            </WeerSection>
+          ) : null}
+
+          <WeerSection
+            title="Historie"
+            subtitle="Grafieken en maandoverzicht"
+            collapsible
+            defaultOpen={false}
+          >
+            {chartHistorie?.labels?.length ? (
+              <PowerChart data={chartHistorie} />
+            ) : null}
+            <MonthlyEnergyChart />
+          </WeerSection>
         </div>
       ) : (
         <DataError onRetry={() => mutateEnergie()} />
       )}
     </PullToRefresh>
+  );
+}
+
+function EnergieSkeleton() {
+  return (
+    <div className="space-y-8">
+      <Skeleton className="-mx-4 h-56 w-[calc(100%+2rem)] rounded-b-3xl sm:-mx-6 sm:w-[calc(100%+3rem)]" />
+      <div className="space-y-3">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-44 w-full rounded-2xl" />
+      </div>
+      <div className="space-y-3">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-52 w-full rounded-2xl" />
+      </div>
+    </div>
   );
 }

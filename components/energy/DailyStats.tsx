@@ -1,6 +1,13 @@
 "use client";
 
-import { AlertCircle, ArrowDownLeft, ArrowUpRight, Droplets, Flame, Sun } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Droplets,
+  Flame,
+  Sun,
+} from "lucide-react";
 import type { EnergieLive } from "@/lib/api/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -9,148 +16,143 @@ interface DailyStatsProps {
   data: EnergieLive;
 }
 
+function MiniStat({
+  icon,
+  label,
+  value,
+  detail,
+  accent,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+  detail?: React.ReactNode;
+  accent?: string;
+}) {
+  return (
+    <div className="rounded-xl bg-black/25 px-3 py-2.5">
+      <div className="mb-1 flex items-center gap-1.5 text-[0.6rem] uppercase tracking-wide text-zinc-600">
+        {icon}
+        {label}
+      </div>
+      <p className={cn("text-lg font-bold tabular-nums", accent ?? "text-zinc-100")}>
+        {value}
+      </p>
+      {detail ? <p className="mt-1 text-[0.65rem] text-zinc-500">{detail}</p> : null}
+    </div>
+  );
+}
+
 export function DailyStats({ data }: DailyStatsProps) {
   const waterFlow = Number(data.water_actueel) > 0;
   const hasMeterstand = data.water_meterstand_label != null;
   const enphase = data.enphase;
-  const showZon =
-    enphase?.bereikbaar && enphase.vandaag_kwh != null;
+  const showZon = enphase?.bereikbaar && enphase.vandaag_kwh != null;
 
   return (
-    <div className="space-y-3">
-      <Card variant="energy">
-        <CardContent>
-          <p className="mb-2 border-l-2 border-amber-500/50 pl-2 text-xs uppercase tracking-wide text-zinc-400">
-            Vandaag (stroom)
-          </p>
+    <Card variant="energy" className="overflow-hidden">
+      <CardContent className="p-0">
+        <div
+          className={cn(
+            "grid grid-cols-1 divide-y divide-white/5 sm:divide-y-0",
+            showZon ? "sm:grid-cols-3 sm:divide-x" : "sm:grid-cols-2 sm:divide-x"
+          )}
+        >
           {showZon ? (
-            <p className="text-2xl font-bold text-amber-300">
-              <Sun className="mr-1.5 inline h-6 w-6 -translate-y-0.5" />
-              {enphase.vandaag_kwh}{" "}
-              <span className="text-sm font-normal text-zinc-400">kWh opgewekt</span>
-              {enphase.vermogen_w != null && enphase.vermogen_w > 0 ? (
-                <span className="mt-1 block text-sm font-normal text-amber-200/80">
-                  Nu {enphase.vermogen_w} W
-                </span>
-              ) : null}
-            </p>
+            <MiniStat
+              icon={<Sun className="h-3 w-3 text-amber-400" />}
+              label="Zon vandaag"
+              value={
+                <>
+                  {enphase.vandaag_kwh}{" "}
+                  <span className="text-sm font-normal text-zinc-500">kWh</span>
+                </>
+              }
+              detail={
+                enphase.vermogen_w != null && enphase.vermogen_w > 0
+                  ? `Nu ${enphase.vermogen_w} W`
+                  : undefined
+              }
+              accent="text-amber-300"
+            />
           ) : null}
-          <p
-            className={cn(
-              "text-2xl font-bold text-white",
-              showZon && "mt-2"
-            )}
-          >
-            <ArrowDownLeft className="mr-1.5 inline h-6 w-6 -translate-y-0.5 text-zinc-300" />
-            {data.stroom_vandaag_in}{" "}
-            <span className="text-sm font-normal text-zinc-400">kWh ingekocht</span>
-          </p>
-          <p className="mt-1 text-2xl font-bold text-emerald-400">
-            <ArrowUpRight className="mr-1.5 inline h-6 w-6 -translate-y-0.5" />
-            {data.stroom_vandaag_uit}{" "}
-            <span className="text-sm font-normal text-zinc-400">kWh teruggeleverd</span>
-          </p>
-        </CardContent>
-      </Card>
+          <MiniStat
+            icon={<ArrowDownLeft className="h-3 w-3 text-zinc-400" />}
+            label="Ingekocht"
+            value={
+              <>
+                {data.stroom_vandaag_in}{" "}
+                <span className="text-sm font-normal text-zinc-500">kWh</span>
+              </>
+            }
+          />
+          <MiniStat
+            icon={<ArrowUpRight className="h-3 w-3 text-emerald-400" />}
+            label="Teruggeleverd"
+            value={
+              <>
+                {data.stroom_vandaag_uit}{" "}
+                <span className="text-sm font-normal text-zinc-500">kWh</span>
+              </>
+            }
+            accent="text-emerald-400"
+          />
+        </div>
 
-      {hasMeterstand ? (
-        <Card variant="energy" className="border-sky-500/25">
-          <CardContent>
+        <div className="grid grid-cols-2 divide-x divide-white/5 border-t border-white/5">
+          <MiniStat
+            icon={<Flame className="h-3 w-3 text-amber-400" />}
+            label="Gas vandaag"
+            value={
+              <>
+                {data.gas_vandaag}{" "}
+                <span className="text-sm font-normal text-zinc-500">m³</span>
+              </>
+            }
+            accent="text-amber-100"
+          />
+          <MiniStat
+            icon={
+              waterFlow ? (
+                <AlertCircle className="h-3 w-3 text-rose-400" />
+              ) : (
+                <Droplets className="h-3 w-3 text-sky-400" />
+              )
+            }
+            label="Water vandaag"
+            value={
+              <>
+                {data.water_vandaag}{" "}
+                <span className="text-sm font-normal text-zinc-500">L</span>
+              </>
+            }
+            detail={
+              waterFlow ? `Flow ${data.water_actueel} L/min` : undefined
+            }
+            accent={waterFlow ? "text-rose-400" : "text-sky-100"}
+          />
+        </div>
+
+        {hasMeterstand ? (
+          <div className="border-t border-white/5 bg-black/20 px-4 py-3">
             <div className="flex items-start gap-3">
-              <Droplets className="mt-0.5 h-7 w-7 shrink-0 text-sky-400" />
-              <div className="min-w-0 flex-1">
-                <p className="text-xs uppercase tracking-wide text-zinc-400">
+              <Droplets className="mt-0.5 h-5 w-5 shrink-0 text-sky-400" />
+              <div className="min-w-0">
+                <p className="text-[0.65rem] uppercase tracking-wide text-zinc-500">
                   Watermeter (geschat)
                 </p>
-                <p className="text-3xl font-bold tabular-nums text-sky-100">
+                <p className="mt-0.5 text-2xl font-bold tabular-nums text-sky-100">
                   {data.water_meterstand_label}{" "}
-                  <span className="text-lg font-normal text-zinc-400">m³</span>
+                  <span className="text-base font-normal text-zinc-500">m³</span>
                 </p>
-                <p className="mt-1 text-xs text-zinc-500">
+                <p className="mt-1 text-[0.65rem] text-zinc-600">
                   Op basis van opgave 1404 m³ (8-2-2026) + sensorverbruik
-                </p>
-                <p className="mt-2 text-sm text-zinc-400">
-                  Vandaag: {data.water_vandaag} L
-                  {waterFlow ? (
-                    <span className="text-rose-400">
-                      {" "}
-                      · flow {data.water_actueel} L/min
-                    </span>
-                  ) : null}
                 </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      ) : null}
-
-      <div className="grid grid-cols-2 gap-3">
-        <Card variant="energy" className="border-amber-500/15">
-          <CardContent className="text-center">
-            <Flame className="mx-auto h-7 w-7 text-amber-400" />
-            <p className="mt-2 text-xs uppercase text-zinc-400">Gas vandaag</p>
-            <p className="text-xl font-bold text-amber-100">{data.gas_vandaag} m³</p>
-          </CardContent>
-        </Card>
-
-        {!hasMeterstand ? (
-          <Card
-            variant="energy"
-            className={cn(waterFlow ? "border-rose-500/40" : "border-sky-500/15")}
-          >
-            <CardContent className="text-center">
-              {waterFlow ? (
-                <AlertCircle className="mx-auto h-7 w-7 text-rose-400" />
-              ) : (
-                <Droplets className="mx-auto h-7 w-7 text-sky-400" />
-              )}
-              <p className="mt-2 text-xs uppercase text-zinc-400">Water vandaag</p>
-              <p
-                className={cn(
-                  "text-xl font-bold",
-                  waterFlow ? "text-rose-400" : "text-sky-100"
-                )}
-              >
-                {data.water_vandaag} L
-              </p>
-              {waterFlow && (
-                <p className="mt-1 text-xs text-rose-400">
-                  Actuele flow: {data.water_actueel} L/min
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        ) : (
-          <Card
-            variant="energy"
-            className={cn(
-              waterFlow ? "border-rose-500/40" : "border-sky-500/15"
-            )}
-          >
-            <CardContent className="text-center">
-              {waterFlow ? (
-                <AlertCircle className="mx-auto h-7 w-7 text-rose-400" />
-              ) : (
-                <Droplets className="mx-auto h-7 w-7 text-sky-400" />
-              )}
-              <p className="mt-2 text-xs uppercase text-zinc-400">Water vandaag</p>
-              <p
-                className={cn(
-                  "text-xl font-bold",
-                  waterFlow ? "text-rose-400" : "text-sky-100"
-                )}
-              >
-                {data.water_vandaag} L
-              </p>
-              {waterFlow && (
-                <p className="mt-1 text-xs text-rose-400">
-                  Actuele flow: {data.water_actueel} L/min
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </div>
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
   );
 }

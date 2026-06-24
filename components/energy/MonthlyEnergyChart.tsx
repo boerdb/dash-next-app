@@ -176,9 +176,7 @@ export function MonthlyEnergyChart() {
     <Card variant="energy">
       <CardContent>
         <div className="mb-3 flex items-center justify-between gap-2">
-          <p className="border-l-2 border-amber-500/50 pl-2 text-xs uppercase tracking-wide text-zinc-400">
-            Dagbalans stroom (kWh)
-          </p>
+          <p className="text-xs font-medium text-zinc-400">Dagbalans stroom</p>
           <div className="flex items-center gap-1">
             <button
               type="button"

@@ -2,7 +2,6 @@
 
 import { Zap } from "lucide-react";
 import type { EnergieLive } from "@/lib/api/types";
-import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 interface PowerHeroProps {
@@ -11,39 +10,82 @@ interface PowerHeroProps {
 
 export function PowerHero({ data }: PowerHeroProps) {
   const exporting = data.stroom_nu < 0;
-  const powerColor = exporting ? "text-emerald-400" : "text-amber-100";
+  const powerColor = exporting ? "text-emerald-300" : "text-amber-100";
+  const isPeak = data.tarief === 2;
 
   return (
-    <Card
-      variant="energy"
+    <section
       className={cn(
-        exporting &&
-          "border-emerald-500/30 bg-gradient-to-br from-emerald-950/40 via-card to-card shadow-[0_0_40px_-10px_rgba(52,211,153,0.4)]"
+        "relative -mx-4 overflow-hidden rounded-b-3xl px-4 pb-6 pt-5 sm:-mx-6",
+        exporting
+          ? "bg-gradient-to-br from-emerald-950 via-emerald-900/80 to-slate-950"
+          : "bg-gradient-to-br from-amber-950 via-orange-950/70 to-slate-950"
       )}
     >
-      <CardContent className="flex items-center justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-wide text-zinc-400">
-            {exporting ? "Nu terugleveren" : "Netafname nu"}
-          </p>
-          <h1 className={cn("text-5xl font-bold tabular-nums", powerColor)}>
-            {data.stroom_nu}
-            <span className="ml-2 text-2xl font-normal">W</span>
-          </h1>
-          <p className="mt-2 text-sm text-zinc-400">
-            Actueel tarief:{" "}
-            <span
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-background/80" />
+      {exporting ? (
+        <div className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rounded-full bg-emerald-400/10 blur-3xl" />
+      ) : (
+        <div className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rounded-full bg-amber-400/10 blur-3xl" />
+      )}
+
+      <div className="relative z-10">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-[0.65rem] font-medium uppercase tracking-[0.25em] text-white/60">
+              {exporting ? "Terugleveren" : "Netafname"}
+            </p>
+            <h1
               className={cn(
-                "font-semibold",
-                data.tarief === 2 ? "text-amber-400" : "text-sky-300"
+                "mt-1 text-6xl font-bold tabular-nums leading-none drop-shadow-lg",
+                powerColor
               )}
             >
-              {data.tarief === 2 ? "Piek" : "Dal"}
-            </span>
-          </p>
+              {Math.abs(data.stroom_nu)}
+              <span className="ml-1 text-2xl font-normal text-white/70">W</span>
+            </h1>
+            {exporting ? (
+              <p className="mt-1 text-sm text-emerald-200/80">Levert terug aan het net</p>
+            ) : null}
+          </div>
+          <Zap
+            className={cn(
+              "h-10 w-10 shrink-0 opacity-90 drop-shadow-md",
+              powerColor
+            )}
+          />
         </div>
-        <Zap className={cn("h-12 w-12 opacity-80", powerColor)} />
-      </CardContent>
-    </Card>
+
+        <div className="mx-auto mt-4 flex max-w-sm flex-wrap items-center justify-center gap-x-4 gap-y-1 rounded-2xl border border-white/10 bg-black/20 px-4 py-2.5 text-sm text-white/90 backdrop-blur-sm">
+          <span>
+            Tarief{" "}
+            <strong
+              className={cn(
+                "font-semibold",
+                isPeak ? "text-amber-300" : "text-sky-300"
+              )}
+            >
+              {isPeak ? "Piek" : "Dal"}
+            </strong>
+          </span>
+          <span className="hidden text-white/30 sm:inline">|</span>
+          <span>
+            Vandaag in{" "}
+            <strong className="font-semibold tabular-nums text-white">
+              {data.stroom_vandaag_in}
+            </strong>{" "}
+            kWh
+          </span>
+          <span className="hidden text-white/30 sm:inline">|</span>
+          <span>
+            Uit{" "}
+            <strong className="font-semibold tabular-nums text-emerald-300">
+              {data.stroom_vandaag_uit}
+            </strong>{" "}
+            kWh
+          </span>
+        </div>
+      </div>
+    </section>
   );
 }

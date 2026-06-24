@@ -35,10 +35,8 @@ export function BatteryChart({ data }: BatteryChartProps) {
   return (
     <Card variant="energy" className="border-violet-500/15">
       <CardContent>
-        <p className="mb-1 border-l-2 border-violet-500/50 pl-2 text-xs uppercase tracking-wide text-zinc-400">
-          Batterijvermogen afgelopen 24 uur (W)
-        </p>
-        <p className="mb-3 pl-2 text-[10px] text-zinc-500">
+        <p className="mb-1 text-xs font-medium text-zinc-400">Batterijvermogen · 24 uur</p>
+        <p className="mb-3 text-[0.65rem] text-zinc-500">
           Positief = laden · negatief = ontladen
         </p>
         {pointCount < 2 && (
