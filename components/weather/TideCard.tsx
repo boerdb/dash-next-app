@@ -60,9 +60,6 @@ export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
   return (
     <Card variant="weather">
       <CardContent>
-        <p className="mb-2 text-center text-[0.65rem] text-zinc-500">
-          Vandaag en morgen · Harlingen
-        </p>
         <div
           className={`mb-4 flex items-center justify-center gap-3 rounded-xl px-4 py-3 ${statusColor}`}
         >

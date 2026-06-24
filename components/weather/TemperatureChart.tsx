@@ -30,14 +30,10 @@ export function TemperatureChart({ data }: TemperatureChartProps) {
   return (
     <Card variant="weather">
       <CardContent>
-        <p className="mb-1 border-l-2 border-sky-500/50 pl-2 text-xs uppercase tracking-wide text-zinc-400">
-          Temperatuur afgelopen 24 uur
-        </p>
-        <p className="mb-1 pl-2 text-[10px] text-zinc-500">
-          Eigen weerstation · Ecowitt
-        </p>
-        <p className="mb-3 pl-2 text-sm text-zinc-500">
-          Gemiddelde: <span className="font-semibold text-sky-400">{data.gemiddelde}°C</span>
+        <p className="mb-1 text-xs font-medium text-zinc-400">Temperatuur · 24 uur</p>
+        <p className="mb-3 text-sm text-zinc-500">
+          Gemiddelde{" "}
+          <span className="font-semibold tabular-nums text-sky-400">{data.gemiddelde}°C</span>
         </p>
         <ChartContainer height={CHART_HEIGHT}>
           <ResponsiveContainer width="100%" height={CHART_HEIGHT} minWidth={0}>

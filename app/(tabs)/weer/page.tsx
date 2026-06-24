@@ -4,6 +4,7 @@ import { useCallback, useMemo } from "react";
 import useSWR, { mutate as swrMutate } from "swr";
 import dynamic from "next/dynamic";
 import { WeatherHero } from "@/components/weather/WeatherHero";
+import { WeerSection } from "@/components/weather/WeerSection";
 import { MetricGrid } from "@/components/weather/MetricGrid";
 import { SensorExtrasCard } from "@/components/weather/SensorExtrasCard";
 import { TideCard } from "@/components/weather/TideCard";
@@ -12,7 +13,6 @@ import { OpenWeatherPanel } from "@/components/weather/OpenWeatherPanel";
 import { PullToRefresh } from "@/components/shared/PullToRefresh";
 import { DataError } from "@/components/shared/DataError";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent } from "@/components/ui/card";
 import { getAstronomyInfo, toAstronomieApi } from "@/lib/astronomy/sun-moon";
 import { jsonFetcher, FetchError } from "@/lib/fetcher";
 import { useRevalidateOnVisible } from "@/lib/hooks/use-revalidate-on-visible";
@@ -165,38 +165,48 @@ export default function WeerPage() {
 
   return (
     <PullToRefresh onRefresh={refreshAll}>
-      <header className="mb-4 text-center">
-        <h1 className="bg-gradient-to-r from-sky-300 to-cyan-200 bg-clip-text text-xl font-semibold text-transparent">
-          Actueel weer
-        </h1>
-      </header>
-
       {showSkeleton ? (
         <WeerSkeleton />
       ) : weerError && !weer ? (
         <DataError message={weerError.message} onRetry={() => mutateWeer()} />
       ) : weer ? (
-        <div className="space-y-4">
+        <div className="space-y-8 pb-2">
           {knmiWaarschuwingen ? <KnmiWarningsCard data={knmiWaarschuwingen} /> : null}
+
           <WeatherHero
             data={weer}
             condition={condition}
             astro={astroData}
             updateLabel={updateLabel}
           />
-          <MetricGrid data={weer} />
-          <SensorExtrasCard data={weer} />
-          <RainYearChart />
-          <PrecipitationRadar />
-          {historie?.labels?.length ? <TemperatureChart data={historie} /> : null}
-          <OpenWeatherPanel
-            data={openWeather}
-            station={weer}
-            error={openWeatherError}
-            isLoading={openWeatherLoading}
-            onRetry={() => mutateOpenWeather()}
-          />
-          <TideCard getijden={getijden} bron={getijBron} />
+
+          <WeerSection title="Weerstation" subtitle="Ecowitt · live elke minuut">
+            <MetricGrid data={weer} />
+            <SensorExtrasCard data={weer} />
+          </WeerSection>
+
+          <WeerSection title="Voorspelling" subtitle="OpenWeather · Harlingen">
+            <OpenWeatherPanel
+              data={openWeather}
+              station={weer}
+              error={openWeatherError}
+              isLoading={openWeatherLoading}
+              onRetry={() => mutateOpenWeather()}
+            />
+          </WeerSection>
+
+          <WeerSection title="Neerslagradar" subtitle="Nederland · RainViewer">
+            <PrecipitationRadar />
+          </WeerSection>
+
+          <WeerSection title="Historie" subtitle="Eigen weerstation">
+            {historie?.labels?.length ? <TemperatureChart data={historie} /> : null}
+            <RainYearChart />
+          </WeerSection>
+
+          <WeerSection title="Getij" subtitle="Harlingen · Waddenzee">
+            <TideCard getijden={getijden} bron={getijBron} />
+          </WeerSection>
         </div>
       ) : (
         <DataError onRetry={() => mutateWeer()} />
@@ -240,23 +250,20 @@ async function openWeatherFetcher(
 
 function WeerSkeleton() {
   return (
-    <div className="space-y-4">
-      <Skeleton className="h-14 w-full rounded-2xl" />
-      <Skeleton className="h-80 w-full rounded-3xl" />
-      <div className="grid grid-cols-2 gap-3">
-        <Skeleton className="h-28" />
-        <Skeleton className="h-28" />
-        <Skeleton className="h-28" />
-        <Skeleton className="h-28" />
+    <div className="space-y-8">
+      <Skeleton className="-mx-4 h-72 w-[calc(100%+2rem)] rounded-b-3xl sm:-mx-6 sm:w-[calc(100%+3rem)]" />
+      <div className="space-y-3">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-52 w-full rounded-2xl" />
       </div>
-      <Skeleton className="h-52 w-full rounded-2xl" />
-      <Skeleton className="h-[300px] w-full rounded-2xl" />
-      <Skeleton className="h-48 w-full rounded-2xl" />
-      <Card>
-        <CardContent>
-          <Skeleton className="h-40 w-full" />
-        </CardContent>
-      </Card>
+      <div className="space-y-3">
+        <Skeleton className="h-4 w-28" />
+        <Skeleton className="h-64 w-full rounded-2xl" />
+      </div>
+      <div className="space-y-3">
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-[300px] w-full rounded-2xl" />
+      </div>
     </div>
   );
 }

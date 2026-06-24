@@ -78,10 +78,8 @@ export function RainYearChart() {
   return (
     <Card variant="weather" className="border-sky-500/20">
       <CardContent>
-        <div className="mb-1 flex items-center justify-between gap-2">
-          <p className="border-l-2 border-sky-500/50 pl-2 text-xs uppercase tracking-wide text-zinc-400">
-            Regen per maand (mm)
-          </p>
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <p className="text-xs font-medium text-zinc-400">Regen per maand</p>
           <div className="flex items-center gap-1">
             <button
               type="button"
@@ -106,9 +104,6 @@ export function RainYearChart() {
             </button>
           </div>
         </div>
-        <p className="mb-3 pl-2 text-[10px] text-zinc-500">
-          Eigen weerstation · Ecowitt · opgebouwd uit dagtotalen
-        </p>
 
         {!hasAnyData && (
           <p className="mb-2 text-xs text-zinc-500">

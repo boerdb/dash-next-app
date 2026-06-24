@@ -20,110 +20,161 @@ interface MetricGridProps {
   data: WeerLive;
 }
 
-function MetricCard({
+function StatCell({
   children,
+  label,
+  value,
+  detail,
   className,
 }: {
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+  detail?: React.ReactNode;
   className?: string;
 }) {
   return (
-    <Card variant="weather" className={className}>
-      <CardContent className="flex flex-col items-center justify-center text-center">
-        {children}
-      </CardContent>
-    </Card>
+    <div className={cn("flex gap-3 p-4", className)}>
+      {children ? (
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5">
+          {children}
+        </div>
+      ) : null}
+      <div className="min-w-0 flex-1">
+        <p className="text-[0.65rem] font-medium uppercase tracking-wide text-zinc-500">
+          {label}
+        </p>
+        <p className="mt-0.5 text-xl font-bold tabular-nums leading-none text-zinc-100">
+          {value}
+        </p>
+        {detail ? (
+          <div className="mt-1.5 text-[0.65rem] leading-snug text-zinc-500">
+            {detail}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function FooterStat({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="text-center sm:text-left">
+      <p className="text-[0.6rem] uppercase tracking-wide text-zinc-600">{label}</p>
+      <p className="mt-0.5 text-sm font-semibold tabular-nums text-zinc-300">{value}</p>
+    </div>
   );
 }
 
 export function MetricGrid({ data }: MetricGridProps) {
   const windDeg = resolveWindDegrees(data);
   const uv = Number(data.uv ?? 0);
+  const windSpeed = Number(data.windspeed_kmh ?? data.windspd_avg10m_kmh ?? 0);
+  const windAvg = Number(data.windspd_avg10m_kmh ?? 0);
+  const windGust = Number(data.windgust_kmh ?? 0);
 
   return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-3">
-        <MetricCard>
-          <WindArrow degrees={windDeg} className="text-sky-400" size={44} />
-          <p className="mt-2 text-xs uppercase tracking-wide text-zinc-400">
-            Wind ({getWindDirection(windDeg)})
-          </p>
-          <p className="text-2xl font-bold tabular-nums">
-            {Number(data.windspeed_kmh ?? data.windspd_avg10m_kmh ?? 0).toFixed(1)}
-            <span className="ml-1 text-sm font-normal text-zinc-400">km/u</span>
-          </p>
-          <p className="text-xs text-zinc-400">
-            Gem. 10 min: {Number(data.windspd_avg10m_kmh ?? 0).toFixed(1)} km/u · Stoot:{" "}
-            {Number(data.windgust_kmh ?? 0).toFixed(1)} km/u
-          </p>
-        </MetricCard>
+    <Card variant="weather" className="overflow-hidden">
+      <CardContent className="p-0">
+        <div className="grid grid-cols-1 divide-y divide-white/5 sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+          <StatCell
+            label={`Wind · ${getWindDirection(windDeg)}`}
+            value={
+              <>
+                {windSpeed.toFixed(1)}
+                <span className="ml-1 text-sm font-normal text-zinc-500">km/u</span>
+              </>
+            }
+            detail={
+              <>
+                Gem. 10 min {windAvg.toFixed(1)} · Stoot {windGust.toFixed(1)} km/u
+              </>
+            }
+          >
+            <WindArrow degrees={windDeg} className="text-sky-400" size={28} />
+          </StatCell>
 
-        <MetricCard>
-          <Droplets className="h-8 w-8 text-blue-400" />
-          <p className="mt-2 text-xs uppercase tracking-wide text-zinc-400">Regen</p>
-          <p className="text-2xl font-bold tabular-nums">
-            {Number(data.dailyrain_mm ?? 0).toFixed(1)}
-            <span className="ml-1 text-sm font-normal text-zinc-400">mm</span>
-          </p>
-          <p className="text-xs text-zinc-400">Vandaag</p>
-          <p className="text-xs text-zinc-500">Mnd: {data.monthlyrain_mm} mm</p>
-          <p className="text-xs text-zinc-500">Jaar: {data.yearlyrain_mm} mm</p>
-        </MetricCard>
+          <StatCell
+            label="Regen vandaag"
+            value={
+              <>
+                {Number(data.dailyrain_mm ?? 0).toFixed(1)}
+                <span className="ml-1 text-sm font-normal text-zinc-500">mm</span>
+              </>
+            }
+            detail={
+              <>
+                Maand {data.monthlyrain_mm ?? "—"} mm · Jaar {data.yearlyrain_mm ?? "—"} mm
+              </>
+            }
+          >
+            <Droplets className="h-5 w-5 text-blue-400" />
+          </StatCell>
+        </div>
 
-        <MetricCard>
-          <Gauge className="h-8 w-8 text-violet-400" />
-          <p className="mt-2 text-xs uppercase tracking-wide text-zinc-400">Luchtdruk</p>
-          <p className="text-2xl font-bold tabular-nums">
-            {Number(data.baromrel_hpa ?? 0).toFixed(1)}
-            <span className="ml-1 text-sm font-normal text-zinc-400">hPa</span>
-          </p>
-          {data.barom_trend_delta_hpa != null && data.barom_trend_direction ? (
-            <p
-              className={cn(
-                "mt-1 flex items-center justify-center gap-1 text-xs font-medium tabular-nums",
-                data.barom_trend_direction === "up" && "text-emerald-400",
-                data.barom_trend_direction === "down" && "text-amber-400",
-                data.barom_trend_direction === "steady" && "text-zinc-500"
-              )}
-            >
-              {data.barom_trend_direction === "up" ? (
-                <ArrowUpRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              ) : data.barom_trend_direction === "down" ? (
-                <ArrowDownRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
+        <div className="grid grid-cols-1 divide-y divide-white/5 border-t border-white/5 sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+          <StatCell
+            label="Luchtdruk"
+            value={
+              <>
+                {Number(data.baromrel_hpa ?? 0).toFixed(1)}
+                <span className="ml-1 text-sm font-normal text-zinc-500">hPa</span>
+              </>
+            }
+            detail={
+              data.barom_trend_delta_hpa != null && data.barom_trend_direction ? (
+                <p
+                  className={cn(
+                    "flex items-center gap-1 font-medium tabular-nums",
+                    data.barom_trend_direction === "up" && "text-emerald-400",
+                    data.barom_trend_direction === "down" && "text-amber-400",
+                    data.barom_trend_direction === "steady" && "text-zinc-500"
+                  )}
+                >
+                  {data.barom_trend_direction === "up" ? (
+                    <ArrowUpRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                  ) : data.barom_trend_direction === "down" ? (
+                    <ArrowDownRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                  ) : (
+                    <Minus className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                  )}
+                  {formatBaromTrendDelta(data.barom_trend_delta_hpa)} hPa ·{" "}
+                  {data.barom_trend_hours ?? 3} u
+                </p>
               ) : (
-                <Minus className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              )}
-              <span>
-                {formatBaromTrendDelta(data.barom_trend_delta_hpa)} hPa ·{" "}
-                {data.barom_trend_hours ?? 3} u
+                "Trend na 3 uur data"
+              )
+            }
+          >
+            <Gauge className="h-5 w-5 text-violet-400" />
+          </StatCell>
+
+          <StatCell
+            label="Zon & UV"
+            value={
+              <span className={uv >= 3 ? "text-amber-400" : undefined}>{data.uv ?? "—"}</span>
+            }
+            detail={`Straling ${Number(data.solarradiation ?? 0).toFixed(0)} W/m²`}
+          >
+            <Sun className="h-5 w-5 text-amber-400" />
+          </StatCell>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 border-t border-white/5 bg-black/20 px-4 py-3 sm:grid-cols-4">
+          <FooterStat label="Vocht buiten" value={`${data.humidity ?? "—"}%`} />
+          <FooterStat label="Dauwpunt" value={`${data.dauwpunt ?? "—"} °C`} />
+          <FooterStat
+            label="Binnen"
+            value={
+              <span className="inline-flex items-center gap-1.5">
+                <Home className="h-3.5 w-3.5 text-emerald-400/80" aria-hidden />
+                {data.tempin_c ?? "—"} °C
               </span>
-            </p>
-          ) : (
-            <p className="mt-1 text-xs text-zinc-500">Trend na 3 uur data</p>
-          )}
-          <p className="text-xs text-zinc-400">Relatief</p>
-        </MetricCard>
-
-        <MetricCard>
-          <Sun className="h-8 w-8 text-amber-400" />
-          <p className="mt-2 text-xs uppercase tracking-wide text-zinc-400">Zonnestraling & UV</p>
-          <p className={`text-2xl font-bold ${uv >= 3 ? "text-amber-400" : ""}`}>{data.uv}</p>
-          <p className="text-xs text-zinc-400">
-            Straling: {Number(data.solarradiation ?? 0).toFixed(0)} W/m²
-          </p>
-        </MetricCard>
-      </div>
-
-      <Card variant="weather">
-        <CardContent className="flex flex-wrap items-center justify-center gap-3 text-center">
-          <Home className="h-5 w-5 text-emerald-400" />
-          <span className="text-xs uppercase text-zinc-400">Binnenklimaat</span>
-          <strong className="text-lg text-sky-100">{data.tempin_c}°C</strong>
-          <span className="text-zinc-600">|</span>
-          <span className="text-xs uppercase text-zinc-400">Vocht:</span>
-          <strong className="text-lg text-cyan-200">{data.humidityin}%</strong>
-        </CardContent>
-      </Card>
-    </div>
+            }
+          />
+          <FooterStat label="Vocht binnen" value={`${data.humidityin ?? "—"}%`} />
+        </div>
+      </CardContent>
+    </Card>
   );
 }

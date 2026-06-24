@@ -76,25 +76,20 @@ export function OpenWeatherSection({ data, station }: OpenWeatherSectionProps) {
   return (
     <Card variant="weather">
       <CardContent className="space-y-4">
-        <header>
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="border-l-2 border-sky-500/50 pl-2 text-xs font-semibold uppercase tracking-widest text-zinc-400">
-              Weersvoorspelling
-            </p>
-            <span
-              className={cn(
-                "rounded-full px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide",
-                dataSource === "onecall-3"
-                  ? "bg-sky-500/20 text-sky-300"
-                  : "bg-zinc-500/20 text-zinc-400"
-              )}
-            >
-              {dataSourceLabel(dataSource)}
-            </span>
-          </div>
-          <p className="mt-1 text-[0.65rem] text-zinc-500">
-            Modeldata van OpenWeather · geen weerstation
+        <header className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-[0.65rem] text-zinc-500">
+            Modeldata · regio Harlingen
           </p>
+          <span
+            className={cn(
+              "rounded-full px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide",
+              dataSource === "onecall-3"
+                ? "bg-sky-500/20 text-sky-300"
+                : "bg-zinc-500/20 text-zinc-400"
+            )}
+          >
+            {dataSourceLabel(dataSource)}
+          </span>
         </header>
 
         <CurrentStatusBlock current={current} />

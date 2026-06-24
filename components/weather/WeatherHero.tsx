@@ -57,27 +57,28 @@ export function WeatherHero({
 
   return (
     <section
-      className="relative -mx-4 overflow-hidden rounded-b-3xl px-4 pb-8 pt-6 sm:-mx-6"
+      className="relative -mx-4 overflow-hidden rounded-b-3xl px-4 pb-6 pt-5 sm:-mx-6"
       style={getWeatherBackgroundStyle(condition)}
     >
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-background/75" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-background/80" />
       <div className="relative z-10 text-center [text-shadow:0_1px_10px_rgba(0,0,0,0.75)]">
-        {updateLabel && (
-          <p className="mb-2 text-xs text-white/85">{updateLabel}</p>
-        )}
-
-        <p className="text-xs font-semibold uppercase tracking-widest text-white">
-          {periodLabel}
-        </p>
-        {showWeatherSub && (
-          <p className="mt-0.5 text-[0.65rem] uppercase tracking-wide text-white/80">
-            {weatherLabel}
-          </p>
-        )}
+        <div className="mb-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-white/75">
+          {updateLabel ? <span>{updateLabel}</span> : null}
+          {updateLabel ? <span className="hidden text-white/40 sm:inline">·</span> : null}
+          <span className="font-medium uppercase tracking-widest text-white/90">
+            {periodLabel}
+          </span>
+          {showWeatherSub ? (
+            <>
+              <span className="text-white/40">·</span>
+              <span className="uppercase tracking-wide text-white/70">{weatherLabel}</span>
+            </>
+          ) : null}
+        </div>
 
         <Icon
           className={cn(
-            "mx-auto my-2 h-10 w-10 text-white/90 drop-shadow-lg",
+            "mx-auto h-9 w-9 text-white/90 drop-shadow-lg",
             condition === "sunny" && "text-amber-200",
             condition === "evening" && "text-orange-200",
             (condition === "thunder" || condition === "storm") && "text-violet-200",
@@ -89,20 +90,36 @@ export function WeatherHero({
 
         <SunMoonArc astro={astro} />
 
-        <p className="mt-3 text-sm uppercase tracking-wide text-white/80">Buiten</p>
-        <h1 className="text-6xl font-bold tabular-nums text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]">
+        <p className="mt-2 text-[0.65rem] uppercase tracking-[0.25em] text-white/60">
+          Buitentemperatuur
+        </p>
+        <h1 className="text-6xl font-bold tabular-nums leading-none text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]">
           {temp}
-          <sup className="ml-1 text-2xl font-normal text-white/80">°C</sup>
+          <sup className="ml-1 text-2xl font-normal text-white/75">°C</sup>
         </h1>
-        <p className="mt-1 text-lg text-sky-200">
-          Gevoel: {data.gevoelstemperatuur ?? "—"} °C
-        </p>
-        <p className="mt-2 text-sm text-white/90">
-          Min: {data.temp_min_c}°C · Max: {data.temp_max_c}°C
-        </p>
-        <p className="text-sm text-white/80">
-          Luchtvochtigheid: {data.humidity}% · Dauwpunt: {data.dauwpunt} °C
-        </p>
+
+        <div className="mx-auto mt-4 flex max-w-sm flex-wrap items-center justify-center gap-x-4 gap-y-1 rounded-2xl border border-white/10 bg-black/20 px-4 py-2.5 text-sm text-white/90 backdrop-blur-sm">
+          <span>
+            Gevoel{" "}
+            <strong className="font-semibold tabular-nums text-white">
+              {data.gevoelstemperatuur ?? "—"}°
+            </strong>
+          </span>
+          <span className="hidden text-white/30 sm:inline">|</span>
+          <span>
+            Min{" "}
+            <strong className="font-semibold tabular-nums text-sky-200">
+              {data.temp_min_c}°
+            </strong>
+          </span>
+          <span className="hidden text-white/30 sm:inline">|</span>
+          <span>
+            Max{" "}
+            <strong className="font-semibold tabular-nums text-orange-200">
+              {data.temp_max_c}°
+            </strong>
+          </span>
+        </div>
       </div>
     </section>
   );

@@ -231,11 +231,8 @@ export function PrecipitationRadar() {
   return (
     <Card variant="weather" className="border-sky-500/20">
       <CardContent>
-        <p className="mb-1 border-l-2 border-sky-500/50 pl-2 text-xs uppercase tracking-wide text-zinc-400">
-          Neerslagradar
-        </p>
-        <p className="mb-3 pl-2 text-[10px] text-zinc-500">
-          Nederland · kustlijnen door neerslag · gele stip = Harlingen
+        <p className="mb-3 text-[0.65rem] text-zinc-500">
+          Kustlijnen door neerslag · gele stip = Harlingen
         </p>
 
         <div
