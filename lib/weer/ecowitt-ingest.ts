@@ -29,6 +29,12 @@ function optionalNum(raw: string | undefined): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+/** Ruwe gateway-waarde (×0,02 V) of al volt (HP2550 stuurt bv. 3.18). */
+function ws90Volts(raw: number): number {
+  const v = raw > 10 ? raw * 0.02 : raw;
+  return Math.round(v * 100) / 100;
+}
+
 /** Ecowitt POST/GET velden → WeerLive (zelfde logica als upload.php). */
 export function parseEcowittPayload(
   input: Record<string, string>
@@ -102,11 +108,11 @@ export function parseEcowittPayload(
 
   const wh90 = num(input.wh90batt);
   if (wh90 !== undefined) {
-    metric.ws90_voltage_v = Math.round(wh90 * 0.02 * 100) / 100;
+    metric.ws90_voltage_v = ws90Volts(wh90);
   }
   const ws90Cap = num(input.ws90cap_volt);
   if (ws90Cap !== undefined) {
-    metric.ws90_cap_voltage_v = Math.round(ws90Cap * 0.02 * 100) / 100;
+    metric.ws90_cap_voltage_v = ws90Volts(ws90Cap);
   }
 
   const tz = "Europe/Amsterdam";

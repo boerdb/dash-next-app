@@ -44,6 +44,15 @@ describe("parseEcowittPayload", () => {
     assert.equal(r.ws90_voltage_v, 3);
     assert.equal(r.ws90_cap_voltage_v, 4);
   });
+
+  it("accepteert WH90-spanning al in volt (HP2550)", () => {
+    const r = parseEcowittPayload({
+      wh90batt: "3.18",
+      ws90cap_volt: "1.8",
+    });
+    assert.equal(r.ws90_voltage_v, 3.18);
+    assert.equal(r.ws90_cap_voltage_v, 1.8);
+  });
 });
 
 describe("mergeDailyMinMax", () => {
