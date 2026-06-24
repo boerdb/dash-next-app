@@ -93,18 +93,22 @@ export async function maybeInsertMeting(data: WeerLive): Promise<boolean> {
   const dir = data.winddir != null ? Number(data.winddir) : 0;
   const rain = data.dailyrain_mm != null ? Number(data.dailyrain_mm) : 0;
   const sun = data.solarradiation != null ? Number(data.solarradiation) : 0;
+  const barom =
+    data.baromrel_hpa != null && Number.isFinite(Number(data.baromrel_hpa))
+      ? Number(data.baromrel_hpa)
+      : null;
 
   const meetMoment =
     meetMomentFromWeer(data) ??
     null;
 
   await pool.query(
-    `INSERT INTO metingen (meet_moment, temp_c, luchtvochtigheid, wind_kmh, wind_richting, regen_mm, zon_straling)
+    `INSERT INTO metingen (meet_moment, temp_c, luchtvochtigheid, wind_kmh, wind_richting, regen_mm, zon_straling, baromrel_hpa)
      VALUES (
        COALESCE(?, CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '${NL_TZ_OFFSET}')),
-       ?, ?, ?, ?, ?, ?
+       ?, ?, ?, ?, ?, ?, ?
      )`,
-    [meetMoment, temp, humidity, wind, dir, rain, Math.round(sun)]
+    [meetMoment, temp, humidity, wind, dir, rain, Math.round(sun), barom]
   );
   return true;
 }

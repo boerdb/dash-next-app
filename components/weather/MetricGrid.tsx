@@ -1,10 +1,20 @@
 "use client";
 
-import { Droplets, Gauge, Home, Sun } from "lucide-react";
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  Droplets,
+  Gauge,
+  Home,
+  Minus,
+  Sun,
+} from "lucide-react";
 import type { WeerLive } from "@/lib/api/types";
+import { formatBaromTrendDelta } from "@/lib/weer/barom-trend";
 import { getWindDirection, resolveWindDegrees } from "@/lib/utils/wind";
 import { WindArrow } from "@/components/weather/WindArrow";
 import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface MetricGridProps {
   data: WeerLive;
@@ -67,6 +77,30 @@ export function MetricGrid({ data }: MetricGridProps) {
             {Number(data.baromrel_hpa ?? 0).toFixed(1)}
             <span className="ml-1 text-sm font-normal text-zinc-400">hPa</span>
           </p>
+          {data.barom_trend_delta_hpa != null && data.barom_trend_direction ? (
+            <p
+              className={cn(
+                "mt-1 flex items-center justify-center gap-1 text-xs font-medium tabular-nums",
+                data.barom_trend_direction === "up" && "text-emerald-400",
+                data.barom_trend_direction === "down" && "text-amber-400",
+                data.barom_trend_direction === "steady" && "text-zinc-500"
+              )}
+            >
+              {data.barom_trend_direction === "up" ? (
+                <ArrowUpRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              ) : data.barom_trend_direction === "down" ? (
+                <ArrowDownRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              ) : (
+                <Minus className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              )}
+              <span>
+                {formatBaromTrendDelta(data.barom_trend_delta_hpa)} hPa ·{" "}
+                {data.barom_trend_hours ?? 3} u
+              </span>
+            </p>
+          ) : (
+            <p className="mt-1 text-xs text-zinc-500">Trend na 3 uur data</p>
+          )}
           <p className="text-xs text-zinc-400">Relatief</p>
         </MetricCard>
 

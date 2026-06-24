@@ -32,6 +32,11 @@ export interface WeerLive {
   rainrate_mm?: number;
   baromrel_hpa?: number;
   baromabs_hpa?: number;
+  /** Drukverandering over barom_trend_hours (standaard 3 uur). */
+  barom_trend_delta_hpa?: number;
+  barom_trend_hours?: number;
+  barom_trend_direction?: "up" | "down" | "steady";
+  barom_trend_label?: string;
   /** WH57 / gateway: afstand laatste inslag (km) */
   lightning_km?: number | null;
   /** Aantal inslagen vandaag */

@@ -1,5 +1,6 @@
 import type { RowDataPacket } from "mysql2";
 import type { WeerLive } from "@/lib/api/types";
+import { applyBaromTrend } from "@/lib/db/barom-trend";
 import { enrichWeerLive } from "@/lib/weer/enrich-live";
 import { getPool } from "@/lib/db/pool";
 import { applyVandaagTempMinMax, readWeerLiveCache } from "@/lib/db/weer-store";
@@ -39,7 +40,8 @@ export async function fetchWeerLiveFromDb(): Promise<WeerLive> {
   const cached = await readWeerLiveCache();
   if (cached) {
     const withMinMax = await applyVandaagTempMinMax(cached);
-    return enrichWeerLive(withMinMax);
+    const withTrend = await applyBaromTrend(withMinMax);
+    return enrichWeerLive(withTrend);
   }
 
   const fromMetingen = await fallbackFromMetingen();
