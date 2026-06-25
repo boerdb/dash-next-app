@@ -22,6 +22,7 @@ import type {
   AstronomieApi,
   GetijdenResponse,
   KnmiWaarschuwingenApi,
+  PrecipForecastResponse,
   WeerHistorie,
   WeerLive,
 } from "@/lib/api/types";
@@ -106,6 +107,17 @@ export default function WeerPage() {
     ...swrFreshOnOpen,
   });
 
+  const { data: openMeteoForecast } = useSWR<PrecipForecastResponse, FetchError>(
+    "/api/weer/regen-voorspelling",
+    jsonFetcher,
+    {
+      refreshInterval: 1_800_000,
+      shouldRetryOnError: false,
+      dedupingInterval: 5_000,
+      ...swrFreshOnOpen,
+    }
+  );
+
   const astroFallback = useMemo(() => {
     try {
       return toAstronomieApi(getAstronomyInfo());
@@ -137,9 +149,15 @@ export default function WeerPage() {
       getWeatherCondition(
         weer ?? null,
         astroData.period,
-        astroData.sunBelowHorizon
+        astroData.sunBelowHorizon,
+        openMeteoForecast?.currentSky
       ),
-    [weer, astroData.period, astroData.sunBelowHorizon]
+    [
+      weer,
+      astroData.period,
+      astroData.sunBelowHorizon,
+      openMeteoForecast?.currentSky,
+    ]
   );
   const showSkeleton = weerLoading && !weer && !weerError;
 

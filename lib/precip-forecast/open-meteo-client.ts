@@ -1,11 +1,16 @@
+import type { OpenMeteoSky, PrecipForecastResponse, PrecipForecastSlot } from "@/lib/api/types";
 import { HARLINGEN } from "@/lib/location";
-import type { PrecipForecastResponse, PrecipForecastSlot } from "@/lib/api/types";
 
 const TZ = "Europe/Amsterdam";
 /** Komende 48 uur (uurlijks). */
 export const PRECIP_FORECAST_HOURS = 48;
 
 interface OpenMeteoForecastResponse {
+  current?: {
+    cloud_cover?: number;
+    weather_code?: number;
+    precipitation?: number;
+  };
   hourly?: {
     time?: string[];
     precipitation?: number[];
@@ -24,6 +29,23 @@ function formatSlotLabel(isoLocal: string): string {
     return `${day} ${time}`;
   }
   return time;
+}
+
+export function mapOpenMeteoCurrentSky(
+  raw: OpenMeteoForecastResponse
+): OpenMeteoSky | null {
+  const current = raw.current;
+  if (!current) return null;
+  const cloudCoverPct = Number(current.cloud_cover);
+  const weatherCode = Number(current.weather_code);
+  if (!Number.isFinite(cloudCoverPct) || !Number.isFinite(weatherCode)) {
+    return null;
+  }
+  return {
+    cloudCoverPct: Math.round(cloudCoverPct),
+    weatherCode: Math.round(weatherCode),
+    precipitationMm: Math.round(Number(current.precipitation ?? 0) * 10) / 10,
+  };
 }
 
 export function mapOpenMeteoPrecipForecast(
@@ -57,6 +79,7 @@ export async function fetchHarlingenPrecipForecast(): Promise<PrecipForecastResp
   const params = new URLSearchParams({
     latitude: String(HARLINGEN.latitude),
     longitude: String(HARLINGEN.longitude),
+    current: "cloud_cover,weather_code,precipitation",
     hourly: "precipitation,precipitation_probability",
     timezone: TZ,
     forecast_days: "2",
@@ -79,6 +102,7 @@ export async function fetchHarlingenPrecipForecast(): Promise<PrecipForecastResp
   return {
     slots,
     hours: slots.length,
+    currentSky: mapOpenMeteoCurrentSky(raw),
     source: "open-meteo",
     updatedAt: new Date().toISOString(),
   };

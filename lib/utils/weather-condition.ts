@@ -1,5 +1,11 @@
 import type { DayPeriod } from "@/lib/astronomy/sun-moon";
-import type { WeatherCondition, WeerLive } from "@/lib/api/types";
+import type { OpenMeteoSky, WeatherCondition, WeerLive } from "@/lib/api/types";
+import {
+  conditionFromOpenMeteo,
+  openMeteoImpliesRain,
+  openMeteoImpliesSnow,
+  openMeteoImpliesThunder,
+} from "@/lib/open-meteo/condition";
 import { isRecentLightningStrike } from "@/lib/weer/lightning-time";
 
 function conditionFromSolar(solar: number): WeatherCondition {
@@ -31,10 +37,22 @@ function isStationRainy(data: WeerLive): boolean {
   return rate > 0;
 }
 
+function skyFromOpenMeteo(sky: OpenMeteoSky): WeatherCondition {
+  const code = sky.weatherCode;
+  if (openMeteoImpliesThunder(code)) {
+    return code >= 96 ? "storm" : "thunder";
+  }
+  if (openMeteoImpliesSnow(code)) return "snow";
+  if (openMeteoImpliesRain(code) || sky.precipitationMm > 0) return "rain";
+  if (code === 45 || code === 48) return "fog";
+  return conditionFromOpenMeteo(code, sky.cloudCoverPct);
+}
+
 export function getWeatherCondition(
   data: WeerLive | null,
   period: DayPeriod = "day",
-  sunBelowHorizon = false
+  sunBelowHorizon = false,
+  openMeteoSky?: OpenMeteoSky | null
 ): WeatherCondition {
   if (!data) return period === "night" ? "night" : "cloudy";
 
@@ -48,6 +66,10 @@ export function getWeatherCondition(
   }
   if (period === "evening") return "evening";
   if (period === "dawn") return "dawn";
+
+  if (openMeteoSky) {
+    return skyFromOpenMeteo(openMeteoSky);
+  }
 
   return conditionFromSolar(Number(data.solarradiation) || 0);
 }

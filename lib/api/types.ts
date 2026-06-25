@@ -212,9 +212,17 @@ export interface PrecipForecastSlot {
   probabilityPct: number | null;
 }
 
+/** Actuele lucht (Open-Meteo) voor hero-achtergrond. */
+export interface OpenMeteoSky {
+  cloudCoverPct: number;
+  weatherCode: number;
+  precipitationMm: number;
+}
+
 export interface PrecipForecastResponse {
   slots: PrecipForecastSlot[];
   hours: number;
+  currentSky: OpenMeteoSky | null;
   source: "open-meteo";
   updatedAt: string;
 }
