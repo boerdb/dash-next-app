@@ -160,9 +160,28 @@ export function MetricGrid({ data }: MetricGridProps) {
           </StatCell>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 border-t border-white/5 bg-black/20 px-4 py-3 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 border-t border-white/5 bg-black/20 px-4 py-3">
           <FooterStat label="Vocht buiten" value={`${data.humidity ?? "—"}%`} />
           <FooterStat label="Dauwpunt" value={`${data.dauwpunt ?? "—"} °C`} />
+          <FooterStat
+            label="Windchill"
+            value={
+              data.gevoelstemperatuur != null ? (
+                <span
+                  className={
+                    Number(data.gevoelstemperatuur) <
+                    Number(data.temp_c ?? data.gevoelstemperatuur)
+                      ? "text-sky-300"
+                      : undefined
+                  }
+                >
+                  {data.gevoelstemperatuur} °C
+                </span>
+              ) : (
+                "—"
+              )
+            }
+          />
           <FooterStat
             label="Hitte-index"
             value={
