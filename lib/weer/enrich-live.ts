@@ -1,4 +1,5 @@
 import type { WeerLive } from "@/lib/api/types";
+import { computeHeatIndexC } from "@/lib/weer/heat-index";
 
 /** Zelfde formules als weer/api.php (dauwpunt + windchill). */
 export function enrichWeerLive(data: WeerLive): WeerLive {
@@ -16,6 +17,11 @@ export function enrichWeerLive(data: WeerLive): WeerLive {
     const alpha =
       ((a * temp) / (b + temp)) + Math.log(humidity / 100);
     out.dauwpunt = Math.round(((b * alpha) / (a - alpha)) * 10) / 10;
+
+    const hitteIndex = computeHeatIndexC(temp, humidity);
+    if (hitteIndex != null) {
+      out.hitte_index_c = hitteIndex;
+    }
   }
 
   if (!Number.isNaN(temp) && !Number.isNaN(windKmh)) {

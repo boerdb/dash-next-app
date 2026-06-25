@@ -7,6 +7,8 @@ export interface WeerLive {
   humidity2?: number | string;
   tempin_c?: number;
   gevoelstemperatuur?: number | string;
+  /** Hitte-index (°C) bij warm + vochtig weer; vanaf ca. 27 °C. */
+  hitte_index_c?: number | string;
   temp_min_c?: number | string;
   temp_max_c?: number | string;
   dauwpunt?: number | string;

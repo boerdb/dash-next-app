@@ -24,10 +24,20 @@ describe("enrichWeerLive", () => {
 
   it("gevoelstemperatuur met alleen windspeed_kmh (GW1100)", () => {
     const r = enrichWeerLive({
-      temp_c: 27.1,
+      temp_c: 25,
       humidity: 62,
       windspeed_kmh: 0,
     });
-    assert.equal(r.gevoelstemperatuur, 27.1);
+    assert.equal(r.gevoelstemperatuur, 25);
+    assert.equal(r.hitte_index_c, undefined);
+  });
+
+  it("berekent hitte-index bij warm vochtig weer", () => {
+    const r = enrichWeerLive({
+      temp_c: 32,
+      humidity: 70,
+      windspd_avg10m_kmh: 10,
+    });
+    assert.ok(Number(r.hitte_index_c) > 32);
   });
 });

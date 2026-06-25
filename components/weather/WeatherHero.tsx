@@ -98,13 +98,24 @@ export function WeatherHero({
           <sup className="ml-1 text-2xl font-normal text-white/75">°C</sup>
         </h1>
 
-        <div className="mx-auto mt-4 flex max-w-sm flex-wrap items-center justify-center gap-x-4 gap-y-1 rounded-2xl border border-white/10 bg-black/20 px-4 py-2.5 text-sm text-white/90 backdrop-blur-sm">
+        <div className="mx-auto mt-4 flex max-w-md flex-wrap items-center justify-center gap-x-4 gap-y-1 rounded-2xl border border-white/10 bg-black/20 px-4 py-2.5 text-sm text-white/90 backdrop-blur-sm">
           <span>
             Gevoel{" "}
             <strong className="font-semibold tabular-nums text-white">
               {data.gevoelstemperatuur ?? "—"}°
             </strong>
           </span>
+          {data.hitte_index_c != null ? (
+            <>
+              <span className="hidden text-white/30 sm:inline">|</span>
+              <span>
+                Hitte{" "}
+                <strong className="font-semibold tabular-nums text-orange-300">
+                  {data.hitte_index_c}°
+                </strong>
+              </span>
+            </>
+          ) : null}
           <span className="hidden text-white/30 sm:inline">|</span>
           <span>
             Min{" "}
