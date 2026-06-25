@@ -204,69 +204,18 @@ export type WeatherCondition =
   | "partly-cloudy"
   | "cloudy";
 
-/** Aanvulling van OpenWeather — station blijft leidend voor live waarden. */
-export interface OpenWeatherMinutely {
+/** Regenvoorspelling (Open-Meteo, uurlijks). */
+export interface PrecipForecastSlot {
   at: number;
   label: string;
   precipitationMm: number;
+  probabilityPct: number | null;
 }
 
-export interface OpenWeatherHourly {
-  at: number;
-  label: string;
-  tempC: number;
-  feelsLikeC: number | null;
-  popPct: number;
-  humidityPct: number | null;
-  windSpeedKmh: number | null;
-  windDeg: number | null;
-  description: string;
-  icon: string;
-}
-
-export interface OpenWeatherDaily {
-  dagKey: string;
-  label: string;
-  tempMinC: number;
-  tempMaxC: number;
-  popPct: number;
-  uviMax: number | null;
-  windSpeedKmh: number | null;
-  windDeg: number | null;
-  sunriseAt: string | null;
-  sunsetAt: string | null;
-  rainMm: number | null;
-  snowMm: number | null;
-  description: string;
-  icon: string;
-}
-
-export interface OpenWeatherCurrent {
-  description: string;
-  icon: string;
-  /** OpenWeather condition code (bijv. 800 = helder) */
-  weatherId: number;
-  tempC: number | null;
-  feelsLikeC: number | null;
-  cloudsPct: number;
-  visibilityKm: number | null;
-  humidityPct: number | null;
-  dewPointC: number | null;
-  pressureHpa: number | null;
-  uvi: number | null;
-  windSpeedKmh: number | null;
-  windDeg: number | null;
-  windGustKmh: number | null;
-  rainMm1h: number | null;
-  snowMm1h: number | null;
-}
-
-export interface OpenWeatherSupplement {
-  current: OpenWeatherCurrent;
-  minutely: OpenWeatherMinutely[];
-  hourly: OpenWeatherHourly[];
-  daily: OpenWeatherDaily[];
-  dataSource: "onecall-3" | "2.5";
+export interface PrecipForecastResponse {
+  slots: PrecipForecastSlot[];
+  hours: number;
+  source: "open-meteo";
   updatedAt: string;
 }
 

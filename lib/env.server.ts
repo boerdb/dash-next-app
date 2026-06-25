@@ -32,9 +32,7 @@ const envSchema = z.object({
   ENERGIE_BATTERY_LAADSTRATEGIE: z
     .enum(["dynamic_hourly", "grid_friendly"])
     .default("dynamic_hourly"),
-  /** Optioneel — voorspelling & aanvullende metingen op het weer-tabblad */
-  OPENWEATHER_API_KEY: z.string().min(1).optional(),
-  /** KNMI Data Platform — officiële waarschuwingen (waarschuwingen_nederland_48h) */
+  /** Optioneel — officiële KNMI waarschuwingen op het weer-tabblad */
   KNMI_API_KEY: z.string().min(1).optional(),
   /** Provinciecode voor KNMI-waarschuwingen (standaard FR = Friesland / Harlingen) */
   KNMI_PROVINCE: z.string().min(2).max(4).optional(),
@@ -62,7 +60,6 @@ export const env = envSchema.parse({
   ENERGIE_P1_TOKEN: process.env.ENERGIE_P1_TOKEN,
   ENERGIE_BATTERY_LABELS: process.env.ENERGIE_BATTERY_LABELS,
   ENERGIE_BATTERY_LAADSTRATEGIE: process.env.ENERGIE_BATTERY_LAADSTRATEGIE,
-  OPENWEATHER_API_KEY: process.env.OPENWEATHER_API_KEY || undefined,
   KNMI_API_KEY: process.env.KNMI_API_KEY || undefined,
   KNMI_PROVINCE: process.env.KNMI_PROVINCE || undefined,
   WATER_METER_OFFSET_M3: process.env.WATER_METER_OFFSET_M3 || undefined,

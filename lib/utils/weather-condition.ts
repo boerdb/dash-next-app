@@ -1,14 +1,5 @@
 import type { DayPeriod } from "@/lib/astronomy/sun-moon";
-import type { OpenWeatherCurrent, WeatherCondition, WeerLive } from "@/lib/api/types";
-import {
-  conditionFromOpenWeather,
-  openWeatherImpliesFog,
-  openWeatherImpliesRain,
-  openWeatherImpliesSnow,
-  openWeatherImpliesThunder,
-  openWeatherImpliesWind,
-  openWeatherThunderCondition,
-} from "@/lib/openweather/condition";
+import type { WeatherCondition, WeerLive } from "@/lib/api/types";
 import { isRecentLightningStrike } from "@/lib/weer/lightning-time";
 
 function conditionFromSolar(solar: number): WeatherCondition {
@@ -35,30 +26,21 @@ function isStationLightning(data: WeerLive): boolean {
   return isRecentLightningStrike(data.lightning_time ?? undefined);
 }
 
+function isStationRainy(data: WeerLive): boolean {
+  const rate = Number(data.rainrate_mm) || Number(data.rainrate_piezo_mm) || 0;
+  return rate > 0;
+}
+
 export function getWeatherCondition(
   data: WeerLive | null,
   period: DayPeriod = "day",
-  openWeather?: OpenWeatherCurrent | null,
   sunBelowHorizon = false
 ): WeatherCondition {
   if (!data) return period === "night" ? "night" : "cloudy";
 
-  const rainRate = Number(data.rainrate_mm) || 0;
-  const owId = openWeather?.weatherId ?? 0;
-  const owClouds = openWeather?.cloudsPct ?? 0;
-
-  if (openWeather && openWeatherImpliesSnow(owId)) return "snow";
   if (isStationLightning(data)) return "thunder";
-  if (openWeather && openWeatherImpliesThunder(owId)) {
-    return openWeatherThunderCondition(owId);
-  }
-  if (rainRate > 0 || (openWeather && openWeatherImpliesRain(owId))) {
-    return "rain";
-  }
-  if (isStationFoggy(data) || (openWeather && openWeatherImpliesFog(owId))) {
-    return "fog";
-  }
-  if (openWeather && openWeatherImpliesWind(owId)) return "wind";
+  if (isStationRainy(data)) return "rain";
+  if (isStationFoggy(data)) return "fog";
   if (isStationWindy(data)) return "wind";
 
   if (period === "night" || (period === "evening" && sunBelowHorizon)) {
@@ -66,13 +48,6 @@ export function getWeatherCondition(
   }
   if (period === "evening") return "evening";
   if (period === "dawn") return "dawn";
-
-  if (openWeather) {
-    const fromOw = conditionFromOpenWeather(owId, owClouds);
-    if (fromOw !== "cloudy") return fromOw;
-    // Model (804 / hoge bewolking%) zegt soms "dicht" terwijl het station nog duidelijk zon ziet.
-    return conditionFromSolar(Number(data.solarradiation) || 0);
-  }
 
   return conditionFromSolar(Number(data.solarradiation) || 0);
 }

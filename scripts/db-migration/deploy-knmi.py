@@ -91,8 +91,8 @@ def main() -> None:
 
     print("==> knmi-waarschuwingen:")
     print(run("curl -sf -m 20 http://127.0.0.1:3000/api/weer/knmi-waarschuwingen")[:500])
-    print("==> openweather (snippet):")
-    print(run("curl -sf -m 15 http://127.0.0.1:3000/api/weer/openweather")[:200])
+    print("==> regenvoorspelling (snippet):")
+    print(run("curl -sf -m 15 http://127.0.0.1:3000/api/weer/regen-voorspelling")[:200])
     c.close()
     print("\nDeploy klaar.")
 

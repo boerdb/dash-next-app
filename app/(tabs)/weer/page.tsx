@@ -9,21 +9,19 @@ import { MetricGrid } from "@/components/weather/MetricGrid";
 import { SensorExtrasCard } from "@/components/weather/SensorExtrasCard";
 import { TideCard } from "@/components/weather/TideCard";
 import { KnmiWarningsCard } from "@/components/weather/KnmiWarningsCard";
-import { OpenWeatherPanel } from "@/components/weather/OpenWeatherPanel";
+import { PrecipForecastCard } from "@/components/weather/PrecipForecastCard";
 import { PullToRefresh } from "@/components/shared/PullToRefresh";
 import { DataError } from "@/components/shared/DataError";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAstronomyInfo, toAstronomieApi } from "@/lib/astronomy/sun-moon";
 import { jsonFetcher, FetchError } from "@/lib/fetcher";
 import { useRevalidateOnVisible } from "@/lib/hooks/use-revalidate-on-visible";
-import { normalizeOpenWeatherSupplement } from "@/lib/openweather/map";
 import { getWeatherCondition } from "@/lib/utils/weather-condition";
 import { formatWeerUpdateLabel } from "@/lib/weer/update-label";
 import type {
   AstronomieApi,
   GetijdenResponse,
   KnmiWaarschuwingenApi,
-  OpenWeatherSupplement,
   WeerHistorie,
   WeerLive,
 } from "@/lib/api/types";
@@ -108,23 +106,6 @@ export default function WeerPage() {
     ...swrFreshOnOpen,
   });
 
-  const {
-    data: openWeather,
-    error: openWeatherError,
-    isLoading: openWeatherLoading,
-    mutate: mutateOpenWeather,
-  } = useSWR<OpenWeatherSupplement | null, FetchError>(
-    "/api/weer/openweather",
-    openWeatherFetcher,
-    {
-      refreshInterval: 1_800_000,
-      shouldRetryOnError: true,
-      errorRetryCount: 2,
-      dedupingInterval: 5_000,
-      ...swrFreshOnOpen,
-    }
-  );
-
   const astroFallback = useMemo(() => {
     try {
       return toAstronomieApi(getAstronomyInfo());
@@ -141,11 +122,11 @@ export default function WeerPage() {
       mutateHistorie(),
       mutateGetijden(),
       mutateAstro(),
-      mutateOpenWeather(),
       mutateKnmi(),
       swrMutate("/api/weer/radar"),
+      swrMutate("/api/weer/regen-voorspelling"),
     ]);
-  }, [mutateWeer, mutateHistorie, mutateGetijden, mutateAstro, mutateOpenWeather, mutateKnmi]);
+  }, [mutateWeer, mutateHistorie, mutateGetijden, mutateAstro, mutateKnmi]);
 
   useRevalidateOnVisible(refreshAll);
 
@@ -156,10 +137,9 @@ export default function WeerPage() {
       getWeatherCondition(
         weer ?? null,
         astroData.period,
-        openWeather?.current,
         astroData.sunBelowHorizon
       ),
-    [weer, astroData.period, astroData.sunBelowHorizon, openWeather?.current]
+    [weer, astroData.period, astroData.sunBelowHorizon]
   );
   const showSkeleton = weerLoading && !weer && !weerError;
 
@@ -185,14 +165,8 @@ export default function WeerPage() {
             <SensorExtrasCard data={weer} />
           </WeerSection>
 
-          <WeerSection title="Voorspelling" subtitle="OpenWeather · Harlingen">
-            <OpenWeatherPanel
-              data={openWeather}
-              station={weer}
-              error={openWeatherError}
-              isLoading={openWeatherLoading}
-              onRetry={() => mutateOpenWeather()}
-            />
+          <WeerSection title="Regenvoorspelling" subtitle="Open-Meteo · komende 48 uur">
+            <PrecipForecastCard />
           </WeerSection>
 
           <WeerSection title="Neerslagradar" subtitle="Nederland · RainViewer">
@@ -235,29 +209,6 @@ async function knmiFetcher(url: string): Promise<KnmiWaarschuwingenApi | null> {
   return (await res.json()) as KnmiWaarschuwingenApi;
 }
 
-async function openWeatherFetcher(
-  url: string
-): Promise<OpenWeatherSupplement | null> {
-  const res = await fetch(url, { cache: "no-store" });
-  if (res.status === 503) {
-    const body = (await res.json().catch(() => ({}))) as { error?: string };
-    throw new FetchError(
-      body.error ?? "OpenWeather niet geconfigureerd",
-      503
-    );
-  }
-  if (!res.ok) {
-    const body = (await res.json().catch(() => ({}))) as { error?: string };
-    throw new FetchError(body.error ?? "OpenWeather niet beschikbaar", res.status);
-  }
-  const raw = (await res.json()) as Partial<OpenWeatherSupplement>;
-  const normalized = normalizeOpenWeatherSupplement(raw);
-  if (!normalized) {
-    throw new FetchError("OpenWeather ongeldige response", 502);
-  }
-  return normalized;
-}
-
 function WeerSkeleton() {
   return (
     <div className="space-y-8">
@@ -268,7 +219,7 @@ function WeerSkeleton() {
       </div>
       <div className="space-y-3">
         <Skeleton className="h-4 w-28" />
-        <Skeleton className="h-64 w-full rounded-2xl" />
+        <Skeleton className="h-32 w-full rounded-2xl" />
       </div>
       <div className="space-y-3">
         <Skeleton className="h-4 w-32" />
