@@ -212,7 +212,7 @@ export function PrecipitationRadar() {
     return (
       <Card variant="weather">
         <CardContent>
-          <p className="text-sm text-zinc-400">Neerslagradar niet beschikbaar.</p>
+          <p className="text-sm text-zinc-300">Neerslagradar niet beschikbaar.</p>
         </CardContent>
       </Card>
     );
@@ -222,7 +222,7 @@ export function PrecipitationRadar() {
     return (
       <Card variant="weather">
         <CardContent>
-          <p className="text-sm text-zinc-400">Geen radarframes beschikbaar.</p>
+          <p className="text-sm text-zinc-300">Geen radarframes beschikbaar.</p>
         </CardContent>
       </Card>
     );
@@ -231,7 +231,7 @@ export function PrecipitationRadar() {
   return (
     <Card variant="weather" className="border-sky-500/20">
       <CardContent>
-        <p className="mb-3 text-[0.65rem] text-zinc-500">
+        <p className="mb-3 text-[0.65rem] text-zinc-300">
           Kustlijnen door neerslag · gele stip = Harlingen
         </p>
 
@@ -250,7 +250,7 @@ export function PrecipitationRadar() {
               setFrameIndex((i) => Math.max(0, i - 1));
             }}
             disabled={!hasFrames || safeIndex <= 0}
-            className="rounded-lg p-2 text-zinc-400 hover:bg-white/10 disabled:opacity-30"
+            className="rounded-lg p-2 text-zinc-300 hover:bg-white/10 disabled:opacity-30"
             aria-label="Vorig frame"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -288,14 +288,14 @@ export function PrecipitationRadar() {
               });
             }}
             disabled={!hasFrames || safeIndex >= lastIndex}
-            className="rounded-lg p-2 text-zinc-400 hover:bg-white/10 disabled:opacity-30"
+            className="rounded-lg p-2 text-zinc-300 hover:bg-white/10 disabled:opacity-30"
             aria-label="Volgend frame"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="mt-2 flex items-center justify-center gap-2 text-xs text-zinc-400">
+        <div className="mt-2 flex items-center justify-center gap-2 text-xs text-zinc-300">
           <span>
             {currentFrame?.label ?? "Laden…"}
             {followLive && safeIndex === lastIndex ? (

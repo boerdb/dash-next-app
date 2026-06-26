@@ -40,7 +40,7 @@ export function PrecipForecastCard() {
   if (error && !data) {
     return (
       <Card variant="weather" className="border-dashed border-zinc-500/30">
-        <CardContent className="text-center text-sm text-zinc-400">
+        <CardContent className="text-center text-sm text-zinc-300">
           <p>{error.message}</p>
           <button
             type="button"
@@ -65,10 +65,10 @@ export function PrecipForecastCard() {
   return (
     <Card variant="weather" className="border-sky-500/20">
       <CardContent>
-        <p className="mb-1 text-xs font-medium text-zinc-400">
+        <p className="mb-1 text-xs font-medium text-zinc-300">
           Verwachte neerslag · komende {data.hours} uur
         </p>
-        <p className="mb-3 text-[0.65rem] text-zinc-500">
+        <p className="mb-3 text-[0.65rem] text-zinc-300">
           Open-Meteo model · Harlingen · mm per uur
         </p>
         <ChartContainer height={CHART_HEIGHT}>

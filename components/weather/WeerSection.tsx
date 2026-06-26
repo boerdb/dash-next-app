@@ -23,11 +23,11 @@ function SectionHeader({
 }) {
   return (
     <>
-      <h2 className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+      <h2 className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-zinc-400">
         {title}
       </h2>
       {subtitle ? (
-        <p className="mt-0.5 text-xs text-zinc-600">{subtitle}</p>
+        <p className="mt-0.5 text-xs text-zinc-400">{subtitle}</p>
       ) : null}
     </>
   );
@@ -69,7 +69,7 @@ export function WeerSection({
         </header>
         <ChevronDown
           className={cn(
-            "mt-0.5 h-4 w-4 shrink-0 text-zinc-500 transition-transform duration-200",
+            "mt-0.5 h-4 w-4 shrink-0 text-zinc-400 transition-transform duration-200",
             open && "rotate-180"
           )}
           aria-hidden

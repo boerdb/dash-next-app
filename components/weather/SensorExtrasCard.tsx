@@ -41,7 +41,7 @@ function SensorBlock({
     <div className="p-4">
       <div className="mb-3 flex items-center gap-2">
         {icon}
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-300">
           {title}
         </h3>
       </div>
@@ -53,7 +53,7 @@ function SensorBlock({
 function MiniMetric({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="rounded-xl bg-black/25 px-3 py-2.5 text-center">
-      <p className="text-[0.6rem] uppercase tracking-wide text-zinc-600">{label}</p>
+      <p className="text-[0.6rem] uppercase tracking-wide text-zinc-300">{label}</p>
       <p className="mt-1 text-lg font-bold tabular-nums text-zinc-100">{value}</p>
     </div>
   );
@@ -97,7 +97,7 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
                     recentStrike && "text-violet-300",
                     lightningStatus === "risk" && "text-amber-300",
                     lightningStatus === "idle" && wh57Detected && "text-emerald-400/80",
-                    lightningStatus === "idle" && !wh57Detected && "text-zinc-500"
+                    lightningStatus === "idle" && !wh57Detected && "text-zinc-300"
                   )}
                 />
               }
@@ -125,7 +125,7 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
                     value={
                       <>
                         {lightningKm}
-                        <span className="ml-0.5 text-xs font-normal text-zinc-500">km</span>
+                        <span className="ml-0.5 text-xs font-normal text-zinc-300">km</span>
                       </>
                     }
                   />
@@ -143,7 +143,7 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
                     "text-sm",
                     lightningStatus === "risk" && "text-amber-200/90",
                     lightningStatus === "idle" && wh57Detected && "text-emerald-200/80",
-                    lightningStatus === "idle" && !wh57Detected && "text-zinc-500"
+                    lightningStatus === "idle" && !wh57Detected && "text-zinc-300"
                   )}
                 >
                   {statusLabel}
@@ -155,7 +155,7 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
                     "mt-3 flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs",
                     lightningBattery.state === "low"
                       ? "border-amber-500/30 bg-amber-950/20 text-amber-200"
-                      : "border-white/5 bg-black/20 text-zinc-400"
+                      : "border-white/5 bg-black/20 text-zinc-300"
                   )}
                 >
                   {lightningBattery.state === "low" ? (

@@ -58,7 +58,7 @@ export function KnmiWarningsCard({ data }: KnmiWarningsCardProps) {
               <p className={cn("text-sm font-semibold", headerStyle.text)}>
                 KNMI · {data.maxLevelLabel}
               </p>
-              <p className="mt-0.5 text-[0.65rem] text-zinc-400">
+              <p className="mt-0.5 text-[0.65rem] text-zinc-300">
                 Officiële waarschuwing · {provinceLabel}
               </p>
             </div>
@@ -79,7 +79,7 @@ export function KnmiWarningsCard({ data }: KnmiWarningsCardProps) {
           ))}
         </ul>
 
-        <p className="text-[0.6rem] text-zinc-500">
+        <p className="text-[0.6rem] text-zinc-300">
           Bron: KNMI Data Platform · ververst ca. elk kwartier
         </p>
       </CardContent>
@@ -103,7 +103,7 @@ function KnmiWarningRow({ warning }: { warning: KnmiWarningItem }) {
       )}
     >
       <p className={cn("text-sm font-medium", style.text)}>{warning.phenomenonLabel}</p>
-      <p className="mt-0.5 text-[0.65rem] text-zinc-400">
+      <p className="mt-0.5 text-[0.65rem] text-zinc-300">
         {warning.levelLabel}
         {warning.validFrom !== warning.validTo
           ? ` · ${warning.validFrom} – ${warning.validTo}`

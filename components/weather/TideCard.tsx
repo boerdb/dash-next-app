@@ -55,7 +55,7 @@ export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
       ? "text-emerald-400 bg-emerald-500/10"
       : status.kleur === "danger"
         ? "text-rose-400 bg-rose-500/10"
-        : "text-zinc-400 bg-zinc-500/10";
+        : "text-zinc-300 bg-zinc-500/10";
 
   return (
     <Card variant="weather">
@@ -69,7 +69,7 @@ export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
           </span>
         </div>
 
-        <div className="grid grid-cols-4 gap-2 border-b border-white/10 pb-2 text-[0.65rem] uppercase text-zinc-500">
+        <div className="grid grid-cols-4 gap-2 border-b border-white/10 pb-2 text-[0.65rem] uppercase text-zinc-300">
           <span>Getij</span>
           <span>Tijd</span>
           <span className="text-center">Verschil</span>
@@ -83,7 +83,7 @@ export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
           return (
             <Fragment key={`${g.dagKey}-${g.type}-${g.tijd}`}>
               {showDayHeader && (
-                <p className="border-b border-white/10 pb-1 pt-3 text-[0.7rem] font-semibold uppercase tracking-wide text-zinc-400 first:pt-0">
+                <p className="border-b border-white/10 pb-1 pt-3 text-[0.7rem] font-semibold uppercase tracking-wide text-zinc-300 first:pt-0">
                   {g.dagLabel}
                 </p>
               )}
@@ -131,7 +131,7 @@ export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
           );
         })}
 
-        <p className="mt-3 text-center text-[0.65rem] text-zinc-500">
+        <p className="mt-3 text-center text-[0.65rem] text-zinc-300">
           {BRON_TEKST[bron].regel1}
           <br />
           {BRON_TEKST[bron].regel2}

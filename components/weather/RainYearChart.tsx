@@ -67,7 +67,7 @@ export function RainYearChart() {
     return (
       <Card variant="weather">
         <CardContent>
-          <p className="text-sm text-zinc-400">Regenoverzicht niet beschikbaar.</p>
+          <p className="text-sm text-zinc-300">Regenoverzicht niet beschikbaar.</p>
         </CardContent>
       </Card>
     );
@@ -79,13 +79,13 @@ export function RainYearChart() {
     <Card variant="weather" className="border-sky-500/20">
       <CardContent>
         <div className="mb-3 flex items-center justify-between gap-2">
-          <p className="text-xs font-medium text-zinc-400">Regen per maand</p>
+          <p className="text-xs font-medium text-zinc-300">Regen per maand</p>
           <div className="flex items-center gap-1">
             <button
               type="button"
               disabled={!data.kan_vorige_jaar}
               onClick={() => setJaar(jaar - 1)}
-              className="rounded-lg p-1.5 text-zinc-400 hover:bg-white/10 disabled:opacity-30"
+              className="rounded-lg p-1.5 text-zinc-300 hover:bg-white/10 disabled:opacity-30"
               aria-label="Vorig jaar"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -97,7 +97,7 @@ export function RainYearChart() {
               type="button"
               disabled={!data.kan_volgende_jaar}
               onClick={() => setJaar(jaar + 1)}
-              className="rounded-lg p-1.5 text-zinc-400 hover:bg-white/10 disabled:opacity-30"
+              className="rounded-lg p-1.5 text-zinc-300 hover:bg-white/10 disabled:opacity-30"
               aria-label="Volgend jaar"
             >
               <ChevronRight className="h-4 w-4" />
@@ -106,7 +106,7 @@ export function RainYearChart() {
         </div>
 
         {!hasAnyData && (
-          <p className="mb-2 text-xs text-zinc-500">
+          <p className="mb-2 text-xs text-zinc-300">
             Nog geen gearchiveerde regendagen — vult zich na ingest en backfill uit
             metingen.
           </p>
@@ -163,7 +163,7 @@ export function RainYearChart() {
           </ResponsiveContainer>
         </ChartContainer>
 
-        <p className="mt-3 text-center text-sm text-zinc-400">
+        <p className="mt-3 text-center text-sm text-zinc-300">
           Totaal {data.jaar}:{" "}
           <span className="font-semibold text-sky-300">
             {formatMm(data.jaar_totaal_mm)}

@@ -30,8 +30,8 @@ export function TemperatureChart({ data }: TemperatureChartProps) {
   return (
     <Card variant="weather">
       <CardContent>
-        <p className="mb-1 text-xs font-medium text-zinc-400">Temperatuur · 24 uur</p>
-        <p className="mb-3 text-sm text-zinc-500">
+        <p className="mb-1 text-xs font-medium text-zinc-300">Temperatuur · 24 uur</p>
+        <p className="mb-3 text-sm text-zinc-300">
           Gemiddelde{" "}
           <span className="font-semibold tabular-nums text-sky-400">{data.gemiddelde}°C</span>
         </p>
