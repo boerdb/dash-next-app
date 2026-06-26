@@ -16,6 +16,7 @@ import type { AstronomieApi, WeerLive, WeatherCondition } from "@/lib/api/types"
 import { periodLabels } from "@/lib/astronomy/sun-moon";
 import { conditionLabels } from "@/lib/utils/weather-condition";
 import { getWeatherBackgroundStyle } from "@/lib/utils/weather-backgrounds";
+import { isWh57Detected } from "@/lib/weer/sensor-status";
 import { SunMoonArc } from "@/components/weather/SunMoonArc";
 import { cn } from "@/lib/utils";
 
@@ -51,6 +52,7 @@ export function WeatherHero({
   const temp = data.temp_c != null ? Number(data.temp_c).toFixed(1) : "—";
   const periodLabel = periodLabels[astro.period];
   const weatherLabel = conditionLabels[condition];
+  const wh57Detected = isWh57Detected(data);
   const showWeatherSub =
     weatherLabel !== periodLabel &&
     !(astro.period === "day" && ["Bewolkt", "Deels bewolkt", "Zonnig"].includes(weatherLabel));
@@ -72,6 +74,12 @@ export function WeatherHero({
             <>
               <span className="text-white/40">·</span>
               <span className="uppercase tracking-wide text-white/70">{weatherLabel}</span>
+            </>
+          ) : null}
+          {wh57Detected ? (
+            <>
+              <span className="text-white/40">·</span>
+              <span className="uppercase tracking-wide text-emerald-200/90">WH57</span>
             </>
           ) : null}
         </div>

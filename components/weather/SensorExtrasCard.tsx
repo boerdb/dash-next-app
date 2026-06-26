@@ -3,11 +3,15 @@
 import { Battery, BatteryWarning, CloudLightning, Gauge } from "lucide-react";
 import type { WeerLive } from "@/lib/api/types";
 import { getLightningBattery } from "@/lib/weer/sensor-battery";
-import { getLightningStatus } from "@/lib/weer/lightning-storm";
+import {
+  getLightningStatus,
+  getLightningStatusLabel,
+} from "@/lib/weer/lightning-storm";
 import {
   hasLightningSensor,
   hasSensorExtras,
   hasWs90Sensor,
+  isWh57Detected,
 } from "@/lib/weer/sensor-status";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -62,6 +66,8 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
   const showWs90 = hasWs90Sensor(data);
   const lightningBattery = getLightningBattery(data);
   const lightningStatus = getLightningStatus(data);
+  const wh57Detected = isWh57Detected(data);
+  const statusLabel = getLightningStatusLabel(data);
   const lightningKm = data.lightning_km;
   const recentStrike = lightningStatus === "strike";
 
@@ -83,27 +89,35 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
         >
           {showLightning ? (
             <SensorBlock
-              title="Bliksem WH57"
+              title="Bliksem"
               icon={
                 <CloudLightning
                   className={cn(
                     "h-4 w-4",
                     recentStrike && "text-violet-300",
                     lightningStatus === "risk" && "text-amber-300",
-                    lightningStatus === "idle" && "text-zinc-500"
+                    lightningStatus === "idle" && wh57Detected && "text-emerald-400/80",
+                    lightningStatus === "idle" && !wh57Detected && "text-zinc-500"
                   )}
                 />
               }
             >
-              {recentStrike ? (
-                <span className="mb-3 inline-flex rounded-full bg-violet-500/15 px-2 py-0.5 text-[0.6rem] font-medium uppercase tracking-wide text-violet-200">
-                  Recent
-                </span>
-              ) : lightningStatus === "risk" ? (
-                <span className="mb-3 inline-flex rounded-full bg-amber-500/15 px-2 py-0.5 text-[0.6rem] font-medium uppercase tracking-wide text-amber-200">
-                  Kans op onweer
-                </span>
-              ) : null}
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                {wh57Detected ? (
+                  <span className="inline-flex rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[0.6rem] font-medium uppercase tracking-wide text-emerald-200">
+                    WH57 gedetecteerd
+                  </span>
+                ) : null}
+                {recentStrike ? (
+                  <span className="inline-flex rounded-full bg-violet-500/15 px-2 py-0.5 text-[0.6rem] font-medium uppercase tracking-wide text-violet-200">
+                    Recent
+                  </span>
+                ) : lightningStatus === "risk" ? (
+                  <span className="inline-flex rounded-full bg-amber-500/15 px-2 py-0.5 text-[0.6rem] font-medium uppercase tracking-wide text-amber-200">
+                    Kans op onweer
+                  </span>
+                ) : null}
+              </div>
               {lightningKm != null && lightningKm > 0 ? (
                 <div className="grid grid-cols-3 gap-2">
                   <MiniMetric
@@ -123,12 +137,17 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
                     }
                   />
                 </div>
-              ) : lightningStatus === "risk" ? (
-                <p className="text-sm text-amber-200/90">
-                  Onweersfront in de buurt · WH57 actief
-                </p>
               ) : (
-                <p className="text-sm text-zinc-500">Geen inslagen · sensor actief</p>
+                <p
+                  className={cn(
+                    "text-sm",
+                    lightningStatus === "risk" && "text-amber-200/90",
+                    lightningStatus === "idle" && wh57Detected && "text-emerald-200/80",
+                    lightningStatus === "idle" && !wh57Detected && "text-zinc-500"
+                  )}
+                >
+                  {statusLabel}
+                </p>
               )}
               {lightningBattery ? (
                 <div

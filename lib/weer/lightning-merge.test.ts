@@ -2,9 +2,11 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
   computeLightningStormRisk,
+  getLightningStatusLabel,
   isBarometerStormForecast,
   pickBestLightningFields,
 } from "./lightning-storm";
+import { isWh57Detected } from "./sensor-status";
 import { mergeWeerLiveBySource } from "./merge-weer-sources";
 import { mapGatewayLightning } from "./ecowitt-local-client";
 
@@ -27,6 +29,24 @@ describe("lightning storm risk", () => {
       { wh57batt: "5", lightning_km: 12, lightning_num: 1 }
     );
     assert.equal(best.lightning_km, 12);
+  });
+
+  it("labelt WH57-detectie zonder inslag", () => {
+    assert.equal(isWh57Detected({ wh57batt: "5" }), true);
+    assert.equal(
+      getLightningStatusLabel({
+        wh57batt: "5",
+        barom_trend_direction: "down",
+        barom_trend_delta_hpa: -1.2,
+        temp_c: 32,
+        humidity: 55,
+      }),
+      "Kans op onweer (barometer)"
+    );
+    assert.equal(
+      getLightningStatusLabel({ wh57batt: "5" }),
+      "WH57 actief · geen inslagen"
+    );
   });
 });
 

@@ -78,8 +78,25 @@ export function pickBestLightningFields(
 
 export type LightningStatusKind = "strike" | "risk" | "idle";
 
+export type LightningRiskReason = "strike" | "storm_front" | "barometer" | null;
+
+export function getLightningRiskReason(data: WeerLive): LightningRiskReason {
+  if (isRecentLightningStrikeNearby(data)) return "strike";
+  if (isLightningStormFront(data)) return "storm_front";
+  if (isBarometerStormForecast(data)) return "barometer";
+  return null;
+}
+
 export function getLightningStatus(data: WeerLive): LightningStatusKind {
   if (isRecentLightningStrikeNearby(data)) return "strike";
   if (computeLightningStormRisk(data)) return "risk";
   return "idle";
+}
+
+export function getLightningStatusLabel(data: WeerLive): string {
+  const reason = getLightningRiskReason(data);
+  if (reason === "strike") return "Recente inslag gedetecteerd";
+  if (reason === "storm_front") return "WH57 detecteert onweersfront";
+  if (reason === "barometer") return "Kans op onweer (barometer)";
+  return "WH57 actief · geen inslagen";
 }
