@@ -39,7 +39,7 @@ function BatteryUnit({
       )}
     >
       {!bereikbaar ? (
-        <BatteryWarning className="mx-auto h-6 w-6 text-zinc-500" />
+        <BatteryWarning className="mx-auto h-6 w-6 text-zinc-400" />
       ) : charging ? (
         <BatteryCharging className="mx-auto h-6 w-6 text-sky-400" />
       ) : (
@@ -50,16 +50,16 @@ function BatteryUnit({
           )}
         />
       )}
-      <p className="mt-2 text-[0.65rem] uppercase tracking-wide text-zinc-500">
+      <p className="mt-2 text-[0.65rem] uppercase tracking-wide text-zinc-400">
         {label}
       </p>
       {bereikbaar && soc != null ? (
         <p className="mt-1 text-2xl font-bold tabular-nums text-white">
           {soc}
-          <span className="text-sm font-normal text-zinc-500">%</span>
+          <span className="text-sm font-normal text-zinc-400">%</span>
         </p>
       ) : (
-        <p className="mt-1 text-xs text-zinc-500">{melding ?? "Offline"}</p>
+        <p className="mt-1 text-xs text-zinc-400">{melding ?? "Offline"}</p>
       )}
       {bereikbaar ? (
         <>
@@ -68,20 +68,20 @@ function BatteryUnit({
               "mt-2 text-xs font-medium tabular-nums",
               charging && "text-sky-300",
               discharging && "text-emerald-400",
-              !charging && !discharging && "text-zinc-500"
+              !charging && !discharging && "text-zinc-400"
             )}
           >
             {powerLabel(vermogen_w)} · {Math.abs(vermogen_w)} W
           </p>
           {(voltage_v != null || cycles != null) && (
-            <p className="mt-1 text-[0.65rem] text-zinc-600">
+            <p className="mt-1 text-[0.65rem] text-zinc-400">
               {voltage_v != null ? `${voltage_v} V` : ""}
               {voltage_v != null && cycles != null ? " · " : ""}
               {cycles != null ? `${cycles} cycli` : ""}
             </p>
           )}
           {(vandaag_laden_kwh != null || vandaag_ontladen_kwh != null) && (
-            <p className="mt-1.5 text-[0.65rem] text-zinc-500">
+            <p className="mt-1.5 text-[0.65rem] text-zinc-400">
               Vandaag {vandaag_laden_kwh ?? 0} / {vandaag_ontladen_kwh ?? 0} kWh
             </p>
           )}
@@ -105,14 +105,14 @@ export function BatteryPanel({ data }: BatteryPanelProps) {
           {hasOnline && data.batterij_soc_gemiddeld != null ? (
             <p className="text-xl font-bold text-white">
               Gemiddeld {data.batterij_soc_gemiddeld}
-              <span className="text-sm font-normal text-zinc-400">% geladen</span>
+              <span className="text-sm font-normal text-zinc-300">% geladen</span>
             </p>
           ) : groep?.bereikbaar ? (
             <p className="text-xl font-bold text-white">
               {groep.aantal} batterijen via P1
             </p>
           ) : (
-            <p className="text-sm text-zinc-500">Geen batterij bereikbaar</p>
+            <p className="text-sm text-zinc-400">Geen batterij bereikbaar</p>
           )}
           {groep?.bereikbaar ? (
             <div className="mt-2 space-y-1 text-sm text-violet-200/90">
@@ -122,13 +122,13 @@ export function BatteryPanel({ data }: BatteryPanelProps) {
                 {groep.target_power_w != null ? ` (doel ${groep.target_power_w} W)` : ""}
               </p>
               {(groep.max_laden_w != null || groep.max_ontladen_w != null) && (
-                <p className="text-xs text-zinc-500">
+                <p className="text-xs text-zinc-400">
                   Max {groep.max_laden_w ?? "?"} W laden · {groep.max_ontladen_w ?? "?"} W
                   ontladen
                 </p>
               )}
               {groep.permissions.length > 0 ? (
-                <p className="text-xs text-zinc-500">
+                <p className="text-xs text-zinc-400">
                   {formatPermissions(groep.permissions)}
                 </p>
               ) : null}

@@ -32,17 +32,17 @@ export function PowerChart({ data }: PowerChartProps) {
   return (
     <Card variant="energy">
       <CardContent>
-        <p className="mb-1 text-xs font-medium text-zinc-400">Netvermogen · 24 uur</p>
-        <p className="mb-3 text-[0.65rem] text-zinc-500">
+        <p className="mb-1 text-xs font-medium text-zinc-300">Netvermogen · 24 uur</p>
+        <p className="mb-3 text-[0.65rem] text-zinc-300">
           Positief = afname · negatief = teruglevering
         </p>
         {pointCount === 0 && (
-          <p className="mb-2 text-xs text-zinc-500">
+          <p className="mb-2 text-xs text-zinc-300">
             Nog geen historie — vult zich elke 5 minuten (ook als dit scherm dicht is).
           </p>
         )}
         {pointCount > 0 && pointCount < 4 && (
-          <p className="mb-2 text-xs text-zinc-500">
+          <p className="mb-2 text-xs text-zinc-300">
             Beperkte historie — oudere uren zonder data blijven leeg; nieuwe punten komen elke 5 min bij.
           </p>
         )}

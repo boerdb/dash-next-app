@@ -31,14 +31,14 @@ function MiniStat({
 }) {
   return (
     <div className="rounded-xl bg-black/25 px-3 py-2.5">
-      <div className="mb-1 flex items-center gap-1.5 text-[0.6rem] uppercase tracking-wide text-zinc-600">
+      <div className="mb-1 flex items-center gap-1.5 text-[0.6rem] uppercase tracking-wide text-zinc-300">
         {icon}
         {label}
       </div>
       <p className={cn("text-lg font-bold tabular-nums", accent ?? "text-zinc-100")}>
         {value}
       </p>
-      {detail ? <p className="mt-1 text-[0.65rem] text-zinc-500">{detail}</p> : null}
+      {detail ? <p className="mt-1 text-[0.65rem] text-zinc-400">{detail}</p> : null}
     </div>
   );
 }
@@ -65,7 +65,7 @@ export function DailyStats({ data }: DailyStatsProps) {
               value={
                 <>
                   {enphase.vandaag_kwh}{" "}
-                  <span className="text-sm font-normal text-zinc-500">kWh</span>
+                  <span className="text-sm font-normal text-zinc-400">kWh</span>
                 </>
               }
               detail={
@@ -82,7 +82,7 @@ export function DailyStats({ data }: DailyStatsProps) {
             value={
               <>
                 {data.stroom_vandaag_in}{" "}
-                <span className="text-sm font-normal text-zinc-500">kWh</span>
+                <span className="text-sm font-normal text-zinc-400">kWh</span>
               </>
             }
           />
@@ -92,7 +92,7 @@ export function DailyStats({ data }: DailyStatsProps) {
             value={
               <>
                 {data.stroom_vandaag_uit}{" "}
-                <span className="text-sm font-normal text-zinc-500">kWh</span>
+                <span className="text-sm font-normal text-zinc-400">kWh</span>
               </>
             }
             accent="text-emerald-400"
@@ -106,7 +106,7 @@ export function DailyStats({ data }: DailyStatsProps) {
             value={
               <>
                 {data.gas_vandaag}{" "}
-                <span className="text-sm font-normal text-zinc-500">m³</span>
+                <span className="text-sm font-normal text-zinc-400">m³</span>
               </>
             }
             accent="text-amber-100"
@@ -123,7 +123,7 @@ export function DailyStats({ data }: DailyStatsProps) {
             value={
               <>
                 {data.water_vandaag}{" "}
-                <span className="text-sm font-normal text-zinc-500">L</span>
+                <span className="text-sm font-normal text-zinc-400">L</span>
               </>
             }
             detail={
@@ -138,14 +138,14 @@ export function DailyStats({ data }: DailyStatsProps) {
             <div className="flex items-start gap-3">
               <Droplets className="mt-0.5 h-5 w-5 shrink-0 text-sky-400" />
               <div className="min-w-0">
-                <p className="text-[0.65rem] uppercase tracking-wide text-zinc-500">
+                <p className="text-[0.65rem] uppercase tracking-wide text-zinc-400">
                   Watermeter (geschat)
                 </p>
                 <p className="mt-0.5 text-2xl font-bold tabular-nums text-sky-100">
                   {data.water_meterstand_label}{" "}
-                  <span className="text-base font-normal text-zinc-500">m³</span>
+                  <span className="text-base font-normal text-zinc-400">m³</span>
                 </p>
-                <p className="mt-1 text-[0.65rem] text-zinc-600">
+                <p className="mt-1 text-[0.65rem] text-zinc-400">
                   Op basis van opgave 1404 m³ (8-2-2026) + sensorverbruik
                 </p>
               </div>

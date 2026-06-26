@@ -35,12 +35,12 @@ export function BatteryChart({ data }: BatteryChartProps) {
   return (
     <Card variant="energy" className="border-violet-500/15">
       <CardContent>
-        <p className="mb-1 text-xs font-medium text-zinc-400">Batterijvermogen · 24 uur</p>
-        <p className="mb-3 text-[0.65rem] text-zinc-500">
+        <p className="mb-1 text-xs font-medium text-zinc-300">Batterijvermogen · 24 uur</p>
+        <p className="mb-3 text-[0.65rem] text-zinc-300">
           Positief = laden · negatief = ontladen
         </p>
         {pointCount < 2 && (
-          <p className="mb-2 text-xs text-zinc-500">
+          <p className="mb-2 text-xs text-zinc-300">
             Grafiek vult zich na elke 5 minuten metingen.
           </p>
         )}
