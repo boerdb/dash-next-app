@@ -69,7 +69,13 @@ export interface WeerLive {
   solarradiation?: number | string;
   tide_info?: string;
   server_timestamp?: string;
-  [key: string]: string | number | null | undefined;
+  [key: string]:
+    | string
+    | number
+    | boolean
+    | null
+    | undefined
+    | { gw1100_at?: string | null; hp2550_at?: string | null };
 }
 
 export interface WeerHistorie {
