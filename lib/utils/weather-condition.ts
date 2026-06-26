@@ -2,19 +2,25 @@ import type { DayPeriod } from "@/lib/astronomy/sun-moon";
 import type { OpenMeteoSky, WeatherCondition, WeerLive } from "@/lib/api/types";
 import {
   conditionFromOpenMeteo,
+  conditionFromShortwaveRadiation,
+  isClearSkyCondition,
   openMeteoImpliesRain,
   openMeteoImpliesSnow,
   openMeteoImpliesThunder,
+  pickDarkerSkyCondition,
 } from "@/lib/open-meteo/condition";
 import {
   computeLightningStormRisk,
   isRecentLightningStrikeNearby,
 } from "@/lib/weer/lightning-storm";
 
-function conditionFromSolar(solar: number): WeatherCondition {
-  if (solar > 300) return "sunny";
-  if (solar > 50) return "partly-cloudy";
-  return "cloudy";
+function blendWithLocalSolar(
+  meteoCondition: WeatherCondition,
+  solarWm2: number
+): WeatherCondition {
+  if (!isClearSkyCondition(meteoCondition)) return meteoCondition;
+  const local = conditionFromShortwaveRadiation(solarWm2);
+  return pickDarkerSkyCondition(meteoCondition, local);
 }
 
 function isStationFoggy(data: WeerLive): boolean {
@@ -68,17 +74,27 @@ export function getWeatherCondition(
   if (isStationFoggy(data)) return "fog";
   if (isStationWindy(data)) return "wind";
 
-  if (period === "night" || (period === "evening" && sunBelowHorizon)) {
+  if ( period === "night" || ( period === "evening" && sunBelowHorizon ) ) {
     return "night";
   }
-  if (period === "evening") return "evening";
-  if (period === "dawn") return "dawn";
+  if ( period === "evening" ) return "evening";
+  if ( period === "dawn" ) return "dawn";
+
+  const stationSolar = Number(data.solarradiation);
 
   if (openMeteoSky) {
-    return skyFromOpenMeteo(openMeteoSky);
+    const meteo = skyFromOpenMeteo(openMeteoSky);
+    if (Number.isFinite(stationSolar) && stationSolar >= 0) {
+      return blendWithLocalSolar(meteo, stationSolar);
+    }
+    return meteo;
   }
 
-  return conditionFromSolar(Number(data.solarradiation) || 0);
+  if (Number.isFinite(stationSolar) && stationSolar >= 0) {
+    return conditionFromShortwaveRadiation(stationSolar);
+  }
+
+  return "cloudy";
 }
 
 export const conditionLabels: Record<WeatherCondition, string> = {

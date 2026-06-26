@@ -27,6 +27,20 @@ export function pickSunnierSkyCondition(
     : model;
 }
 
+/** Voor lokale schaduw: station lager dan regionaal model → donkerder icoon. */
+export function pickDarkerSkyCondition(
+  a: ClearSkyCondition,
+  b: ClearSkyCondition
+): ClearSkyCondition {
+  return CLEAR_SKY_RANK[a] < CLEAR_SKY_RANK[b] ? a : b;
+}
+
+export function isClearSkyCondition(
+  condition: WeatherCondition
+): condition is ClearSkyCondition {
+  return Object.hasOwn(CLEAR_SKY_RANK, condition);
+}
+
 /** WMO weather interpretation codes (Open-Meteo). */
 export function conditionFromOpenMeteo(
   weatherCode: number,
