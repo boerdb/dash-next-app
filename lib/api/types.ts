@@ -48,6 +48,8 @@ export interface WeerLive {
   lightning_time_raw?: number | null;
   /** WH57 / barometer: kans op onweer (console-icoon zonder inslag). */
   lightning_storm_risk?: boolean;
+  /** Houdt stormkans aan (Amsterdam) zoals HP2550-console. */
+  lightning_storm_risk_until?: string | null;
   /** WS90 batterijspanning (V) */
   ws90_voltage_v?: number;
   ws90_cap_voltage_v?: number;

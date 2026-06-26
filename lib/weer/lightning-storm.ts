@@ -2,10 +2,26 @@ import type { WeerLive } from "@/lib/api/types";
 import { isRecentLightningStrike } from "@/lib/weer/lightning-time";
 
 const WH57_MAX_KM = 40;
+const NL_TZ = "Europe/Amsterdam";
+/** Console houdt onweersicoon vaak uren actief na trigger. */
+export const STORM_RISK_LATCH_MS = 4 * 60 * 60 * 1000;
 
 function fieldPresent(data: WeerLive, key: keyof WeerLive): boolean {
   const v = data[key];
   return v !== undefined && v !== "";
+}
+
+function latchUntilIso(now: number): string {
+  return new Date(now + STORM_RISK_LATCH_MS)
+    .toLocaleString("sv-SE", { timeZone: NL_TZ })
+    .replace("T", " ")
+    .slice(0, 19);
+}
+
+function parseUntilIso(iso: string | null | undefined): number | null {
+  if (!iso) return null;
+  const t = new Date(iso.replace(" ", "T")).getTime();
+  return Number.isNaN(t) ? null : t;
 }
 
 /** Recente inslag binnen WH57-bereik. */
@@ -28,21 +44,87 @@ export function isLightningStormFront(data: WeerLive): boolean {
 
 /** Console-achtige stormvoorspelling uit dalende druk + warm vochtig weer. */
 export function isBarometerStormForecast(data: WeerLive): boolean {
-  if (data.barom_trend_direction !== "down") return false;
   const delta = Number(data.barom_trend_delta_hpa);
   const temp = Number(data.temp_c);
   const humidity = Number(data.humidity);
+  if (!fieldPresent(data, "wh57batt")) return false;
   if (!Number.isFinite(delta) || delta > -0.8) return false;
   if (!Number.isFinite(temp) || temp < 24) return false;
   if (!Number.isFinite(humidity) || humidity < 45) return false;
-  return fieldPresent(data, "wh57batt");
+  return data.barom_trend_direction === "down";
+}
+
+/** Warm vochtige lucht + WH57: onweersomgeving (HP2550-icoon zonder nieuwe drukdaling). */
+export function isConvectiveStormSetup(data: WeerLive): boolean {
+  if (!fieldPresent(data, "wh57batt")) return false;
+  const temp = Number(data.temp_c);
+  const humidity = Number(data.humidity);
+  const heatIndex = Number(data.hitte_index_c);
+  const delta = Number(data.barom_trend_delta_hpa);
+  if (!Number.isFinite(temp) || temp < 28) return false;
+  if (!Number.isFinite(humidity) || humidity < 45) return false;
+  if (Number.isFinite(heatIndex) && heatIndex >= 36) return true;
+  if (temp >= 32 && humidity >= 50 && Number.isFinite(delta) && delta <= 0) {
+    return true;
+  }
+  return false;
+}
+
+export function shouldClearStormRiskLatch(data: WeerLive): boolean {
+  const delta = Number(data.barom_trend_delta_hpa);
+  return (
+    data.barom_trend_direction === "up" &&
+    Number.isFinite(delta) &&
+    delta >= 0.8
+  );
 }
 
 export function computeLightningStormRisk(data: WeerLive): boolean {
   if (isRecentLightningStrikeNearby(data)) return true;
   if (isLightningStormFront(data)) return true;
   if (isBarometerStormForecast(data)) return true;
+  if (isConvectiveStormSetup(data)) return true;
   return false;
+}
+
+/** Berekent stormkans incl. latch (voor ingest én live). */
+export function resolveLightningStormRisk(
+  data: WeerLive,
+  previous: WeerLive | null,
+  now = Date.now()
+): WeerLive {
+  if (shouldClearStormRiskLatch(data)) {
+    const immediate = computeLightningStormRisk(data);
+    return {
+      ...data,
+      lightning_storm_risk: immediate,
+      lightning_storm_risk_until: immediate ? latchUntilIso(now) : null,
+    };
+  }
+
+  const immediate = computeLightningStormRisk(data);
+  if (immediate) {
+    return {
+      ...data,
+      lightning_storm_risk: true,
+      lightning_storm_risk_until: latchUntilIso(now),
+    };
+  }
+
+  const untilMs = parseUntilIso(previous?.lightning_storm_risk_until);
+  if (untilMs != null && untilMs > now) {
+    return {
+      ...data,
+      lightning_storm_risk: true,
+      lightning_storm_risk_until: previous?.lightning_storm_risk_until ?? null,
+    };
+  }
+
+  return {
+    ...data,
+    lightning_storm_risk: false,
+    lightning_storm_risk_until: null,
+  };
 }
 
 export function pickBestLightningFields(
@@ -78,17 +160,28 @@ export function pickBestLightningFields(
 
 export type LightningStatusKind = "strike" | "risk" | "idle";
 
-export type LightningRiskReason = "strike" | "storm_front" | "barometer" | null;
+export type LightningRiskReason =
+  | "strike"
+  | "storm_front"
+  | "barometer"
+  | "convective"
+  | "latched"
+  | null;
 
 export function getLightningRiskReason(data: WeerLive): LightningRiskReason {
   if (isRecentLightningStrikeNearby(data)) return "strike";
   if (isLightningStormFront(data)) return "storm_front";
   if (isBarometerStormForecast(data)) return "barometer";
+  if (isConvectiveStormSetup(data)) return "convective";
+  if (data.lightning_storm_risk && data.lightning_storm_risk_until) {
+    return "latched";
+  }
   return null;
 }
 
 export function getLightningStatus(data: WeerLive): LightningStatusKind {
   if (isRecentLightningStrikeNearby(data)) return "strike";
+  if (data.lightning_storm_risk === true) return "risk";
   if (computeLightningStormRisk(data)) return "risk";
   return "idle";
 }
@@ -98,5 +191,7 @@ export function getLightningStatusLabel(data: WeerLive): string {
   if (reason === "strike") return "Recente inslag gedetecteerd";
   if (reason === "storm_front") return "WH57 detecteert onweersfront";
   if (reason === "barometer") return "Kans op onweer (barometer)";
+  if (reason === "convective") return "Kans op onweer · warm & vochtig";
+  if (reason === "latched") return "Kans op onweer · nog actief";
   return "WH57 actief · geen inslagen";
 }

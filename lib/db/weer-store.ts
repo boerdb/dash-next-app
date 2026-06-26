@@ -1,6 +1,7 @@
 import type { RowDataPacket } from "mysql2";
 import type { WeerLive } from "@/lib/api/types";
 import { enrichWeerLive } from "@/lib/weer/enrich-live";
+import { resolveLightningStormRisk } from "@/lib/weer/lightning-storm";
 import { applyWindAvg10m } from "@/lib/weer/wind-avg10m";
 import { mergeWeerLiveBySource } from "@/lib/weer/merge-weer-sources";
 import {
@@ -69,14 +70,16 @@ export async function readWeerLiveCache(): Promise<WeerLive | null> {
 }
 
 export async function writeWeerLiveCache(data: WeerLive): Promise<WeerLive> {
+  const previous = await readWeerLiveCache();
   const enriched = enrichWeerLive(data);
+  const withStorm = resolveLightningStormRisk(enriched, previous);
   const pool = getPool();
   await pool.query(
     `INSERT INTO weer_live (id, payload) VALUES (1, ?)
      ON DUPLICATE KEY UPDATE payload = VALUES(payload), updated_at = CURRENT_TIMESTAMP`,
-    [JSON.stringify(enriched)]
+    [JSON.stringify(withStorm)]
   );
-  return enriched;
+  return withStorm;
 }
 
 /** Elke 5 min een rij in metingen (zoals save_weather.php cron). */
@@ -130,8 +133,9 @@ export async function ingestWeerLive(raw: WeerLive): Promise<WeerLive> {
   const merged = mergeWeerLiveBySource(raw, previous);
   const withWindAvg = applyWindAvg10m(merged, previous);
   const enriched = enrichWeerLive(withWindAvg);
-  await maybeInsertMeting(enriched);
-  const withMinMax = await applyVandaagTempMinMax(enriched);
+  const withStorm = resolveLightningStormRisk(enriched, previous);
+  await maybeInsertMeting(withStorm);
+  const withMinMax = await applyVandaagTempMinMax(withStorm);
   const saved = await writeWeerLiveCache(withMinMax);
   try {
     const sync = regenDagSyncFromIngest(saved, previous);

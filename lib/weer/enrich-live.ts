@@ -1,6 +1,5 @@
 import type { WeerLive } from "@/lib/api/types";
 import { computeHeatIndexC } from "@/lib/weer/heat-index";
-import { computeLightningStormRisk } from "@/lib/weer/lightning-storm";
 
 /** Zelfde formules als weer/api.php (dauwpunt + windchill). */
 export function enrichWeerLive(data: WeerLive): WeerLive {
@@ -36,8 +35,6 @@ export function enrichWeerLive(data: WeerLive): WeerLive {
     }
     out.gevoelstemperatuur = Math.round(gevoel * 10) / 10;
   }
-
-  out.lightning_storm_risk = computeLightningStormRisk(out);
 
   return out;
 }

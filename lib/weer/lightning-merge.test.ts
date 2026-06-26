@@ -4,7 +4,10 @@ import {
   computeLightningStormRisk,
   getLightningStatusLabel,
   isBarometerStormForecast,
+  isConvectiveStormSetup,
   pickBestLightningFields,
+  resolveLightningStormRisk,
+  STORM_RISK_LATCH_MS,
 } from "./lightning-storm";
 import { isWh57Detected } from "./sensor-status";
 import { mergeWeerLiveBySource } from "./merge-weer-sources";
@@ -46,6 +49,50 @@ describe("lightning storm risk", () => {
     assert.equal(
       getLightningStatusLabel({ wh57batt: "5" }),
       "WH57 actief · geen inslagen"
+    );
+  });
+
+  it("detecteert convectieve setup bij warm vochtig weer", () => {
+    const data = {
+      wh57batt: "5",
+      temp_c: 34,
+      humidity: 55,
+      hitte_index_c: 40.2,
+      barom_trend_direction: "steady" as const,
+      barom_trend_delta_hpa: -0.4,
+    };
+    assert.equal(isConvectiveStormSetup(data), true);
+    assert.equal(computeLightningStormRisk(data), true);
+    assert.equal(
+      getLightningStatusLabel(data),
+      "Kans op onweer · warm & vochtig"
+    );
+  });
+
+  it("houdt stormkans aan via latch na dalende druk", () => {
+    const now = Date.parse("2026-06-19T15:00:00");
+    const until = new Date(now + STORM_RISK_LATCH_MS)
+      .toLocaleString("sv-SE", { timeZone: "Europe/Amsterdam" })
+      .replace("T", " ")
+      .slice(0, 19);
+    const previous = {
+      wh57batt: "5",
+      lightning_storm_risk: true,
+      lightning_storm_risk_until: until,
+    };
+    const current = {
+      wh57batt: "5",
+      temp_c: 22,
+      humidity: 40,
+      barom_trend_direction: "steady" as const,
+      barom_trend_delta_hpa: -0.2,
+    };
+    const resolved = resolveLightningStormRisk(current, previous, now);
+    assert.equal(resolved.lightning_storm_risk, true);
+    assert.equal(resolved.lightning_storm_risk_until, until);
+    assert.equal(
+      getLightningStatusLabel(resolved),
+      "Kans op onweer · nog actief"
     );
   });
 });
