@@ -15,8 +15,8 @@ export default function TabsError({
 
   return (
     <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-8 text-center">
-      <h2 className="text-lg font-semibold text-white">Er ging iets mis</h2>
-      <p className="mt-2 text-sm text-zinc-400">{error.message}</p>
+      <h2 className="text-lg font-semibold text-foreground">Er ging iets mis</h2>
+      <p className="mt-2 text-sm text-surface-muted">{error.message}</p>
       <button
         type="button"
         onClick={reset}

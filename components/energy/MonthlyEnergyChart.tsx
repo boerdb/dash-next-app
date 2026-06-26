@@ -19,6 +19,7 @@ import { dagTitelLang } from "@/lib/energie/maand-labels";
 import { jsonFetcher } from "@/lib/fetcher";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart-container";
+import { chartTooltipStyle, useChartTheme } from "@/lib/hooks/use-chart-theme";
 const CHART_HEIGHT = 220;
 const COLOR_NET = "#a78bfa";
 const COLOR_BAT = "#38bdf8";
@@ -43,10 +44,10 @@ function formatKwh(n: number) {
 function DagDetail({ dag }: { dag: EnergieMaandDag }) {
   const verbruik = dag.net_in_kwh + dag.batterij_kwh;
   return (
-    <div className="mt-4 space-y-3 border-t border-white/10 pt-4">
+    <div className="mt-4 space-y-3 border-t border-card-border pt-4">
       <div>
-        <p className="text-sm font-medium text-white">{dagTitelLang(dag.dag)}</p>
-        <p className="text-xs text-zinc-300">
+        <p className="text-sm font-medium text-foreground">{dagTitelLang(dag.dag)}</p>
+        <p className="text-xs text-surface-muted">
           Verbruik {formatKwh(verbruik)}
           {dag.net_uit_kwh > 0 && (
             <span className="text-amber-300/90">
@@ -58,29 +59,29 @@ function DagDetail({ dag }: { dag: EnergieMaandDag }) {
       </div>
       <ul className="space-y-2 text-sm">
         <li className="flex items-center justify-between gap-2">
-          <span className="flex items-center gap-2 text-zinc-300">
+          <span className="flex items-center gap-2 text-surface-muted">
             <span
               className="h-2.5 w-2.5 rounded-full"
               style={{ background: COLOR_NET }}
             />
             Van het net
           </span>
-          <span className="font-medium text-white">{formatKwh(dag.net_in_kwh)}</span>
+          <span className="font-medium text-foreground">{formatKwh(dag.net_in_kwh)}</span>
         </li>
         <li className="flex items-center justify-between gap-2">
-          <span className="flex items-center gap-2 text-zinc-300">
+          <span className="flex items-center gap-2 text-surface-muted">
             <span
               className="h-2.5 w-2.5 rounded-full"
               style={{ background: COLOR_BAT }}
             />
             Van batterijen
           </span>
-          <span className="font-medium text-white">
+          <span className="font-medium text-foreground">
             {formatKwh(dag.batterij_kwh)}
           </span>
         </li>
         <li className="flex items-center justify-between gap-2">
-          <span className="flex items-center gap-2 text-zinc-300">
+          <span className="flex items-center gap-2 text-surface-muted">
             <span
               className="h-2.5 w-2.5 rounded-full"
               style={{ background: COLOR_EXPORT }}
@@ -97,6 +98,7 @@ function DagDetail({ dag }: { dag: EnergieMaandDag }) {
 }
 
 export function MonthlyEnergyChart() {
+  const chartTheme = useChartTheme();
   const now = new Date();
   const initJaar = Number(
     now.toLocaleString("en-CA", {
@@ -160,7 +162,7 @@ export function MonthlyEnergyChart() {
     return (
       <Card variant="energy">
         <CardContent>
-          <p className="text-sm text-zinc-300">
+          <p className="text-sm text-surface-muted">
             Maandoverzicht vult zich na de eerste volledige dag met data.
           </p>
         </CardContent>
@@ -176,7 +178,7 @@ export function MonthlyEnergyChart() {
     <Card variant="energy">
       <CardContent>
         <div className="mb-3 flex items-center justify-between gap-2">
-          <p className="text-xs font-medium text-zinc-300">Dagbalans stroom</p>
+          <p className="text-xs font-medium text-surface-muted">Dagbalans stroom</p>
           <div className="flex items-center gap-1">
             <button
               type="button"
@@ -186,12 +188,12 @@ export function MonthlyEnergyChart() {
                 setJaar(p.jaar);
                 setMaand(p.maand);
               }}
-              className="rounded-lg p-1.5 text-zinc-300 hover:bg-white/10 disabled:opacity-30"
+              className="rounded-lg p-1.5 text-surface-muted hover:bg-surface-subtle disabled:opacity-30"
               aria-label="Vorige maand"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="min-w-[7rem] text-center text-sm font-medium text-zinc-200">
+            <span className="min-w-[7rem] text-center text-sm font-medium text-foreground">
               {data.maand_label}
             </span>
             <button
@@ -202,7 +204,7 @@ export function MonthlyEnergyChart() {
                 setJaar(n.jaar);
                 setMaand(n.maand);
               }}
-              className="rounded-lg p-1.5 text-zinc-300 hover:bg-white/10 disabled:opacity-30"
+              className="rounded-lg p-1.5 text-surface-muted hover:bg-surface-subtle disabled:opacity-30"
               aria-label="Volgende maand"
             >
               <ChevronRight className="h-4 w-4" />
@@ -211,7 +213,7 @@ export function MonthlyEnergyChart() {
         </div>
 
         {!hasAnyData && (
-          <p className="mb-2 text-xs text-zinc-300">
+          <p className="mb-2 text-xs text-surface-muted">
             Nog geen dagtotalen — na middernacht verschijnen eerdere dagen; vandaag
             werkt direct mee.
           </p>
@@ -227,31 +229,26 @@ export function MonthlyEnergyChart() {
                 if (typeof idx === "number") setSelectedIndex(idx);
               }}
             >
-              <CartesianGrid
-                stroke="rgba(255,255,255,0.05)"
-                vertical={false}
-              />
-              <ReferenceLine y={0} stroke="rgba(255,255,255,0.2)" />
+              <CartesianGrid stroke={chartTheme.grid} vertical={false} />
+              <ReferenceLine y={0} stroke={chartTheme.refLine} />
               <XAxis
                 dataKey="label"
-                tick={{ fill: "#a1a1aa", fontSize: 9 }}
+                tick={{ fill: chartTheme.tick, fontSize: 9 }}
                 tickLine={false}
                 axisLine={false}
                 interval={Math.max(0, Math.floor(chartData.length / 8) - 1)}
               />
               <YAxis
                 domain={[-yMax, yMax]}
-                tick={{ fill: "#a1a1aa", fontSize: 10 }}
+                tick={{ fill: chartTheme.tick, fontSize: 10 }}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(v) => `${Math.abs(Number(v)).toFixed(1)}`}
               />
               <Tooltip
-                cursor={{ fill: "rgba(255,255,255,0.06)" }}
+                cursor={{ fill: chartTheme.cursor }}
                 contentStyle={{
-                  background: "#1e1e1e",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: 8,
+                  ...chartTooltipStyle(chartTheme),
                   fontSize: 12,
                 }}
                 formatter={(value, name) => {
@@ -294,7 +291,7 @@ export function MonthlyEnergyChart() {
           </ResponsiveContainer>
         </ChartContainer>
 
-        <div className="mt-2 flex flex-wrap gap-3 text-[10px] text-zinc-300">
+        <div className="mt-2 flex flex-wrap gap-3 text-[10px] text-surface-muted">
           <span className="flex items-center gap-1">
             <span className="h-2 w-2 rounded-full" style={{ background: COLOR_NET }} />
             Van net
@@ -312,7 +309,7 @@ export function MonthlyEnergyChart() {
         {selected ? (
           <DagDetail dag={selected} />
         ) : (
-          <p className="mt-3 text-xs text-zinc-300">Tik op een dag voor details.</p>
+          <p className="mt-3 text-xs text-surface-muted">Tik op een dag voor details.</p>
         )}
       </CardContent>
     </Card>

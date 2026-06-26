@@ -183,13 +183,15 @@ export default function WeerPage() {
             <SensorExtrasCard data={weer} />
           </WeerSection>
 
-          <WeerSection title="Regenvoorspelling" subtitle="Open-Meteo · komende 48 uur">
-            <PrecipForecastCard />
-          </WeerSection>
+          <div className="grid gap-8 md:grid-cols-2 md:gap-6 md:items-start">
+            <WeerSection title="Regenvoorspelling" subtitle="Open-Meteo · komende 48 uur">
+              <PrecipForecastCard />
+            </WeerSection>
 
-          <WeerSection title="Neerslagradar" subtitle="Nederland · RainViewer">
-            <PrecipitationRadar />
-          </WeerSection>
+            <WeerSection title="Neerslagradar" subtitle="Nederland · RainViewer">
+              <PrecipitationRadar />
+            </WeerSection>
+          </div>
 
           <WeerSection
             title="Historie"
@@ -197,8 +199,10 @@ export default function WeerPage() {
             collapsible
             defaultOpen={false}
           >
-            {historie?.labels?.length ? <TemperatureChart data={historie} /> : null}
-            <RainYearChart />
+            <div className="grid gap-3 md:grid-cols-2 md:gap-4">
+              {historie?.labels?.length ? <TemperatureChart data={historie} /> : null}
+              <RainYearChart />
+            </div>
           </WeerSection>
 
           <WeerSection
@@ -230,7 +234,7 @@ async function knmiFetcher(url: string): Promise<KnmiWaarschuwingenApi | null> {
 function WeerSkeleton() {
   return (
     <div className="space-y-8">
-      <Skeleton className="-mx-4 h-72 w-[calc(100%+2rem)] rounded-b-3xl sm:-mx-6 sm:w-[calc(100%+3rem)]" />
+      <Skeleton className="-mx-4 h-72 w-[calc(100%+2rem)] rounded-b-3xl sm:-mx-6 sm:w-[calc(100%+3rem)] md:-mx-8 md:w-[calc(100%+4rem)]" />
       <div className="space-y-3">
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-52 w-full rounded-2xl" />

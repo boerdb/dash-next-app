@@ -13,14 +13,17 @@ import {
 import type { EnergieHistorie } from "@/lib/api/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart-container";
+import { chartTooltipStyle, useChartTheme } from "@/lib/hooks/use-chart-theme";
 
 interface PowerChartProps {
   data: EnergieHistorie;
 }
 
 const CHART_HEIGHT = 180;
+const SERIES_COLOR = "#ffce00";
 
 export function PowerChart({ data }: PowerChartProps) {
+  const chartTheme = useChartTheme();
   const fillId = useId().replace(/:/g, "");
   const chartData = data.labels.map((label, i) => ({
     label,
@@ -32,17 +35,17 @@ export function PowerChart({ data }: PowerChartProps) {
   return (
     <Card variant="energy">
       <CardContent>
-        <p className="mb-1 text-xs font-medium text-zinc-300">Netvermogen · 24 uur</p>
-        <p className="mb-3 text-[0.65rem] text-zinc-300">
+        <p className="mb-1 text-xs font-medium text-surface-muted">Netvermogen · 24 uur</p>
+        <p className="mb-3 text-[0.65rem] text-surface-muted">
           Positief = afname · negatief = teruglevering
         </p>
         {pointCount === 0 && (
-          <p className="mb-2 text-xs text-zinc-300">
+          <p className="mb-2 text-xs text-surface-muted">
             Nog geen historie — vult zich elke 5 minuten (ook als dit scherm dicht is).
           </p>
         )}
         {pointCount > 0 && pointCount < 4 && (
-          <p className="mb-2 text-xs text-zinc-300">
+          <p className="mb-2 text-xs text-surface-muted">
             Beperkte historie — oudere uren zonder data blijven leeg; nieuwe punten komen elke 5 min bij.
           </p>
         )}
@@ -51,38 +54,32 @@ export function PowerChart({ data }: PowerChartProps) {
             <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#ffce00" stopOpacity={0.25} />
-                  <stop offset="100%" stopColor="#ffce00" stopOpacity={0} />
+                  <stop offset="0%" stopColor={SERIES_COLOR} stopOpacity={0.25} />
+                  <stop offset="100%" stopColor={SERIES_COLOR} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} />
+              <CartesianGrid stroke={chartTheme.grid} vertical={false} />
               <XAxis
                 dataKey="label"
-                tick={{ fill: "#a1a1aa", fontSize: 10 }}
+                tick={{ fill: chartTheme.tick, fontSize: 10 }}
                 tickLine={false}
                 axisLine={false}
                 interval="preserveStartEnd"
               />
               <YAxis
-                tick={{ fill: "#a1a1aa", fontSize: 10 }}
+                tick={{ fill: chartTheme.tick, fontSize: 10 }}
                 tickLine={false}
                 axisLine={false}
               />
-              <Tooltip
-                contentStyle={{
-                  background: "#1e1e1e",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: 8,
-                }}
-              />
+              <Tooltip contentStyle={chartTooltipStyle(chartTheme)} />
               <Area
                 type="monotone"
                 dataKey="watt"
-                stroke="#ffce00"
+                stroke={SERIES_COLOR}
                 strokeWidth={2}
                 fill={`url(#${fillId})`}
                 connectNulls={false}
-                dot={sparse ? { r: 3, fill: "#ffce00", strokeWidth: 0 } : false}
+                dot={sparse ? { r: 3, fill: SERIES_COLOR, strokeWidth: 0 } : false}
                 activeDot={{ r: 4, fill: "#fde68a" }}
               />
             </AreaChart>

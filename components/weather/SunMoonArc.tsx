@@ -222,7 +222,7 @@ export function SunMoonArc({ astro }: SunMoonArcProps) {
         </text>
       </svg>
 
-      <div className="mt-2 flex items-center justify-center gap-2.5 rounded-xl bg-black/25 px-3 py-2">
+      <div className="mt-2 flex items-center justify-center gap-2.5 rounded-xl border border-white/10 bg-black/25 px-3 py-2 backdrop-blur-sm">
         <MoonPhaseDisc
           phase={astro.moon.phase}
           fraction={astro.moon.fraction}

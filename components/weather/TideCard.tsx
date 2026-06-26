@@ -55,7 +55,7 @@ export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
       ? "text-emerald-400 bg-emerald-500/10"
       : status.kleur === "danger"
         ? "text-rose-400 bg-rose-500/10"
-        : "text-zinc-300 bg-zinc-500/10";
+        : "text-surface-muted bg-surface-subtle";
 
   return (
     <Card variant="weather">
@@ -69,7 +69,7 @@ export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
           </span>
         </div>
 
-        <div className="grid grid-cols-4 gap-2 border-b border-white/10 pb-2 text-[0.65rem] uppercase text-zinc-300">
+        <div className="grid grid-cols-4 gap-2 border-b border-card-border pb-2 text-[0.65rem] uppercase text-surface-muted">
           <span>Getij</span>
           <span>Tijd</span>
           <span className="text-center">Verschil</span>
@@ -83,13 +83,13 @@ export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
           return (
             <Fragment key={`${g.dagKey}-${g.type}-${g.tijd}`}>
               {showDayHeader && (
-                <p className="border-b border-white/10 pb-1 pt-3 text-[0.7rem] font-semibold uppercase tracking-wide text-zinc-300 first:pt-0">
+                <p className="border-b border-card-border pb-1 pt-3 text-[0.7rem] font-semibold uppercase tracking-wide text-surface-muted first:pt-0">
                   {g.dagLabel}
                 </p>
               )}
               <div
                 className={cn(
-                  "grid grid-cols-4 gap-2 border-b border-white/5 py-3 text-sm transition-colors",
+                  "grid grid-cols-4 gap-2 border-b border-card-border py-3 text-sm transition-colors",
                   isActive &&
                     "rounded-xl border border-sky-400/40 bg-sky-500/15 px-2 -mx-2 shadow-[0_0_20px_-8px_rgba(56,189,248,0.6)]"
                 )}
@@ -104,7 +104,7 @@ export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
                 </span>
                 <span
                   className={cn(
-                    "text-zinc-200",
+                    "text-foreground",
                     isActive && "font-semibold text-white"
                   )}
                 >
@@ -131,7 +131,7 @@ export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
           );
         })}
 
-        <p className="mt-3 text-center text-[0.65rem] text-zinc-300">
+        <p className="mt-3 text-center text-[0.65rem] text-surface-muted">
           {BRON_TEKST[bron].regel1}
           <br />
           {BRON_TEKST[bron].regel2}

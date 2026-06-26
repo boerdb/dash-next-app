@@ -17,9 +17,9 @@ export const weatherBackgrounds: Record<WeatherCondition, { image: string }> = {
   dawn: { image: "/weather/dawn.jpg" },
 };
 
-/** Lichter dan voorheen: midden laat foto-kleur door; onder sluit aan op --background */
+/** Donkere scrim over de foto — geen fade naar pagina-achtergrond (dat doet WeatherHero in CSS). */
 const overlay =
-  "linear-gradient(to bottom, rgba(0,0,0,0.32) 0%, rgba(0,0,0,0.08) 48%, rgba(12,18,34,0.52) 100%)";
+  "linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.10) 55%, rgba(0,0,0,0.28) 100%)";
 
 const darkConditions = new Set<WeatherCondition>([
   "night",
@@ -31,7 +31,7 @@ const darkConditions = new Set<WeatherCondition>([
 ]);
 
 const overlayDark =
-  "linear-gradient(to bottom, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.15) 45%, rgba(12,18,34,0.58) 100%)";
+  "linear-gradient(to bottom, rgba(0,0,0,0.48) 0%, rgba(0,0,0,0.18) 50%, rgba(0,0,0,0.42) 100%)";
 
 export function getWeatherBackgroundStyle(condition: WeatherCondition): CSSProperties {
   const { image } = weatherBackgrounds[condition];

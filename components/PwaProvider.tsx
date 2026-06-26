@@ -113,8 +113,8 @@ export function PwaProvider() {
 
   if (updateReloading) {
     return (
-      <div className="fixed bottom-20 left-4 right-4 z-[60] mx-auto max-w-lg">
-        <div className="rounded-2xl border border-sky-500/30 bg-zinc-900 px-4 py-3 text-center text-sm text-zinc-200 shadow-xl">
+      <div className="fixed bottom-20 left-4 right-4 z-[60] mx-auto max-w-lg md:max-w-3xl lg:max-w-5xl">
+        <div className="rounded-2xl border border-sky-500/30 bg-card px-4 py-3 text-center text-sm text-foreground shadow-xl">
           Bezig met bijwerken…
         </div>
       </div>
@@ -166,15 +166,15 @@ function InstallBanner({
   icon: typeof Download;
 }) {
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-[60] mx-auto max-w-lg">
-      <div className="rounded-2xl border border-sky-500/30 bg-zinc-900 p-4 shadow-xl">
+    <div className="fixed bottom-20 left-4 right-4 z-[60] mx-auto max-w-lg md:max-w-3xl lg:max-w-5xl">
+      <div className="rounded-2xl border border-sky-500/30 bg-card p-4 shadow-xl">
         <div className="flex gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-500/20">
             <Icon className="h-5 w-5 text-sky-400" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-white">{title}</p>
-            <p className="mt-0.5 text-xs text-zinc-400">{description}</p>
+            <p className="text-sm font-semibold text-foreground">{title}</p>
+            <p className="mt-0.5 text-xs text-surface-muted">{description}</p>
             <div className="mt-3 flex gap-2">
               <button
                 type="button"
@@ -186,7 +186,7 @@ function InstallBanner({
               <button
                 type="button"
                 onClick={onDismiss}
-                className="rounded-lg px-3 py-1.5 text-sm text-zinc-400 hover:text-zinc-200"
+                className="rounded-lg px-3 py-1.5 text-sm text-surface-muted hover:text-foreground"
               >
                 Later
               </button>
@@ -195,7 +195,7 @@ function InstallBanner({
           <button
             type="button"
             onClick={onDismiss}
-            className="shrink-0 text-zinc-500 hover:text-zinc-300"
+            className="shrink-0 text-nav-inactive hover:text-nav-hover"
             aria-label="Sluiten"
           >
             <X className="h-5 w-5" />

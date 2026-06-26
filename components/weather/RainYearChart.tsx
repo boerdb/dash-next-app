@@ -17,6 +17,7 @@ import type { WeerRegenJaarResponse } from "@/lib/api/types";
 import { jsonFetcher } from "@/lib/fetcher";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart-container";
+import { chartTooltipStyle, useChartTheme } from "@/lib/hooks/use-chart-theme";
 
 const CHART_HEIGHT = 200;
 const COLOR_RAIN = "#38bdf8";
@@ -30,6 +31,7 @@ function formatMm(n: number) {
 }
 
 export function RainYearChart() {
+  const chartTheme = useChartTheme();
   const initJaar = Number(
     new Date().toLocaleString("en-CA", {
       timeZone: "Europe/Amsterdam",
@@ -67,7 +69,7 @@ export function RainYearChart() {
     return (
       <Card variant="weather">
         <CardContent>
-          <p className="text-sm text-zinc-300">Regenoverzicht niet beschikbaar.</p>
+          <p className="text-sm text-surface-muted">Regenoverzicht niet beschikbaar.</p>
         </CardContent>
       </Card>
     );
@@ -79,25 +81,25 @@ export function RainYearChart() {
     <Card variant="weather" className="border-sky-500/20">
       <CardContent>
         <div className="mb-3 flex items-center justify-between gap-2">
-          <p className="text-xs font-medium text-zinc-300">Regen per maand</p>
+          <p className="text-xs font-medium text-surface-muted">Regen per maand</p>
           <div className="flex items-center gap-1">
             <button
               type="button"
               disabled={!data.kan_vorige_jaar}
               onClick={() => setJaar(jaar - 1)}
-              className="rounded-lg p-1.5 text-zinc-300 hover:bg-white/10 disabled:opacity-30"
+              className="rounded-lg p-1.5 text-surface-muted hover:bg-surface-subtle disabled:opacity-30"
               aria-label="Vorig jaar"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="min-w-[4rem] text-center text-sm font-medium text-zinc-200">
+            <span className="min-w-[4rem] text-center text-sm font-medium text-foreground">
               {data.jaar}
             </span>
             <button
               type="button"
               disabled={!data.kan_volgende_jaar}
               onClick={() => setJaar(jaar + 1)}
-              className="rounded-lg p-1.5 text-zinc-300 hover:bg-white/10 disabled:opacity-30"
+              className="rounded-lg p-1.5 text-surface-muted hover:bg-surface-subtle disabled:opacity-30"
               aria-label="Volgend jaar"
             >
               <ChevronRight className="h-4 w-4" />
@@ -106,7 +108,7 @@ export function RainYearChart() {
         </div>
 
         {!hasAnyData && (
-          <p className="mb-2 text-xs text-zinc-300">
+          <p className="mb-2 text-xs text-surface-muted">
             Nog geen gearchiveerde regendagen — vult zich na ingest en backfill uit
             metingen.
           </p>
@@ -118,32 +120,27 @@ export function RainYearChart() {
               data={chartData}
               margin={{ top: 8, right: 4, left: -12, bottom: 0 }}
             >
-              <CartesianGrid
-                stroke="rgba(255,255,255,0.05)"
-                vertical={false}
-              />
+              <CartesianGrid stroke={chartTheme.grid} vertical={false} />
               <XAxis
                 dataKey="label"
-                tick={{ fill: "#a1a1aa", fontSize: 10 }}
+                tick={{ fill: chartTheme.tick, fontSize: 10 }}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis
                 domain={[0, yMax]}
-                tick={{ fill: "#a1a1aa", fontSize: 10 }}
+                tick={{ fill: chartTheme.tick, fontSize: 10 }}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(v) => `${Number(v)}`}
               />
               <Tooltip
-                cursor={{ fill: "rgba(255,255,255,0.06)" }}
+                cursor={{ fill: chartTheme.cursor }}
                 contentStyle={{
-                  background: "#1e1e1e",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: 8,
+                  ...chartTooltipStyle(chartTheme),
                   fontSize: 12,
                 }}
-                labelStyle={{ color: "#a1a1aa" }}
+                labelStyle={{ color: chartTheme.tooltipLabel }}
                 itemStyle={{ color: "#7dd3fc" }}
                 formatter={(value) => [formatMm(Number(value)), "Regen"]}
               />
@@ -163,7 +160,7 @@ export function RainYearChart() {
           </ResponsiveContainer>
         </ChartContainer>
 
-        <p className="mt-3 text-center text-sm text-zinc-300">
+        <p className="mt-3 text-center text-sm text-surface-muted">
           Totaal {data.jaar}:{" "}
           <span className="font-semibold text-sky-300">
             {formatMm(data.jaar_totaal_mm)}

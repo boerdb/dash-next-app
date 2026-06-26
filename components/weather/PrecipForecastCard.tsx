@@ -16,10 +16,12 @@ import { jsonFetcher, FetchError } from "@/lib/fetcher";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart-container";
 import { Skeleton } from "@/components/ui/skeleton";
+import { chartTooltipStyle, useChartTheme } from "@/lib/hooks/use-chart-theme";
 
 const CHART_HEIGHT = 120;
 
 export function PrecipForecastCard() {
+  const chartTheme = useChartTheme();
   const gradientId = useId().replace(/:/g, "");
   const { data, error, isLoading, mutate } = useSWR<PrecipForecastResponse, FetchError>(
     "/api/weer/regen-voorspelling",
@@ -39,13 +41,13 @@ export function PrecipForecastCard() {
 
   if (error && !data) {
     return (
-      <Card variant="weather" className="border-dashed border-zinc-500/30">
-        <CardContent className="text-center text-sm text-zinc-300">
+      <Card variant="weather" className="border-dashed border-card-border">
+        <CardContent className="text-center text-sm text-surface-muted">
           <p>{error.message}</p>
           <button
             type="button"
             onClick={() => mutate()}
-            className="mt-3 rounded-lg bg-sky-500/20 px-3 py-1.5 text-xs font-medium text-sky-300"
+            className="mt-3 rounded-lg bg-sky-500/20 px-3 py-1.5 text-xs font-medium text-sky-600 dark:text-sky-300"
           >
             Opnieuw laden
           </button>
@@ -65,10 +67,10 @@ export function PrecipForecastCard() {
   return (
     <Card variant="weather" className="border-sky-500/20">
       <CardContent>
-        <p className="mb-1 text-xs font-medium text-zinc-300">
+        <p className="mb-1 text-xs font-medium text-surface-muted">
           Verwachte neerslag · komende {data.hours} uur
         </p>
-        <p className="mb-3 text-[0.65rem] text-zinc-300">
+        <p className="mb-3 text-[0.65rem] text-surface-muted">
           Open-Meteo model · Harlingen · mm per uur
         </p>
         <ChartContainer height={CHART_HEIGHT}>
@@ -80,25 +82,23 @@ export function PrecipForecastCard() {
                   <stop offset="100%" stopColor="#38bdf8" stopOpacity={0.2} />
                 </linearGradient>
               </defs>
-              <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} />
+              <CartesianGrid stroke={chartTheme.grid} vertical={false} />
               <XAxis
                 dataKey="label"
-                tick={{ fill: "#a1a1aa", fontSize: 8 }}
+                tick={{ fill: chartTheme.tick, fontSize: 8 }}
                 tickLine={false}
                 axisLine={false}
                 interval="preserveStartEnd"
               />
               <YAxis
-                tick={{ fill: "#a1a1aa", fontSize: 8 }}
+                tick={{ fill: chartTheme.tick, fontSize: 8 }}
                 tickLine={false}
                 axisLine={false}
                 width={28}
               />
               <Tooltip
                 contentStyle={{
-                  background: "#1e1e1e",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: 8,
+                  ...chartTooltipStyle(chartTheme),
                   fontSize: 12,
                 }}
                 formatter={(value, _name, item) => {

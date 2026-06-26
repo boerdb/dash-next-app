@@ -23,11 +23,11 @@ function SectionHeader({
 }) {
   return (
     <>
-      <h2 className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-zinc-400">
+      <h2 className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-surface-muted">
         {title}
       </h2>
       {subtitle ? (
-        <p className="mt-0.5 text-xs text-zinc-400">{subtitle}</p>
+        <p className="mt-0.5 text-xs text-surface-muted">{subtitle}</p>
       ) : null}
     </>
   );
@@ -62,14 +62,14 @@ export function WeerSection({
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls={panelId}
-        className="flex w-full items-start justify-between gap-3 rounded-xl border border-transparent px-1 py-0.5 text-left transition-colors hover:border-white/5 hover:bg-white/[0.02]"
+        className="flex w-full items-start justify-between gap-3 rounded-xl border border-transparent px-1 py-0.5 text-left transition-colors hover:border-card-border hover:bg-surface-subtle"
       >
         <header className="min-w-0 flex-1">
           <SectionHeader title={title} subtitle={subtitle} />
         </header>
         <ChevronDown
           className={cn(
-            "mt-0.5 h-4 w-4 shrink-0 text-zinc-400 transition-transform duration-200",
+            "mt-0.5 h-4 w-4 shrink-0 text-surface-muted transition-transform duration-200",
             open && "rotate-180"
           )}
           aria-hidden

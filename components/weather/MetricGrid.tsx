@@ -36,19 +36,19 @@ function StatCell({
   return (
     <div className={cn("flex gap-3 p-4", className)}>
       {children ? (
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-subtle">
           {children}
         </div>
       ) : null}
       <div className="min-w-0 flex-1">
-        <p className="text-[0.65rem] font-medium uppercase tracking-wide text-zinc-400">
+        <p className="text-[0.65rem] font-medium uppercase tracking-wide text-surface-muted">
           {label}
         </p>
-        <p className="mt-0.5 text-xl font-bold tabular-nums leading-none text-zinc-100">
+        <p className="mt-0.5 text-xl font-bold tabular-nums leading-none text-foreground">
           {value}
         </p>
         {detail ? (
-          <div className="mt-1.5 text-[0.65rem] leading-snug text-zinc-400">
+          <div className="mt-1.5 text-[0.65rem] leading-snug text-surface-muted">
             {detail}
           </div>
         ) : null}
@@ -60,8 +60,8 @@ function StatCell({
 function FooterStat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="text-center sm:text-left">
-      <p className="text-[0.6rem] uppercase tracking-wide text-zinc-400">{label}</p>
-      <p className="mt-0.5 text-sm font-semibold tabular-nums text-zinc-200">{value}</p>
+      <p className="text-[0.6rem] uppercase tracking-wide text-surface-muted">{label}</p>
+      <p className="mt-0.5 text-sm font-semibold tabular-nums text-foreground">{value}</p>
     </div>
   );
 }
@@ -76,13 +76,13 @@ export function MetricGrid({ data }: MetricGridProps) {
   return (
     <Card variant="weather" className="overflow-hidden">
       <CardContent className="p-0">
-        <div className="grid grid-cols-1 divide-y divide-white/5 sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+        <div className="grid grid-cols-1 divide-y divide-card-border sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4 lg:divide-x lg:divide-y-0">
           <StatCell
             label={`Wind · ${getWindDirection(windDeg)}`}
             value={
               <>
                 {windSpeed.toFixed(1)}
-                <span className="ml-1 text-sm font-normal text-zinc-400">km/u</span>
+                <span className="ml-1 text-sm font-normal text-surface-muted">km/u</span>
               </>
             }
             detail={
@@ -99,7 +99,7 @@ export function MetricGrid({ data }: MetricGridProps) {
             value={
               <>
                 {Number(data.dailyrain_mm ?? 0).toFixed(1)}
-                <span className="ml-1 text-sm font-normal text-zinc-400">mm</span>
+                <span className="ml-1 text-sm font-normal text-surface-muted">mm</span>
               </>
             }
             detail={
@@ -110,15 +110,13 @@ export function MetricGrid({ data }: MetricGridProps) {
           >
             <Droplets className="h-5 w-5 text-blue-400" />
           </StatCell>
-        </div>
 
-        <div className="grid grid-cols-1 divide-y divide-white/5 border-t border-white/5 sm:grid-cols-2 sm:divide-x sm:divide-y-0">
           <StatCell
             label="Luchtdruk"
             value={
               <>
                 {Number(data.baromrel_hpa ?? 0).toFixed(1)}
-                <span className="ml-1 text-sm font-normal text-zinc-400">hPa</span>
+                <span className="ml-1 text-sm font-normal text-surface-muted">hPa</span>
               </>
             }
             detail={
@@ -128,7 +126,7 @@ export function MetricGrid({ data }: MetricGridProps) {
                     "flex items-center gap-1 font-medium tabular-nums",
                     data.barom_trend_direction === "up" && "text-emerald-400",
                     data.barom_trend_direction === "down" && "text-amber-400",
-                    data.barom_trend_direction === "steady" && "text-zinc-400"
+                    data.barom_trend_direction === "steady" && "text-surface-muted"
                   )}
                 >
                   {data.barom_trend_direction === "up" ? (
@@ -160,7 +158,7 @@ export function MetricGrid({ data }: MetricGridProps) {
           </StatCell>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 border-t border-white/5 bg-black/20 px-4 py-3">
+        <div className="grid grid-cols-2 gap-3 border-t border-card-border bg-surface-inset px-4 py-3 sm:grid-cols-3 lg:grid-cols-6">
           <FooterStat label="Vocht buiten" value={`${data.humidity ?? "—"}%`} />
           <FooterStat label="Dauwpunt" value={`${data.dauwpunt ?? "—"} °C`} />
           <FooterStat

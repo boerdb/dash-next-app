@@ -13,7 +13,7 @@ export function DataError({
 }: DataErrorProps) {
   return (
     <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-6 text-center">
-      <p className="text-sm text-rose-200">{message}</p>
+      <p className="text-sm text-rose-700 dark:text-rose-200">{message}</p>
       {onRetry && (
         <button
           type="button"

@@ -85,16 +85,18 @@ export default function EnergiePage() {
         <div className="space-y-8 pb-2">
           <PowerHero data={energie} />
 
-          <WeerSection title="Vandaag" subtitle="Stroom · gas · water">
-            <DailyStats data={energie} />
-          </WeerSection>
-
-          {showBatteries ? (
-            <WeerSection title="Batterijen" subtitle="HomeWizard · laadstrategie">
-              <BatteryPanel data={energie} />
-              <BatteryChart data={energie} />
+          <div className="grid gap-8 md:grid-cols-2 md:gap-6 md:items-start">
+            <WeerSection title="Vandaag" subtitle="Stroom · gas · water">
+              <DailyStats data={energie} />
             </WeerSection>
-          ) : null}
+
+            {showBatteries ? (
+              <WeerSection title="Batterijen" subtitle="HomeWizard · laadstrategie">
+                <BatteryPanel data={energie} />
+                <BatteryChart data={energie} />
+              </WeerSection>
+            ) : null}
+          </div>
 
           <WeerSection
             title="Historie"
@@ -102,10 +104,12 @@ export default function EnergiePage() {
             collapsible
             defaultOpen={false}
           >
-            {chartHistorie?.labels?.length ? (
-              <PowerChart data={chartHistorie} />
-            ) : null}
-            <MonthlyEnergyChart />
+            <div className="grid gap-3 lg:grid-cols-2 lg:gap-4">
+              {chartHistorie?.labels?.length ? (
+                <PowerChart data={chartHistorie} />
+              ) : null}
+              <MonthlyEnergyChart />
+            </div>
           </WeerSection>
         </div>
       ) : (
@@ -118,7 +122,7 @@ export default function EnergiePage() {
 function EnergieSkeleton() {
   return (
     <div className="space-y-8">
-      <Skeleton className="-mx-4 h-56 w-[calc(100%+2rem)] rounded-b-3xl sm:-mx-6 sm:w-[calc(100%+3rem)]" />
+      <Skeleton className="-mx-4 h-56 w-[calc(100%+2rem)] rounded-b-3xl sm:-mx-6 sm:w-[calc(100%+3rem)] md:-mx-8 md:w-[calc(100%+4rem)]" />
       <div className="space-y-3">
         <Skeleton className="h-4 w-20" />
         <Skeleton className="h-44 w-full rounded-2xl" />

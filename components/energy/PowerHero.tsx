@@ -16,13 +16,15 @@ export function PowerHero({ data }: PowerHeroProps) {
   return (
     <section
       className={cn(
-        "relative -mx-4 overflow-hidden rounded-b-3xl px-4 pb-6 pt-5 sm:-mx-6",
+        "relative -mx-4 overflow-hidden rounded-b-3xl px-4 pb-6 pt-5 sm:-mx-6 md:-mx-8",
         exporting
           ? "bg-gradient-to-br from-emerald-950 via-emerald-900/80 to-slate-950"
           : "bg-gradient-to-br from-amber-950 via-orange-950/70 to-slate-950"
       )}
     >
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-background/80" />
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-b from-transparent to-background sm:h-20" />
+      </div>
       {exporting ? (
         <div className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rounded-full bg-emerald-400/10 blur-3xl" />
       ) : (

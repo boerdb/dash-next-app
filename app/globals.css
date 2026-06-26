@@ -1,6 +1,35 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
+  --background: #f4f6fb;
+  --foreground: #1a1f2e;
+  --primary: #0284c7;
+  --accent-weather: #0284c7;
+  --accent-energy: #d97706;
+  --card: rgba(255, 255, 255, 0.92);
+  --card-border: rgba(15, 23, 42, 0.1);
+  --surface-muted: #64748b;
+  --surface-subtle: rgba(15, 23, 42, 0.05);
+  --surface-inset: rgba(15, 23, 42, 0.04);
+  --nav-bg: rgba(244, 246, 251, 0.95);
+  --gradient-from: #e2e8f0;
+  --gradient-via: #f4f6fb;
+  --gradient-to: #e2e8f0;
+  --hero-scrim: rgba(255, 255, 255, 0.15);
+  --chart-grid: rgba(15, 23, 42, 0.08);
+  --chart-tick: #64748b;
+  --chart-tooltip-bg: #ffffff;
+  --chart-tooltip-border: rgba(15, 23, 42, 0.12);
+  --chart-tooltip-label: #64748b;
+  --chart-cursor: rgba(15, 23, 42, 0.06);
+  --chart-ref-line: rgba(15, 23, 42, 0.15);
+  --nav-inactive: #94a3b8;
+  --nav-hover: #475569;
+}
+
+.dark {
   --background: #0c1222;
   --foreground: #ededed;
   --primary: #38bdf8;
@@ -9,6 +38,22 @@
   --card: rgba(255, 255, 255, 0.05);
   --card-border: rgba(255, 255, 255, 0.1);
   --surface-muted: #a1a1aa;
+  --surface-subtle: rgba(255, 255, 255, 0.05);
+  --surface-inset: rgba(0, 0, 0, 0.2);
+  --nav-bg: rgba(12, 18, 34, 0.95);
+  --gradient-from: #020617;
+  --gradient-via: #0c1222;
+  --gradient-to: #020617;
+  --hero-scrim: rgba(0, 0, 0, 0.25);
+  --chart-grid: rgba(255, 255, 255, 0.05);
+  --chart-tick: #a1a1aa;
+  --chart-tooltip-bg: #1e1e1e;
+  --chart-tooltip-border: rgba(255, 255, 255, 0.1);
+  --chart-tooltip-label: #a1a1aa;
+  --chart-cursor: rgba(255, 255, 255, 0.06);
+  --chart-ref-line: rgba(255, 255, 255, 0.2);
+  --nav-inactive: #71717a;
+  --nav-hover: #d4d4d8;
 }
 
 @theme inline {
@@ -20,6 +65,11 @@
   --color-card: var(--card);
   --color-card-border: var(--card-border);
   --color-surface-muted: var(--surface-muted);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-surface-inset: var(--surface-inset);
+  --color-nav-bg: var(--nav-bg);
+  --color-nav-inactive: var(--nav-inactive);
+  --color-nav-hover: var(--nav-hover);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -44,10 +94,10 @@ body {
 
 .radar-map .leaflet-control-attribution {
   font-size: 9px;
-  background: rgba(0, 0, 0, 0.55) !important;
-  color: #a1a1aa !important;
+  background: var(--surface-inset) !important;
+  color: var(--surface-muted) !important;
 }
 
 .radar-map .leaflet-control-attribution a {
-  color: #7dd3fc !important;
+  color: var(--primary) !important;
 }
