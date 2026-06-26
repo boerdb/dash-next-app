@@ -49,6 +49,8 @@ const envSchema = z.object({
   /** Optioneel: auto JWT via Enlighten-login (MFA moet uit) */
   ENPHASE_ENLIGHTEN_USER: z.string().email().optional(),
   ENPHASE_ENLIGHTEN_PASSWORD: z.string().min(1).optional(),
+  /** GW1100 LAN-URL voor WH57-aanvulling (bijv. http://192.168.1.150) */
+  ECOWITT_GATEWAY_URL: z.string().url().optional(),
 });
 
 export const env = envSchema.parse({
@@ -68,6 +70,7 @@ export const env = envSchema.parse({
   ENPHASE_GATEWAY_TOKEN: process.env.ENPHASE_GATEWAY_TOKEN || undefined,
   ENPHASE_ENLIGHTEN_USER: process.env.ENPHASE_ENLIGHTEN_USER || undefined,
   ENPHASE_ENLIGHTEN_PASSWORD: process.env.ENPHASE_ENLIGHTEN_PASSWORD || undefined,
+  ECOWITT_GATEWAY_URL: process.env.ECOWITT_GATEWAY_URL || undefined,
 });
 
 export const enphaseConfigured = Boolean(

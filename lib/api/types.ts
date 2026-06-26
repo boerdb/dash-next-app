@@ -46,6 +46,8 @@ export interface WeerLive {
   /** Laatste inslag (Amsterdam wall clock) */
   lightning_time?: string | null;
   lightning_time_raw?: number | null;
+  /** WH57 / barometer: kans op onweer (console-icoon zonder inslag). */
+  lightning_storm_risk?: boolean;
   /** WS90 batterijspanning (V) */
   ws90_voltage_v?: number;
   ws90_cap_voltage_v?: number;
@@ -57,6 +59,11 @@ export interface WeerLive {
   batt2?: number | string;
   stationtype?: string;
   model?: string;
+  /** Laatste update per bron bij merged ingest. */
+  weer_sources?: {
+    gw1100_at?: string | null;
+    hp2550_at?: string | null;
+  };
   freq?: string;
   uv?: number | string;
   solarradiation?: number | string;

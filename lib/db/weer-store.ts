@@ -2,6 +2,12 @@ import type { RowDataPacket } from "mysql2";
 import type { WeerLive } from "@/lib/api/types";
 import { enrichWeerLive } from "@/lib/weer/enrich-live";
 import { applyWindAvg10m } from "@/lib/weer/wind-avg10m";
+import { mergeWeerLiveBySource } from "@/lib/weer/merge-weer-sources";
+import {
+  fetchGatewayLiveData,
+  mapGatewayLightning,
+} from "@/lib/weer/ecowitt-local-client";
+import { env } from "@/lib/env.server";
 import { getPool } from "@/lib/db/pool";
 import { todayAmsterdamDate } from "@/lib/weer/regen-jaar-labels";
 import {
@@ -121,7 +127,8 @@ export async function maybeInsertMeting(data: WeerLive): Promise<boolean> {
 
 export async function ingestWeerLive(raw: WeerLive): Promise<WeerLive> {
   const previous = await readWeerLiveCache();
-  const withWindAvg = applyWindAvg10m(raw, previous);
+  const merged = mergeWeerLiveBySource(raw, previous);
+  const withWindAvg = applyWindAvg10m(merged, previous);
   const enriched = enrichWeerLive(withWindAvg);
   await maybeInsertMeting(enriched);
   const withMinMax = await applyVandaagTempMinMax(enriched);
@@ -138,6 +145,25 @@ export async function ingestWeerLive(raw: WeerLive): Promise<WeerLive> {
     console.warn("weer_regen_dag sync:", e);
   }
   return saved;
+}
+
+/** Poll GW1100 LAN-API (.150) voor WH57-data; vult gaten in custom upload. */
+export async function supplementWeerFromGateway(): Promise<WeerLive | null> {
+  const gatewayUrl = env.ECOWITT_GATEWAY_URL;
+  if (!gatewayUrl) return null;
+
+  const previous = await readWeerLiveCache();
+  if (!previous) return null;
+
+  const raw = await fetchGatewayLiveData(gatewayUrl);
+  if (!raw) return null;
+
+  const lightning = mapGatewayLightning(raw, previous.dateutc);
+  if (Object.keys(lightning).length === 0) return previous;
+
+  const merged = { ...previous, ...lightning };
+  const enriched = enrichWeerLive(merged);
+  return writeWeerLiveCache(enriched);
 }
 
 export function isCacheFresh(updatedAt: Date | null): boolean {

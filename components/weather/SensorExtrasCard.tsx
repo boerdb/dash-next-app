@@ -2,8 +2,8 @@
 
 import { Battery, BatteryWarning, CloudLightning, Gauge } from "lucide-react";
 import type { WeerLive } from "@/lib/api/types";
-import { isRecentLightningStrike } from "@/lib/weer/lightning-time";
 import { getLightningBattery } from "@/lib/weer/sensor-battery";
+import { getLightningStatus } from "@/lib/weer/lightning-storm";
 import {
   hasLightningSensor,
   hasSensorExtras,
@@ -61,11 +61,9 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
   const showLightning = hasLightningSensor(data);
   const showWs90 = hasWs90Sensor(data);
   const lightningBattery = getLightningBattery(data);
+  const lightningStatus = getLightningStatus(data);
   const lightningKm = data.lightning_km;
-  const recentStrike =
-    lightningKm != null &&
-    lightningKm > 0 &&
-    isRecentLightningStrike(data.lightning_time ?? undefined);
+  const recentStrike = lightningStatus === "strike";
 
   const rainTodayMm =
     showWs90 && data.dailyrain_piezo_mm != null
@@ -90,7 +88,9 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
                 <CloudLightning
                   className={cn(
                     "h-4 w-4",
-                    recentStrike ? "text-violet-300" : "text-zinc-500"
+                    recentStrike && "text-violet-300",
+                    lightningStatus === "risk" && "text-amber-300",
+                    lightningStatus === "idle" && "text-zinc-500"
                   )}
                 />
               }
@@ -98,6 +98,10 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
               {recentStrike ? (
                 <span className="mb-3 inline-flex rounded-full bg-violet-500/15 px-2 py-0.5 text-[0.6rem] font-medium uppercase tracking-wide text-violet-200">
                   Recent
+                </span>
+              ) : lightningStatus === "risk" ? (
+                <span className="mb-3 inline-flex rounded-full bg-amber-500/15 px-2 py-0.5 text-[0.6rem] font-medium uppercase tracking-wide text-amber-200">
+                  Kans op onweer
                 </span>
               ) : null}
               {lightningKm != null && lightningKm > 0 ? (
@@ -119,6 +123,10 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
                     }
                   />
                 </div>
+              ) : lightningStatus === "risk" ? (
+                <p className="text-sm text-amber-200/90">
+                  Onweersfront in de buurt · WH57 actief
+                </p>
               ) : (
                 <p className="text-sm text-zinc-500">Geen inslagen · sensor actief</p>
               )}

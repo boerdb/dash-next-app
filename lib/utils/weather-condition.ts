@@ -6,7 +6,10 @@ import {
   openMeteoImpliesSnow,
   openMeteoImpliesThunder,
 } from "@/lib/open-meteo/condition";
-import { isRecentLightningStrike } from "@/lib/weer/lightning-time";
+import {
+  computeLightningStormRisk,
+  isRecentLightningStrikeNearby,
+} from "@/lib/weer/lightning-storm";
 
 function conditionFromSolar(solar: number): WeatherCondition {
   if (solar > 300) return "sunny";
@@ -26,10 +29,10 @@ function isStationWindy(data: WeerLive): boolean {
   return wind >= 40 || gust >= 55;
 }
 
-function isStationLightning(data: WeerLive): boolean {
-  const km = data.lightning_km;
-  if (km == null || km <= 0) return false;
-  return isRecentLightningStrike(data.lightning_time ?? undefined);
+function isStationThunder(data: WeerLive): boolean {
+  if (isRecentLightningStrikeNearby(data)) return true;
+  if (data.lightning_storm_risk === true) return true;
+  return computeLightningStormRisk(data);
 }
 
 function isStationRainy(data: WeerLive): boolean {
@@ -60,7 +63,7 @@ export function getWeatherCondition(
 ): WeatherCondition {
   if (!data) return period === "night" ? "night" : "cloudy";
 
-  if (isStationLightning(data)) return "thunder";
+  if (isStationThunder(data)) return "thunder";
   if (isStationRainy(data)) return "rain";
   if (isStationFoggy(data)) return "fog";
   if (isStationWindy(data)) return "wind";
