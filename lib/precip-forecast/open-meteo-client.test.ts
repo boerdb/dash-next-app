@@ -32,9 +32,11 @@ describe("mapOpenMeteoCurrentSky", () => {
         cloud_cover: 22,
         weather_code: 2,
         precipitation: 0,
+        shortwave_radiation: 650,
       },
     });
     assert.equal(sky?.cloudCoverPct, 22);
     assert.equal(sky?.weatherCode, 2);
+    assert.equal(sky?.shortwaveRadiationWm2, 650);
   });
 });

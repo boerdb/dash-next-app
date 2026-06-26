@@ -219,6 +219,8 @@ export interface OpenMeteoSky {
   cloudCoverPct: number;
   weatherCode: number;
   precipitationMm: number;
+  /** Gemeten kortgolvige instraling (W/m²); betrouwbaarder dan bewolking/weercode bij lokale afwijkingen. */
+  shortwaveRadiationWm2: number | null;
 }
 
 export interface PrecipForecastResponse {

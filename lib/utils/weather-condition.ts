@@ -45,7 +45,11 @@ function skyFromOpenMeteo(sky: OpenMeteoSky): WeatherCondition {
   if (openMeteoImpliesSnow(code)) return "snow";
   if (openMeteoImpliesRain(code) || sky.precipitationMm > 0) return "rain";
   if (code === 45 || code === 48) return "fog";
-  return conditionFromOpenMeteo(code, sky.cloudCoverPct);
+  return conditionFromOpenMeteo(
+    code,
+    sky.cloudCoverPct,
+    sky.shortwaveRadiationWm2
+  );
 }
 
 export function getWeatherCondition(

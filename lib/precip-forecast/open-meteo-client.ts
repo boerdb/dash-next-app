@@ -10,6 +10,7 @@ interface OpenMeteoForecastResponse {
     cloud_cover?: number;
     weather_code?: number;
     precipitation?: number;
+    shortwave_radiation?: number;
   };
   hourly?: {
     time?: string[];
@@ -41,10 +42,14 @@ export function mapOpenMeteoCurrentSky(
   if (!Number.isFinite(cloudCoverPct) || !Number.isFinite(weatherCode)) {
     return null;
   }
+  const shortwave = Number(current.shortwave_radiation);
   return {
     cloudCoverPct: Math.round(cloudCoverPct),
     weatherCode: Math.round(weatherCode),
     precipitationMm: Math.round(Number(current.precipitation ?? 0) * 10) / 10,
+    shortwaveRadiationWm2: Number.isFinite(shortwave)
+      ? Math.round(shortwave)
+      : null,
   };
 }
 
@@ -79,7 +84,7 @@ export async function fetchHarlingenPrecipForecast(): Promise<PrecipForecastResp
   const params = new URLSearchParams({
     latitude: String(HARLINGEN.latitude),
     longitude: String(HARLINGEN.longitude),
-    current: "cloud_cover,weather_code,precipitation",
+    current: "cloud_cover,weather_code,precipitation,shortwave_radiation",
     hourly: "precipitation,precipitation_probability",
     timezone: TZ,
     forecast_days: "2",
