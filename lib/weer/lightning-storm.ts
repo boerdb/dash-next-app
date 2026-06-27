@@ -1,5 +1,6 @@
 import type { WeerLive } from "@/lib/api/types";
 import { isRecentLightningStrike } from "@/lib/weer/lightning-time";
+import { hasLightningSensor } from "@/lib/weer/sensor-status";
 
 const WH57_MAX_KM = 40;
 const NL_TZ = "Europe/Amsterdam";
@@ -199,7 +200,12 @@ export function shouldAccelerateLightningPoll(
   if (!data) return false;
   if (getLightningStatus(data) !== "idle") return true;
   const km = data.lightning_km;
-  return km != null && km > 0 && km <= WH57_MAX_KM;
+  if (km != null && km > 0 && km <= WH57_MAX_KM) return true;
+  if (hasLightningSensor(data)) {
+    const num = Number(data.lightning_num);
+    if (Number.isFinite(num) && num > 0) return true;
+  }
+  return false;
 }
 
 export function getLightningStatusLabel(data: WeerLive): string {

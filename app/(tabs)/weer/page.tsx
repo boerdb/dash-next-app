@@ -89,6 +89,7 @@ export default function WeerPage() {
       shouldAccelerateLightningPoll(latest)
         ? LIGHTNING_POLL_ACTIVE_MS
         : LIGHTNING_POLL_NORMAL_MS,
+    dedupingInterval: 2_000,
     shouldRetryOnError: true,
     errorRetryCount: 3,
     ...swrFreshOnOpen,

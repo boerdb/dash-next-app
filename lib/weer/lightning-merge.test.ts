@@ -169,4 +169,15 @@ describe("shouldAccelerateLightningPoll", () => {
     assert.equal(shouldAccelerateLightningPoll({ temp_c: 20 }), false);
     assert.equal(shouldAccelerateLightningPoll(null), false);
   });
+
+  it("true bij actieve dagteller zonder recente inslag", () => {
+    assert.equal(
+      shouldAccelerateLightningPoll({
+        wh57batt: "5",
+        lightning_num: 314,
+        lightning_km: 0,
+      }),
+      true
+    );
+  });
 });

@@ -45,11 +45,9 @@ async function fallbackFromMetingen(): Promise<WeerLive | null> {
 /** Live uit weer_live (Ecowitt ingest), anders laatste rij uit metingen. */
 export async function fetchWeerLiveFromDb(): Promise<WeerLive> {
   await maybeSupplementLightningFromGateway();
-  try {
-    await syncTodayBliksemFromLiveCache();
-  } catch (e) {
+  void syncTodayBliksemFromLiveCache().catch((e) => {
     console.warn("weer_bliksem_dag live sync:", e);
-  }
+  });
   const cached = await readWeerLiveCache();
   if (cached) {
     const withMinMax = await applyVandaagTempMinMax(cached);
