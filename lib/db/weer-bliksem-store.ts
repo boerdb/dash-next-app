@@ -50,6 +50,30 @@ export async function syncBliksemFromIngest(
   }
 }
 
+/** Bewaar dagmax in DB; bij dagwissel eerst gisteren definitief archiveren. */
+export async function persistBliksemAfterLiveUpdate(
+  live: WeerLive,
+  previous: WeerLive | null = null
+): Promise<void> {
+  if (
+    previous?.date_tracked &&
+    live.date_tracked &&
+    previous.date_tracked !== live.date_tracked &&
+    shouldSyncBliksemDag(previous)
+  ) {
+    await upsertBliksemDag(
+      previous.date_tracked,
+      bliksemCountFromWeer(previous)
+    );
+  }
+
+  if (!shouldSyncBliksemDag(live)) return;
+
+  const dag = live.date_tracked ?? todayAmsterdamDate();
+  if (!dag) return;
+  await upsertBliksemDag(dag, bliksemCountFromWeer(live));
+}
+
 export async function syncTodayBliksemFromLiveCache(): Promise<void> {
   const pool = getPool();
   const [rows] = await pool.query<CachePayloadRow[]>(

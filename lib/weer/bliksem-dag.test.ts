@@ -4,6 +4,7 @@ import {
   bliksemCountFromWeer,
   bliksemDagSyncFromIngest,
   resolveDailyLightningCount,
+  shouldPersistBliksemLive,
 } from "./bliksem-dag";
 
 describe("resolveDailyLightningCount", () => {
@@ -42,5 +43,27 @@ describe("bliksemDagSyncFromIngest", () => {
 describe("bliksemCountFromWeer", () => {
   it("valt terug op 0", () => {
     assert.equal(bliksemCountFromWeer({}), 0);
+  });
+});
+
+describe("shouldPersistBliksemLive", () => {
+  it("true bij dagwissel om gisteren te archiveren", () => {
+    assert.equal(
+      shouldPersistBliksemLive(
+        { date_tracked: "2026-06-28", lightning_num: 0, wh57batt: "5" },
+        { date_tracked: "2026-06-27", lightning_num: 314, wh57batt: "5" }
+      ),
+      true
+    );
+  });
+
+  it("false zonder WH57 op beide dagen", () => {
+    assert.equal(
+      shouldPersistBliksemLive(
+        { date_tracked: "2026-06-28" },
+        { date_tracked: "2026-06-27" }
+      ),
+      false
+    );
   });
 });

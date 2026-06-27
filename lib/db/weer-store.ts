@@ -21,8 +21,8 @@ import {
 } from "@/lib/weer/temp-minmax";
 import { meetMomentFromWeer, NL_TZ_OFFSET } from "@/lib/db/nl-time";
 import { syncRegenFromIngest } from "@/lib/db/weer-regen-store";
-import { syncBliksemFromIngest } from "@/lib/db/weer-bliksem-store";
-import { bliksemDagSyncFromIngest, shouldSyncBliksemDag } from "@/lib/weer/bliksem-dag";
+import { persistBliksemAfterLiveUpdate } from "@/lib/db/weer-bliksem-store";
+import { shouldPersistBliksemLive } from "@/lib/weer/bliksem-dag";
 import { regenDagSyncFromIngest, regenMmFromWeer } from "@/lib/weer/regen-dag";
 
 const CACHE_MAX_AGE_MS = 10 * 60 * 1000;
@@ -156,15 +156,9 @@ export async function ingestWeerLive(raw: WeerLive): Promise<WeerLive> {
   } catch (e) {
     console.warn("weer_regen_dag sync:", e);
   }
-  if (shouldSyncBliksemDag(saved)) {
+  if (shouldPersistBliksemLive(saved, previous)) {
     try {
-      const bliksem = bliksemDagSyncFromIngest(saved, previous);
-      await syncBliksemFromIngest(
-        bliksem.archiveDag,
-        bliksem.archiveCount,
-        bliksem.vandaagDag,
-        bliksem.vandaagCount
-      );
+      await persistBliksemAfterLiveUpdate(saved, previous);
     } catch (e) {
       console.warn("weer_bliksem_dag sync:", e);
     }
@@ -188,7 +182,15 @@ export async function supplementWeerFromGateway(): Promise<WeerLive | null> {
 
   const merged = { ...previous, ...lightning };
   const enriched = enrichWeerLive(merged);
-  return writeWeerLiveCache(enriched);
+  const saved = await writeWeerLiveCache(enriched);
+  if (saved) {
+    try {
+      await persistBliksemAfterLiveUpdate(saved, previous);
+    } catch (e) {
+      console.warn("weer_bliksem_dag gateway sync:", e);
+    }
+  }
+  return saved;
 }
 
 /** Tijdens onweer vaker WH57 ophalen (max. elke 5 s). */

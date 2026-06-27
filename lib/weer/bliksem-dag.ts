@@ -19,6 +19,23 @@ export function shouldSyncBliksemDag(data: WeerLive): boolean {
   return resolveDailyLightningCount(data) !== undefined;
 }
 
+/** Ook syncen bij dagwissel als gisteren WH57-data had (archive vóór reset). */
+export function shouldPersistBliksemLive(
+  live: WeerLive,
+  previous: WeerLive | null = null
+): boolean {
+  if (shouldSyncBliksemDag(live)) return true;
+  if (
+    previous?.date_tracked &&
+    live.date_tracked &&
+    previous.date_tracked !== live.date_tracked &&
+    shouldSyncBliksemDag(previous)
+  ) {
+    return true;
+  }
+  return false;
+}
+
 /** Bij dagwissel: vorige dag definitief archiveren, daarna vandaag syncen. */
 export function bliksemDagSyncFromIngest(
   fresh: WeerLive,
