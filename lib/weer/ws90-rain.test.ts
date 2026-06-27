@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { applyWs90RainPrimary, hasPiezoRain } from "./ws90-rain";
+import { applyWs90RainPrimary, hasPiezoRain, resolveRainRateMm } from "./ws90-rain";
 
 describe("applyWs90RainPrimary", () => {
   it("kopieert piezo naar standaard regenvelden", () => {
@@ -28,5 +28,19 @@ describe("hasPiezoRain", () => {
   it("detecteert piezo dagregen", () => {
     assert.equal(hasPiezoRain({ dailyrain_piezo_mm: 0.1 }), true);
     assert.equal(hasPiezoRain({ dailyrain_mm: 1 }), false);
+  });
+});
+
+describe("resolveRainRateMm", () => {
+  it("geeft 0 mm/u door", () => {
+    assert.equal(resolveRainRateMm({ rainrate_mm: 0 }), 0);
+    assert.equal(resolveRainRateMm({ rainrate_piezo_mm: 0 }), 0);
+  });
+
+  it("prefereert genormaliseerd veld", () => {
+    assert.equal(
+      resolveRainRateMm({ rainrate_mm: 0.6, rainrate_piezo_mm: 0.1 }),
+      0.6
+    );
   });
 });

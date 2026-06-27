@@ -48,3 +48,10 @@ export function applyWs90RainPrimary(data: WeerLive): WeerLive {
 
   return out;
 }
+
+/** Actuele neerslagintensiteit (mm/u), piezo heeft voorrang. */
+export function resolveRainRateMm(data: WeerLive): number | undefined {
+  const fromStandard = finiteMm(data.rainrate_mm);
+  if (fromStandard !== undefined) return fromStandard;
+  return finiteMm(data.rainrate_piezo_mm);
+}
