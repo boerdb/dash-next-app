@@ -4,6 +4,7 @@ import { applyBaromTrend } from "@/lib/db/barom-trend";
 import { enrichWeerLive } from "@/lib/weer/enrich-live";
 import { resolveLightningStormRisk } from "@/lib/weer/lightning-storm";
 import { getPool } from "@/lib/db/pool";
+import { applyDbRainPeriodTotals } from "@/lib/db/weer-regen-store";
 import { applyVandaagTempMinMax, readWeerLiveCache } from "@/lib/db/weer-store";
 
 interface MetingRow extends RowDataPacket {
@@ -43,7 +44,8 @@ export async function fetchWeerLiveFromDb(): Promise<WeerLive> {
     const withMinMax = await applyVandaagTempMinMax(cached);
     const withTrend = await applyBaromTrend(withMinMax);
     const enriched = enrichWeerLive(withTrend);
-    return resolveLightningStormRisk(enriched, cached);
+    const withStorm = resolveLightningStormRisk(enriched, cached);
+    return applyDbRainPeriodTotals(withStorm);
   }
 
   const fromMetingen = await fallbackFromMetingen();

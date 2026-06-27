@@ -1,7 +1,8 @@
 import type { RowDataPacket } from "mysql2";
-import type { WeerRegenJaarMaand, WeerRegenJaarResponse } from "@/lib/api/types";
+import type { WeerLive, WeerRegenJaarMaand, WeerRegenJaarResponse } from "@/lib/api/types";
 import { amsterdamSqlOffset } from "@/lib/energie/amsterdam-sql-offset";
 import { getPool } from "@/lib/db/pool";
+import { regenMmFromWeer } from "@/lib/weer/regen-dag";
 import {
   currentJaarAmsterdam,
   jaarNavigatie,
@@ -9,6 +10,10 @@ import {
   round1,
   todayAmsterdamDate,
 } from "@/lib/weer/regen-jaar-labels";
+import {
+  overlayDbRainPeriodTotals,
+  applyWs90RainPrimary,
+} from "@/lib/weer/ws90-rain";
 
 interface MaandRow extends RowDataPacket {
   maand: number;
@@ -20,7 +25,16 @@ interface DagRow extends RowDataPacket {
   regen_mm: number;
 }
 
+interface TotaalRow extends RowDataPacket {
+  totaal: number;
+}
+
+interface CachePayloadRow extends RowDataPacket {
+  payload: string | WeerLive;
+}
+
 let lastBackfillAt = 0;
+const backfillJaarAt = new Map<number, number>();
 
 export async function upsertRegenDag(dag: string, regenMm: number): Promise<void> {
   if (!dag) return;
@@ -73,18 +87,93 @@ export async function backfillRegenDagFromMetingen(
   return rows.length;
 }
 
+/** Vul weer_regen_dag voor een kalenderjaar uit metingen (MAX per dag). */
+export async function backfillRegenDagForJaar(jaar: number): Promise<void> {
+  const now = Date.now();
+  const last = backfillJaarAt.get(jaar) ?? 0;
+  if (now - last < 3_600_000) return;
+  backfillJaarAt.set(jaar, now);
+
+  const vandaag = todayAmsterdamDate();
+  const currentJaar = Number(vandaag.slice(0, 4));
+  if (jaar > currentJaar) return;
+
+  const van = `${jaar}-01-01`;
+  const tot =
+    jaar < currentJaar ? `${jaar}-12-31` : vandaag;
+
+  try {
+    await backfillRegenDagFromMetingen(van, tot);
+  } catch (e) {
+    console.warn("weer_regen_dag backfill jaar:", jaar, e);
+  }
+}
+
 export async function maybeBackfillRegenDag(): Promise<void> {
   const now = Date.now();
   if (now - lastBackfillAt < 3_600_000) return;
   lastBackfillAt = now;
+  await backfillRegenDagForJaar(currentJaarAmsterdam());
+}
 
+/** Sync vandaag uit weer_live-cache (piezo-dagregen) vóór maand/jaar-totalen. */
+export async function syncTodayRegenFromLiveCache(): Promise<void> {
+  const pool = getPool();
+  const [rows] = await pool.query<CachePayloadRow[]>(
+    "SELECT payload FROM weer_live WHERE id = 1 LIMIT 1"
+  );
+  const row = rows[0];
+  if (!row) return;
+
+  const raw =
+    typeof row.payload === "string"
+      ? (JSON.parse(row.payload) as WeerLive)
+      : row.payload;
+  const live = applyWs90RainPrimary(raw);
+  const dag = live.date_tracked ?? todayAmsterdamDate();
+  if (!dag) return;
+
+  await upsertRegenDag(dag, regenMmFromWeer(live));
+}
+
+export async function fetchRegenMaandTotaal(
+  jaar: number,
+  maand: number
+): Promise<number> {
+  const pool = getPool();
+  const [rows] = await pool.query<TotaalRow[]>(
+    `SELECT ROUND(COALESCE(SUM(regen_mm), 0), 1) AS totaal
+     FROM weer_regen_dag
+     WHERE YEAR(dag) = ? AND MONTH(dag) = ?`,
+    [jaar, maand]
+  );
+  return round1(Number(rows[0]?.totaal ?? 0));
+}
+
+export async function fetchRegenJaarTotaal(jaar: number): Promise<number> {
+  const totals = await fetchRegenMaandTotalen(jaar);
+  let sum = 0;
+  for (const v of totals.values()) sum += v;
+  return round1(sum);
+}
+
+/** Maand/jaar uit DB i.p.v. WS90-gateway-tellers (combineert WH65-historie + piezo). */
+export async function applyDbRainPeriodTotals(
+  data: WeerLive
+): Promise<WeerLive> {
   const vandaag = todayAmsterdamDate();
-  const van = `${vandaag.slice(0, 4)}-01-01`;
-  try {
-    await backfillRegenDagFromMetingen(van, vandaag);
-  } catch (e) {
-    console.warn("weer_regen_dag backfill:", e);
-  }
+  const jaar = Number(vandaag.slice(0, 4));
+  const maand = Number(vandaag.slice(5, 7));
+
+  await syncTodayRegenFromLiveCache();
+  await backfillRegenDagForJaar(jaar);
+
+  const [maandMm, jaarMm] = await Promise.all([
+    fetchRegenMaandTotaal(jaar, maand),
+    fetchRegenJaarTotaal(jaar),
+  ]);
+
+  return overlayDbRainPeriodTotals(data, maandMm, jaarMm);
 }
 
 export async function fetchRegenMaandTotalen(
@@ -108,7 +197,8 @@ export async function fetchRegenMaandTotalen(
 export async function buildWeerRegenJaarResponse(
   jaar: number
 ): Promise<WeerRegenJaarResponse> {
-  await maybeBackfillRegenDag();
+  await syncTodayRegenFromLiveCache();
+  await backfillRegenDagForJaar(jaar);
   const totals = await fetchRegenMaandTotalen(jaar);
   const currentJaar = currentJaarAmsterdam();
   const vandaag = todayAmsterdamDate();

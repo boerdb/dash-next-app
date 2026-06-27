@@ -55,3 +55,19 @@ export function resolveRainRateMm(data: WeerLive): number | undefined {
   if (fromStandard !== undefined) return fromStandard;
   return finiteMm(data.rainrate_piezo_mm);
 }
+
+/**
+ * WS90 piezo-tellers beginnen op nul; maand/jaar uit weer_regen_dag (WH65 + piezo per dag).
+ */
+export function overlayDbRainPeriodTotals(
+  data: WeerLive,
+  maandMm: number,
+  jaarMm: number
+): WeerLive {
+  if (!hasPiezoRain(data)) return data;
+  return {
+    ...data,
+    monthlyrain_mm: maandMm,
+    yearlyrain_mm: jaarMm,
+  };
+}
