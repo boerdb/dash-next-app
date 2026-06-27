@@ -41,6 +41,8 @@ describe("parseEcowittPayload", () => {
     assert.ok(r.lightning_time);
     assert.equal(r.dailyrain_piezo_mm, 3);
     assert.equal(r.rainrate_piezo_mm, 0.3);
+    assert.equal(r.dailyrain_mm, 3);
+    assert.equal(r.rainrate_mm, 0.3);
     assert.equal(r.ws90_voltage_v, 3);
     assert.equal(r.ws90_cap_voltage_v, 4);
   });

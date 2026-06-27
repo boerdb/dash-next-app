@@ -1,5 +1,6 @@
 import type { WeerLive } from "@/lib/api/types";
 import { parseLightningTime } from "@/lib/weer/lightning-time";
+import { applyWs90RainPrimary } from "@/lib/weer/ws90-rain";
 
 function fToC(f: number): number {
   return Math.round(((f - 32) * 5) / 9 * 10) / 10;
@@ -55,12 +56,17 @@ export function parseEcowittPayload(
   const dailyrain = num(input.dailyrainin);
   const dailyrainPiezo = num(input.drain_piezo);
   const weeklyrain = num(input.weeklyrainin);
+  const weeklyrainPiezo = num(input.wrain_piezo);
   const hourlyrain = num(input.hourlyrainin);
+  const hourlyrainPiezo = num(input.hrain_piezo);
   const last24hrain = num(input.last24hrainin);
+  const last24hrainPiezo = num(input.last24hrain_piezo);
   const monthlyrain = num(input.monthlyrainin);
+  const monthlyrainPiezo = num(input.mrain_piezo);
   const yearlyrain = num(input.yearlyrainin);
+  const yearlyrainPiezo = num(input.yrain_piezo);
 
-  // tempf = hoofdbuiten (WH65); temp2f = Ecowitt kanaal 2 (bijv. WH25 slaapkamer).
+  // tempf = buiten (WS90); temp2f = Ecowitt kanaal 2 (bijv. WH25 slaapkamer).
   if (tempf !== undefined) metric.temp_c = fToC(tempf);
   if (temp2f !== undefined) metric.temp2_c = fToC(temp2f);
   if (tempinf !== undefined) metric.tempin_c = fToC(tempinf);
@@ -77,10 +83,25 @@ export function parseEcowittPayload(
     metric.dailyrain_piezo_mm = inToMm(dailyrainPiezo);
   }
   if (weeklyrain !== undefined) metric.weeklyrain_mm = inToMm(weeklyrain);
+  if (weeklyrainPiezo !== undefined) {
+    metric.weeklyrain_piezo_mm = inToMm(weeklyrainPiezo);
+  }
   if (hourlyrain !== undefined) metric.hourlyrain_mm = inToMm(hourlyrain);
+  if (hourlyrainPiezo !== undefined) {
+    metric.hourlyrain_piezo_mm = inToMm(hourlyrainPiezo);
+  }
   if (last24hrain !== undefined) metric.last24hrain_mm = inToMm(last24hrain);
+  if (last24hrainPiezo !== undefined) {
+    metric.last24hrain_piezo_mm = inToMm(last24hrainPiezo);
+  }
   if (monthlyrain !== undefined) metric.monthlyrain_mm = inToMm(monthlyrain);
+  if (monthlyrainPiezo !== undefined) {
+    metric.monthlyrain_piezo_mm = inToMm(monthlyrainPiezo);
+  }
   if (yearlyrain !== undefined) metric.yearlyrain_mm = inToMm(yearlyrain);
+  if (yearlyrainPiezo !== undefined) {
+    metric.yearlyrain_piezo_mm = inToMm(yearlyrainPiezo);
+  }
 
   if (input.humidity !== undefined) metric.humidity = num(input.humidity);
   if (input.humidity2 !== undefined) metric.humidity2 = num(input.humidity2);
@@ -147,7 +168,7 @@ export function parseEcowittPayload(
     metric.temp_max_c = currentTemp;
   }
 
-  return metric as WeerLive;
+  return applyWs90RainPrimary(metric as WeerLive);
 }
 
 /** Min/max vandaag behouden (was data.json op PHP). */

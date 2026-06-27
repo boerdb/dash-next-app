@@ -13,7 +13,6 @@ import {
   hasWs90Sensor,
   isWh57Detected,
 } from "@/lib/weer/sensor-status";
-import { regenMmFromWeer } from "@/lib/weer/regen-dag";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -71,8 +70,6 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
   const statusLabel = getLightningStatusLabel(data);
   const lightningKm = data.lightning_km;
   const recentStrike = lightningStatus === "strike";
-
-  const rainTodayMm = regenMmFromWeer(data);
 
   const bothSensors = showLightning && showWs90;
 
@@ -172,18 +169,14 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
 
           {showWs90 ? (
             <SensorBlock
-              title="WS90 piezo"
+              title="WS90"
               icon={<Gauge className="h-4 w-4 text-cyan-400" />}
             >
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-1 lg:grid-cols-2">
-                <MiniMetric
-                  label="Vandaag"
-                  value={`${Number(rainTodayMm ?? 0).toFixed(1)} mm`}
-                />
-                {data.rainrate_piezo_mm != null ? (
+                {data.rainrate_mm != null && Number(data.rainrate_mm) > 0 ? (
                   <MiniMetric
                     label="Nu"
-                    value={`${Number(data.rainrate_piezo_mm).toFixed(1)} mm/u`}
+                    value={`${Number(data.rainrate_mm).toFixed(1)} mm/u`}
                   />
                 ) : null}
                 {data.ws90_voltage_v != null ? (

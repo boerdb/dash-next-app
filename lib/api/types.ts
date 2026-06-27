@@ -23,9 +23,14 @@ export interface WeerLive {
   windgust_kmh?: number;
   maxdailygust_kmh?: number;
   dailyrain_mm?: number;
-  /** WS90 piezo-regen (mm), naast of i.p.v. WH65 */
+  /** WS90 piezo-regen (mm); gekopieerd naar dailyrain_mm bij ingest. */
   dailyrain_piezo_mm?: number;
   rainrate_piezo_mm?: number;
+  weeklyrain_piezo_mm?: number;
+  hourlyrain_piezo_mm?: number;
+  last24hrain_piezo_mm?: number;
+  monthlyrain_piezo_mm?: number;
+  yearlyrain_piezo_mm?: number;
   weeklyrain_mm?: number;
   hourlyrain_mm?: number;
   last24hrain_mm?: number;

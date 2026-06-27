@@ -1,10 +1,11 @@
 import type { WeerLive } from "@/lib/api/types";
 import { computeHeatIndexC } from "@/lib/weer/heat-index";
+import { applyWs90RainPrimary } from "@/lib/weer/ws90-rain";
 import { WIND_CHILL_MAX_TEMP_C, WIND_CHILL_MIN_WIND_KMH } from "@/lib/weer/wind-chill-display";
 
 /** Zelfde formules als weer/api.php (dauwpunt + windchill). */
 export function enrichWeerLive(data: WeerLive): WeerLive {
-  const out = { ...data };
+  const out = applyWs90RainPrimary({ ...data });
 
   const temp = out.temp_c != null ? Number(out.temp_c) : NaN;
   const humidity = out.humidity != null ? Number(out.humidity) : NaN;

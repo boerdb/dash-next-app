@@ -42,7 +42,7 @@ function isStationThunder(data: WeerLive): boolean {
 }
 
 function isStationRainy(data: WeerLive): boolean {
-  const rate = Number(data.rainrate_mm) || Number(data.rainrate_piezo_mm) || 0;
+  const rate = Number(data.rainrate_mm) || 0;
   return rate > 0;
 }
 
