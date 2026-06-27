@@ -1,5 +1,6 @@
 import type { WeerLive } from "@/lib/api/types";
 import { computeHeatIndexC } from "@/lib/weer/heat-index";
+import { WIND_CHILL_MAX_TEMP_C, WIND_CHILL_MIN_WIND_KMH } from "@/lib/weer/wind-chill-display";
 
 /** Zelfde formules als weer/api.php (dauwpunt + windchill). */
 export function enrichWeerLive(data: WeerLive): WeerLive {
@@ -28,7 +29,7 @@ export function enrichWeerLive(data: WeerLive): WeerLive {
 
   if (!Number.isNaN(temp) && !Number.isNaN(windKmh)) {
     let gevoel = temp;
-    if (temp <= 10 && windKmh > 4.8) {
+    if (temp <= WIND_CHILL_MAX_TEMP_C && windKmh >= WIND_CHILL_MIN_WIND_KMH) {
       gevoel =
         13.12 +
         0.6215 * temp -

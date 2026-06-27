@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import type { WeerLive } from "@/lib/api/types";
 import { shouldShowHeatIndex } from "@/lib/weer/heat-index";
+import { shouldShowWindChill } from "@/lib/weer/wind-chill-display";
 import { formatBaromTrendDelta } from "@/lib/weer/barom-trend";
 import { getWindDirection, resolveWindDegrees } from "@/lib/utils/wind";
 import { WindArrow } from "@/components/weather/WindArrow";
@@ -74,9 +75,15 @@ export function MetricGrid({ data }: MetricGridProps) {
   const windAvg = Number(data.windspd_avg10m_kmh ?? 0);
   const windGust = Number(data.windgust_kmh ?? 0);
   const showHitteIndex = shouldShowHeatIndex(data);
-  const footerCols = showHitteIndex
-    ? "sm:grid-cols-3 lg:grid-cols-6"
-    : "sm:grid-cols-2 lg:grid-cols-5";
+  const showWindChill = shouldShowWindChill(data);
+  const footerCount =
+    2 + (showWindChill ? 1 : 0) + (showHitteIndex ? 1 : 0) + 2;
+  const footerCols =
+    footerCount >= 6
+      ? "sm:grid-cols-3 lg:grid-cols-6"
+      : footerCount >= 5
+        ? "sm:grid-cols-3 lg:grid-cols-5"
+        : "sm:grid-cols-2 lg:grid-cols-4";
 
   return (
     <Card variant="weather" className="overflow-hidden">
@@ -171,25 +178,14 @@ export function MetricGrid({ data }: MetricGridProps) {
         >
           <FooterStat label="Vocht buiten" value={`${data.humidity ?? "—"}%`} />
           <FooterStat label="Dauwpunt" value={`${data.dauwpunt ?? "—"} °C`} />
-          <FooterStat
-            label="Windchill"
-            value={
-              data.gevoelstemperatuur != null ? (
-                <span
-                  className={
-                    Number(data.gevoelstemperatuur) <
-                    Number(data.temp_c ?? data.gevoelstemperatuur)
-                      ? "text-sky-300"
-                      : undefined
-                  }
-                >
-                  {data.gevoelstemperatuur} °C
-                </span>
-              ) : (
-                "—"
-              )
-            }
-          />
+          {showWindChill ? (
+            <FooterStat
+              label="Windchill"
+              value={
+                <span className="text-sky-300">{data.gevoelstemperatuur} °C</span>
+              }
+            />
+          ) : null}
           {showHitteIndex ? (
             <FooterStat
               label="Hitte-index"

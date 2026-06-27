@@ -13,13 +13,22 @@ describe("enrichWeerLive", () => {
     assert.equal(r.gevoelstemperatuur, 16.3);
   });
 
-  it("windchill bij kou en wind", () => {
+  it("windchill bij kou en wind ≥3 Bft", () => {
     const r = enrichWeerLive({
       temp_c: 5,
       humidity: 80,
       windspd_avg10m_kmh: 20,
     });
     assert.ok(Number(r.gevoelstemperatuur) < 5);
+  });
+
+  it("geen windchill-formule onder 3 Bft", () => {
+    const r = enrichWeerLive({
+      temp_c: 5,
+      humidity: 80,
+      windspd_avg10m_kmh: 8,
+    });
+    assert.equal(r.gevoelstemperatuur, 5);
   });
 
   it("gevoelstemperatuur met alleen windspeed_kmh (GW1100)", () => {
