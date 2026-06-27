@@ -14,6 +14,7 @@ import { shouldShowHeatIndex } from "@/lib/weer/heat-index";
 import { shouldShowWindChill } from "@/lib/weer/wind-chill-display";
 import { formatBaromTrendDelta } from "@/lib/weer/barom-trend";
 import { regenMmFromWeer } from "@/lib/weer/regen-dag";
+import { resolveRainRateMm } from "@/lib/weer/ws90-rain";
 import { getWindDirection, resolveWindDegrees } from "@/lib/utils/wind";
 import { WindArrow } from "@/components/weather/WindArrow";
 import { Card, CardContent } from "@/components/ui/card";
@@ -78,6 +79,7 @@ export function MetricGrid({ data }: MetricGridProps) {
   const showHitteIndex = shouldShowHeatIndex(data);
   const showWindChill = shouldShowWindChill(data);
   const rainTodayMm = regenMmFromWeer(data);
+  const rainRateMm = resolveRainRateMm(data);
   const footerCount =
     2 + (showWindChill ? 1 : 0) + (showHitteIndex ? 1 : 0) + 2;
   const footerCols =
@@ -118,6 +120,9 @@ export function MetricGrid({ data }: MetricGridProps) {
             }
             detail={
               <>
+                {rainRateMm !== undefined ? (
+                  <>Nu {rainRateMm.toFixed(1)} mm/u · </>
+                ) : null}
                 Maand {data.monthlyrain_mm ?? "—"} mm · Jaar {data.yearlyrain_mm ?? "—"} mm
               </>
             }
