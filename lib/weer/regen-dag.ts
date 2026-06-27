@@ -1,8 +1,22 @@
 import type { WeerLive } from "@/lib/api/types";
+import { hasWs90Sensor } from "@/lib/weer/sensor-status";
 import { round1 } from "@/lib/weer/regen-jaar-labels";
 
+/** Dagregen (mm): WS90 piezo heeft voorrang als die sensor actief is. */
+export function resolveDailyRainMm(data: WeerLive): number | undefined {
+  if (hasWs90Sensor(data) && data.dailyrain_piezo_mm != null) {
+    const piezo = Number(data.dailyrain_piezo_mm);
+    if (Number.isFinite(piezo) && piezo >= 0) return piezo;
+  }
+  if (data.dailyrain_mm != null) {
+    const mm = Number(data.dailyrain_mm);
+    if (Number.isFinite(mm) && mm >= 0) return mm;
+  }
+  return undefined;
+}
+
 export function regenMmFromWeer(data: WeerLive): number {
-  const mm = Number(data.dailyrain_mm ?? 0);
+  const mm = resolveDailyRainMm(data) ?? 0;
   return Number.isFinite(mm) && mm >= 0 ? round1(mm) : 0;
 }
 

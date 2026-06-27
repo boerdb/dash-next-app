@@ -13,6 +13,7 @@ import {
   hasWs90Sensor,
   isWh57Detected,
 } from "@/lib/weer/sensor-status";
+import { regenMmFromWeer } from "@/lib/weer/regen-dag";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -71,10 +72,7 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
   const lightningKm = data.lightning_km;
   const recentStrike = lightningStatus === "strike";
 
-  const rainTodayMm =
-    showWs90 && data.dailyrain_piezo_mm != null
-      ? data.dailyrain_piezo_mm
-      : data.dailyrain_mm;
+  const rainTodayMm = regenMmFromWeer(data);
 
   const bothSensors = showLightning && showWs90;
 

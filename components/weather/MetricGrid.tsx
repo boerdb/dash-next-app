@@ -13,6 +13,7 @@ import type { WeerLive } from "@/lib/api/types";
 import { shouldShowHeatIndex } from "@/lib/weer/heat-index";
 import { shouldShowWindChill } from "@/lib/weer/wind-chill-display";
 import { formatBaromTrendDelta } from "@/lib/weer/barom-trend";
+import { regenMmFromWeer } from "@/lib/weer/regen-dag";
 import { getWindDirection, resolveWindDegrees } from "@/lib/utils/wind";
 import { WindArrow } from "@/components/weather/WindArrow";
 import { Card, CardContent } from "@/components/ui/card";
@@ -76,6 +77,7 @@ export function MetricGrid({ data }: MetricGridProps) {
   const windGust = Number(data.windgust_kmh ?? 0);
   const showHitteIndex = shouldShowHeatIndex(data);
   const showWindChill = shouldShowWindChill(data);
+  const rainTodayMm = regenMmFromWeer(data);
   const footerCount =
     2 + (showWindChill ? 1 : 0) + (showHitteIndex ? 1 : 0) + 2;
   const footerCols =
@@ -110,7 +112,7 @@ export function MetricGrid({ data }: MetricGridProps) {
             label="Regen vandaag"
             value={
               <>
-                {Number(data.dailyrain_mm ?? 0).toFixed(1)}
+                {rainTodayMm.toFixed(1)}
                 <span className="ml-1 text-sm font-normal text-surface-muted">mm</span>
               </>
             }

@@ -17,7 +17,7 @@ import {
 } from "@/lib/weer/temp-minmax";
 import { meetMomentFromWeer, NL_TZ_OFFSET } from "@/lib/db/nl-time";
 import { syncRegenFromIngest } from "@/lib/db/weer-regen-store";
-import { regenDagSyncFromIngest } from "@/lib/weer/regen-dag";
+import { regenDagSyncFromIngest, regenMmFromWeer } from "@/lib/weer/regen-dag";
 
 const CACHE_MAX_AGE_MS = 10 * 60 * 1000;
 
@@ -106,7 +106,7 @@ export async function maybeInsertMeting(data: WeerLive): Promise<boolean> {
         ? Number(data.windspeed_kmh)
         : 0;
   const dir = data.winddir != null ? Number(data.winddir) : 0;
-  const rain = data.dailyrain_mm != null ? Number(data.dailyrain_mm) : 0;
+  const rain = regenMmFromWeer(data);
   const sun = data.solarradiation != null ? Number(data.solarradiation) : 0;
   const barom =
     data.baromrel_hpa != null && Number.isFinite(Number(data.baromrel_hpa))
