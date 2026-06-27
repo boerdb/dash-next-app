@@ -10,6 +10,10 @@ import {
 } from "@/lib/weer/ecowitt-local-client";
 import { env } from "@/lib/env.server";
 import { getPool } from "@/lib/db/pool";
+import {
+  GATEWAY_LIGHTNING_SUPPLEMENT_MS,
+  shouldAccelerateLightningPoll,
+} from "@/lib/weer/lightning-storm";
 import { todayAmsterdamDate } from "@/lib/weer/regen-jaar-labels";
 import {
   mergeVandaagTempMinMax,
@@ -20,6 +24,8 @@ import { syncRegenFromIngest } from "@/lib/db/weer-regen-store";
 import { regenDagSyncFromIngest, regenMmFromWeer } from "@/lib/weer/regen-dag";
 
 const CACHE_MAX_AGE_MS = 10 * 60 * 1000;
+
+let lastLightningGatewayPollAt = 0;
 
 interface CacheRow extends RowDataPacket {
   payload: string | WeerLive;
@@ -168,6 +174,19 @@ export async function supplementWeerFromGateway(): Promise<WeerLive | null> {
   const merged = { ...previous, ...lightning };
   const enriched = enrichWeerLive(merged);
   return writeWeerLiveCache(enriched);
+}
+
+/** Tijdens onweer vaker WH57 ophalen (max. elke 5 s). */
+export async function maybeSupplementLightningFromGateway(): Promise<void> {
+  const previous = await readWeerLiveCache();
+  if (!previous || !shouldAccelerateLightningPoll(previous)) return;
+
+  const now = Date.now();
+  if (now - lastLightningGatewayPollAt < GATEWAY_LIGHTNING_SUPPLEMENT_MS) {
+    return;
+  }
+  lastLightningGatewayPollAt = now;
+  await supplementWeerFromGateway();
 }
 
 export function isCacheFresh(updatedAt: Date | null): boolean {

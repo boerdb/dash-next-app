@@ -5,7 +5,11 @@ import { enrichWeerLive } from "@/lib/weer/enrich-live";
 import { resolveLightningStormRisk } from "@/lib/weer/lightning-storm";
 import { getPool } from "@/lib/db/pool";
 import { applyDbRainPeriodTotals } from "@/lib/db/weer-regen-store";
-import { applyVandaagTempMinMax, readWeerLiveCache } from "@/lib/db/weer-store";
+import {
+  applyVandaagTempMinMax,
+  maybeSupplementLightningFromGateway,
+  readWeerLiveCache,
+} from "@/lib/db/weer-store";
 
 interface MetingRow extends RowDataPacket {
   meet_moment: Date;
@@ -39,6 +43,7 @@ async function fallbackFromMetingen(): Promise<WeerLive | null> {
 
 /** Live uit weer_live (Ecowitt ingest), anders laatste rij uit metingen. */
 export async function fetchWeerLiveFromDb(): Promise<WeerLive> {
+  await maybeSupplementLightningFromGateway();
   const cached = await readWeerLiveCache();
   if (cached) {
     const withMinMax = await applyVandaagTempMinMax(cached);

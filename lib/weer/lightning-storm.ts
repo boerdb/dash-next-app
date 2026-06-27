@@ -6,6 +6,12 @@ const NL_TZ = "Europe/Amsterdam";
 /** Console houdt onweersicoon vaak uren actief na trigger. */
 export const STORM_RISK_LATCH_MS = 4 * 60 * 60 * 1000;
 
+/** Live-poll interval weerpagina (ms). */
+export const LIGHTNING_POLL_NORMAL_MS = 30_000;
+export const LIGHTNING_POLL_ACTIVE_MS = 5_000;
+/** Max. frequentie GW1100 WH57-aanvulling tijdens onweer (ms). */
+export const GATEWAY_LIGHTNING_SUPPLEMENT_MS = 5_000;
+
 function fieldPresent(data: WeerLive, key: keyof WeerLive): boolean {
   const v = data[key];
   return v !== undefined && v !== "";
@@ -184,6 +190,16 @@ export function getLightningStatus(data: WeerLive): LightningStatusKind {
   if (data.lightning_storm_risk === true) return "risk";
   if (computeLightningStormRisk(data)) return "risk";
   return "idle";
+}
+
+/** Snellere live-poll + gateway-sync bij actief onweer / WH57-detectie. */
+export function shouldAccelerateLightningPoll(
+  data: WeerLive | null | undefined
+): boolean {
+  if (!data) return false;
+  if (getLightningStatus(data) !== "idle") return true;
+  const km = data.lightning_km;
+  return km != null && km > 0 && km <= WH57_MAX_KM;
 }
 
 export function getLightningStatusLabel(data: WeerLive): string {

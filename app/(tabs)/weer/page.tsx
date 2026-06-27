@@ -18,6 +18,11 @@ import { jsonFetcher, FetchError } from "@/lib/fetcher";
 import { useRevalidateOnVisible } from "@/lib/hooks/use-revalidate-on-visible";
 import { getWeatherCondition } from "@/lib/utils/weather-condition";
 import { formatWeerUpdateLabel } from "@/lib/weer/update-label";
+import {
+  LIGHTNING_POLL_ACTIVE_MS,
+  LIGHTNING_POLL_NORMAL_MS,
+  shouldAccelerateLightningPoll,
+} from "@/lib/weer/lightning-storm";
 import type {
   AstronomieApi,
   GetijdenResponse,
@@ -72,7 +77,10 @@ export default function WeerPage() {
     isLoading: weerLoading,
     mutate: mutateWeer,
   } = useSWR<WeerLive, FetchError>("/api/weer/live", jsonFetcher, {
-    refreshInterval: 30_000,
+    refreshInterval: (latest) =>
+      shouldAccelerateLightningPoll(latest)
+        ? LIGHTNING_POLL_ACTIVE_MS
+        : LIGHTNING_POLL_NORMAL_MS,
     shouldRetryOnError: true,
     errorRetryCount: 3,
     ...swrFreshOnOpen,

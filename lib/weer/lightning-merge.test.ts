@@ -7,6 +7,7 @@ import {
   isConvectiveStormSetup,
   pickBestLightningFields,
   resolveLightningStormRisk,
+  shouldAccelerateLightningPoll,
   STORM_RISK_LATCH_MS,
 } from "./lightning-storm";
 import { isWh57Detected } from "./sensor-status";
@@ -135,5 +136,37 @@ describe("mapGatewayLightning", () => {
       lightning: [{ distance: "--.-", count: "0" }],
     });
     assert.equal(mapped.lightning_km, undefined);
+  });
+});
+
+describe("shouldAccelerateLightningPoll", () => {
+  it("true bij recente inslag", () => {
+    const now = Date.now();
+    const strikeTime = new Date(now - 5 * 60_000)
+      .toLocaleString("sv-SE", { timeZone: "Europe/Amsterdam" })
+      .replace("T", " ")
+      .slice(0, 19);
+    assert.equal(
+      shouldAccelerateLightningPoll({
+        lightning_km: 12,
+        lightning_time: strikeTime,
+      }),
+      true
+    );
+  });
+
+  it("true bij onweersfront zonder inslag", () => {
+    assert.equal(
+      shouldAccelerateLightningPoll({
+        wh57batt: "5",
+        lightning_km: 22,
+      }),
+      true
+    );
+  });
+
+  it("false zonder WH57-activiteit", () => {
+    assert.equal(shouldAccelerateLightningPoll({ temp_c: 20 }), false);
+    assert.equal(shouldAccelerateLightningPoll(null), false);
   });
 });
