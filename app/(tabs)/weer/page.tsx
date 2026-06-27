@@ -44,6 +44,14 @@ const RainYearChart = dynamic(
   { ssr: false, loading: () => <Skeleton className="h-52 w-full rounded-2xl" /> }
 );
 
+const LightningYearChart = dynamic(
+  () =>
+    import("@/components/weather/LightningYearChart").then(
+      (m) => m.LightningYearChart
+    ),
+  { ssr: false, loading: () => <Skeleton className="h-52 w-full rounded-2xl" /> }
+);
+
 const PrecipitationRadar = dynamic(
   () =>
     import("@/components/weather/PrecipitationRadar").then(
@@ -207,9 +215,14 @@ export default function WeerPage() {
             collapsible
             defaultOpen={false}
           >
-            <div className="grid gap-3 md:grid-cols-2 md:gap-4">
-              {historie?.labels?.length ? <TemperatureChart data={historie} /> : null}
-              <RainYearChart />
+            <div className="space-y-3 md:space-y-4">
+              {historie?.labels?.length ? (
+                <TemperatureChart data={historie} />
+              ) : null}
+              <div className="grid gap-3 md:grid-cols-2 md:gap-4">
+                <RainYearChart />
+                <LightningYearChart />
+              </div>
             </div>
           </WeerSection>
 

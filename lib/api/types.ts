@@ -106,6 +106,21 @@ export interface WeerRegenJaarResponse {
   kan_volgende_jaar: boolean;
 }
 
+export interface WeerBliksemJaarMaand {
+  maand: number;
+  label: string;
+  ontadingen: number;
+}
+
+export interface WeerBliksemJaarResponse {
+  jaar: number;
+  maanden: WeerBliksemJaarMaand[];
+  jaar_totaal: number;
+  vandaag: string;
+  kan_vorige_jaar: boolean;
+  kan_volgende_jaar: boolean;
+}
+
 export interface WeerRadarFrame {
   time: number;
   label: string;

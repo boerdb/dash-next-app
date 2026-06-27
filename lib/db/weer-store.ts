@@ -21,6 +21,8 @@ import {
 } from "@/lib/weer/temp-minmax";
 import { meetMomentFromWeer, NL_TZ_OFFSET } from "@/lib/db/nl-time";
 import { syncRegenFromIngest } from "@/lib/db/weer-regen-store";
+import { syncBliksemFromIngest } from "@/lib/db/weer-bliksem-store";
+import { bliksemDagSyncFromIngest, shouldSyncBliksemDag } from "@/lib/weer/bliksem-dag";
 import { regenDagSyncFromIngest, regenMmFromWeer } from "@/lib/weer/regen-dag";
 
 const CACHE_MAX_AGE_MS = 10 * 60 * 1000;
@@ -153,6 +155,19 @@ export async function ingestWeerLive(raw: WeerLive): Promise<WeerLive> {
     );
   } catch (e) {
     console.warn("weer_regen_dag sync:", e);
+  }
+  if (shouldSyncBliksemDag(saved)) {
+    try {
+      const bliksem = bliksemDagSyncFromIngest(saved, previous);
+      await syncBliksemFromIngest(
+        bliksem.archiveDag,
+        bliksem.archiveCount,
+        bliksem.vandaagDag,
+        bliksem.vandaagCount
+      );
+    } catch (e) {
+      console.warn("weer_bliksem_dag sync:", e);
+    }
   }
   return saved;
 }
