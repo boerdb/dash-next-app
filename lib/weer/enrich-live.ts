@@ -21,6 +21,8 @@ export function enrichWeerLive(data: WeerLive): WeerLive {
     const hitteIndex = computeHeatIndexC(temp, humidity);
     if (hitteIndex != null) {
       out.hitte_index_c = hitteIndex;
+    } else {
+      delete out.hitte_index_c;
     }
   }
 

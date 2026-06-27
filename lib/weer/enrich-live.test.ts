@@ -40,4 +40,13 @@ describe("enrichWeerLive", () => {
     });
     assert.ok(Number(r.hitte_index_c) > 32);
   });
+
+  it("wist verouderde hitte-index als temperatuur onder 27 °C zakt", () => {
+    const r = enrichWeerLive({
+      temp_c: 22,
+      humidity: 85,
+      hitte_index_c: 38.5,
+    });
+    assert.equal(r.hitte_index_c, undefined);
+  });
 });

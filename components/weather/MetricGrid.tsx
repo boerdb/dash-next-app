@@ -10,6 +10,7 @@ import {
   Sun,
 } from "lucide-react";
 import type { WeerLive } from "@/lib/api/types";
+import { shouldShowHeatIndex } from "@/lib/weer/heat-index";
 import { formatBaromTrendDelta } from "@/lib/weer/barom-trend";
 import { getWindDirection, resolveWindDegrees } from "@/lib/utils/wind";
 import { WindArrow } from "@/components/weather/WindArrow";
@@ -72,6 +73,10 @@ export function MetricGrid({ data }: MetricGridProps) {
   const windSpeed = Number(data.windspeed_kmh ?? data.windspd_avg10m_kmh ?? 0);
   const windAvg = Number(data.windspd_avg10m_kmh ?? 0);
   const windGust = Number(data.windgust_kmh ?? 0);
+  const showHitteIndex = shouldShowHeatIndex(data);
+  const footerCols = showHitteIndex
+    ? "sm:grid-cols-3 lg:grid-cols-6"
+    : "sm:grid-cols-2 lg:grid-cols-5";
 
   return (
     <Card variant="weather" className="overflow-hidden">
@@ -158,7 +163,12 @@ export function MetricGrid({ data }: MetricGridProps) {
           </StatCell>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 border-t border-card-border bg-surface-inset px-4 py-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div
+          className={cn(
+            "grid grid-cols-2 gap-3 border-t border-card-border bg-surface-inset px-4 py-3",
+            footerCols
+          )}
+        >
           <FooterStat label="Vocht buiten" value={`${data.humidity ?? "—"}%`} />
           <FooterStat label="Dauwpunt" value={`${data.dauwpunt ?? "—"} °C`} />
           <FooterStat
@@ -180,16 +190,14 @@ export function MetricGrid({ data }: MetricGridProps) {
               )
             }
           />
-          <FooterStat
-            label="Hitte-index"
-            value={
-              data.hitte_index_c != null ? (
+          {showHitteIndex ? (
+            <FooterStat
+              label="Hitte-index"
+              value={
                 <span className="text-orange-300">{data.hitte_index_c} °C</span>
-              ) : (
-                "—"
-              )
-            }
-          />
+              }
+            />
+          ) : null}
           <FooterStat
             label="Binnen"
             value={

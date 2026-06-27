@@ -49,3 +49,14 @@ export function computeHeatIndexC(
   const hiC = fToC(heatIndexFahrenheit(cToF(tempC), humidityPct));
   return Math.round(hiC * 10) / 10;
 }
+
+/** Tonen vanaf 27 °C buiten, met geldige hitte-index. */
+export function shouldShowHeatIndex(data: {
+  temp_c?: number | string | null;
+  hitte_index_c?: number | string | null;
+}): boolean {
+  const temp = data.temp_c != null ? Number(data.temp_c) : NaN;
+  if (!Number.isFinite(temp) || temp < HEAT_INDEX_MIN_TEMP_C) return false;
+  if (data.hitte_index_c == null || data.hitte_index_c === "") return false;
+  return Number.isFinite(Number(data.hitte_index_c));
+}
