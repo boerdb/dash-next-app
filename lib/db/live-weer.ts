@@ -8,7 +8,7 @@ import { applyDbRainPeriodTotals } from "@/lib/db/weer-regen-store";
 import { syncTodayBliksemFromLiveCache } from "@/lib/db/weer-bliksem-store";
 import {
   applyVandaagTempMinMax,
-  maybeSupplementLightningFromGateway,
+  maybeSupplementFromGateway,
   readWeerLiveCache,
 } from "@/lib/db/weer-store";
 
@@ -44,7 +44,7 @@ async function fallbackFromMetingen(): Promise<WeerLive | null> {
 
 /** Live uit weer_live (Ecowitt ingest), anders laatste rij uit metingen. */
 export async function fetchWeerLiveFromDb(): Promise<WeerLive> {
-  await maybeSupplementLightningFromGateway();
+  await maybeSupplementFromGateway();
   void syncTodayBliksemFromLiveCache().catch((e) => {
     console.warn("weer_bliksem_dag live sync:", e);
   });

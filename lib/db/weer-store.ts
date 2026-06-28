@@ -7,6 +7,7 @@ import { mergeWeerLiveBySource } from "@/lib/weer/merge-weer-sources";
 import {
   fetchGatewayLiveData,
   mapGatewayLightning,
+  mapGatewayLive,
 } from "@/lib/weer/ecowitt-local-client";
 import { env } from "@/lib/env.server";
 import { getPool } from "@/lib/db/pool";
@@ -26,8 +27,10 @@ import { shouldPersistBliksemLive } from "@/lib/weer/bliksem-dag";
 import { regenDagSyncFromIngest, regenMmFromWeer } from "@/lib/weer/regen-dag";
 
 const CACHE_MAX_AGE_MS = 10 * 60 * 1000;
+/** Gateway-poll bij rustig weer (wind/sensoren sneller dan de ~1 min upload). */
+const GATEWAY_SUPPLEMENT_MS = 15_000;
 
-let lastLightningGatewayPollAt = 0;
+let lastGatewayPollAt = 0;
 
 interface CacheRow extends RowDataPacket {
   payload: string | WeerLive;
@@ -166,7 +169,10 @@ export async function ingestWeerLive(raw: WeerLive): Promise<WeerLive> {
   return saved;
 }
 
-/** Poll GW1100 LAN-API (.150) voor WH57-data; vult gaten in custom upload. */
+/**
+ * Poll GW1100 LAN-API (.150): wind/temp/vocht/zon/UV/regen + WH57-bliksem.
+ * Lokaal ververst de gateway sneller dan de Ecowitt custom upload (~1 min).
+ */
 export async function supplementWeerFromGateway(): Promise<WeerLive | null> {
   const gatewayUrl = env.ECOWITT_GATEWAY_URL;
   if (!gatewayUrl) return null;
@@ -177,10 +183,13 @@ export async function supplementWeerFromGateway(): Promise<WeerLive | null> {
   const raw = await fetchGatewayLiveData(gatewayUrl);
   if (!raw) return null;
 
-  const lightning = mapGatewayLightning(raw, previous.dateutc);
-  if (Object.keys(lightning).length === 0) return previous;
+  const fields = {
+    ...mapGatewayLive(raw),
+    ...mapGatewayLightning(raw, previous.dateutc),
+  };
+  if (Object.keys(fields).length === 0) return previous;
 
-  const merged = { ...previous, ...lightning };
+  const merged = applyWindAvg10m({ ...previous, ...fields }, previous);
   const enriched = enrichWeerLive(merged);
   const saved = await writeWeerLiveCache(enriched);
   if (saved) {
@@ -193,16 +202,20 @@ export async function supplementWeerFromGateway(): Promise<WeerLive | null> {
   return saved;
 }
 
-/** Tijdens onweer vaker WH57 ophalen (max. elke 5 s). */
-export async function maybeSupplementLightningFromGateway(): Promise<void> {
+/**
+ * Gateway-aanvulling met throttle: elke ~15 s, of elke 5 s tijdens onweer.
+ * Zo loopt o.a. de windmeter near-real-time mee met de lokale GW1100.
+ */
+export async function maybeSupplementFromGateway(): Promise<void> {
   const previous = await readWeerLiveCache();
-  if (!previous || !shouldAccelerateLightningPoll(previous)) return;
+  if (!previous) return;
 
+  const interval = shouldAccelerateLightningPoll(previous)
+    ? GATEWAY_LIGHTNING_SUPPLEMENT_MS
+    : GATEWAY_SUPPLEMENT_MS;
   const now = Date.now();
-  if (now - lastLightningGatewayPollAt < GATEWAY_LIGHTNING_SUPPLEMENT_MS) {
-    return;
-  }
-  lastLightningGatewayPollAt = now;
+  if (now - lastGatewayPollAt < interval) return;
+  lastGatewayPollAt = now;
   await supplementWeerFromGateway();
 }
 

@@ -12,7 +12,7 @@ import {
 } from "./lightning-storm";
 import { isWh57Detected } from "./sensor-status";
 import { mergeWeerLiveBySource } from "./merge-weer-sources";
-import { mapGatewayLightning } from "./ecowitt-local-client";
+import { mapGatewayLightning, mapGatewayLive } from "./ecowitt-local-client";
 
 describe("lightning storm risk", () => {
   it("detecteert console-achtige stormkans bij dalende druk", () => {
@@ -136,6 +136,82 @@ describe("mapGatewayLightning", () => {
       lightning: [{ distance: "--.-", count: "0" }],
     });
     assert.equal(mapped.lightning_km, undefined);
+  });
+});
+
+describe("mapGatewayLive", () => {
+  const raw = {
+    common_list: [
+      { id: "0x02", val: "23.4", unit: "C" },
+      { id: "0x07", val: "66%" },
+      { id: "5", val: "0.978 kPa" },
+      { id: "0x0B", val: "7.92 km/h" },
+      { id: "0x0C", val: "12.96 km/h" },
+      { id: "0x19", val: "18.00 km/h" },
+      { id: "0x15", val: "513.73 W/m2" },
+      { id: "0x17", val: "4" },
+      { id: "0x0A", val: "256" },
+    ],
+    piezoRain: [
+      { id: "0x0E", val: "0.0 mm/Hr" },
+      { id: "0x10", val: "5.9 mm" },
+      { id: "0x12", val: "14.5 mm" },
+      { id: "0x13", val: "14.5 mm", battery: "5" },
+    ],
+    wh25: [
+      {
+        intemp: "27.8",
+        unit: "C",
+        inhumi: "65%",
+        abs: "1020.2 hPa",
+        rel: "1021.4 hPa",
+      },
+    ],
+    ch_aisle: [{ channel: "2", temp: "28.5", unit: "C", humidity: "59%" }],
+  };
+
+  it("mapt wind, richting en dagmax", () => {
+    const m = mapGatewayLive(raw);
+    assert.equal(m.winddir, 256);
+    assert.equal(m.windspeed_kmh, 7.92);
+    assert.equal(m.windgust_kmh, 12.96);
+    assert.equal(m.maxdailygust_kmh, 18);
+  });
+
+  it("mapt temp, vocht, zon, UV en VPD", () => {
+    const m = mapGatewayLive(raw);
+    assert.equal(m.temp_c, 23.4);
+    assert.equal(m.humidity, 66);
+    assert.equal(m.solarradiation, 513.73);
+    assert.equal(m.uv, 4);
+    assert.equal(m.vpd, 0.978);
+  });
+
+  it("mapt piezo-regen, binnenklimaat en kanaal 2", () => {
+    const m = mapGatewayLive(raw);
+    assert.equal(m.rainrate_piezo_mm, 0);
+    assert.equal(m.dailyrain_piezo_mm, 5.9);
+    assert.equal(m.monthlyrain_piezo_mm, 14.5);
+    assert.equal(m.tempin_c, 27.8);
+    assert.equal(m.humidityin, 65);
+    assert.equal(m.baromrel_hpa, 1021.4);
+    assert.equal(m.temp2_c, 28.5);
+    assert.equal(m.humidity2, 59);
+  });
+
+  it("converteert °F en mph indien nodig", () => {
+    const m = mapGatewayLive({
+      common_list: [
+        { id: "0x02", val: "50", unit: "F" },
+        { id: "0x0B", val: "10 mph" },
+      ],
+    });
+    assert.equal(m.temp_c, 10);
+    assert.equal(m.windspeed_kmh, 16.1);
+  });
+
+  it("geeft lege mapping bij lege respons", () => {
+    assert.deepEqual(mapGatewayLive({}), {});
   });
 });
 
