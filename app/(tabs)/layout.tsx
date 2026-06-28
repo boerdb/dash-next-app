@@ -10,7 +10,7 @@ export default function TabsLayout({
   return (
     <div className="mx-auto min-h-dvh w-full max-w-lg bg-background bg-gradient-to-b from-[var(--gradient-from)] via-[var(--gradient-via)] to-[var(--gradient-to)] pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:max-w-3xl lg:max-w-5xl">
       <EnergiePrefetch />
-      <main className="px-4 pt-[max(1rem,env(safe-area-inset-top,0px))] sm:px-6 md:px-8">
+      <main className="px-4 sm:px-6 md:px-8">
         <AppHeader />
         {children}
       </main>
