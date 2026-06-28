@@ -131,6 +131,11 @@ export function WeatherHero({
             <span className="hidden text-white/30 sm:inline">|</span>
           ) : null}
           <span>
+            {data.temp_min_time ? (
+              <span className="mr-1 text-[0.7rem] tabular-nums text-white/55">
+                {data.temp_min_time}
+              </span>
+            ) : null}
             Min{" "}
             <strong className="font-semibold tabular-nums text-sky-200">
               {data.temp_min_c}°
@@ -142,6 +147,11 @@ export function WeatherHero({
             <strong className="font-semibold tabular-nums text-orange-200">
               {data.temp_max_c}°
             </strong>
+            {data.temp_max_time ? (
+              <span className="ml-1 text-[0.7rem] tabular-nums text-white/55">
+                {data.temp_max_time}
+              </span>
+            ) : null}
           </span>
         </div>
       </div>

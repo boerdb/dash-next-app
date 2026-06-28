@@ -11,6 +11,10 @@ export interface WeerLive {
   hitte_index_c?: number | string;
   temp_min_c?: number | string;
   temp_max_c?: number | string;
+  /** Tijdstip (HH:MM, Amsterdam) van de dag-minimumtemperatuur. */
+  temp_min_time?: string | null;
+  /** Tijdstip (HH:MM, Amsterdam) van de dag-maximumtemperatuur. */
+  temp_max_time?: string | null;
   dauwpunt?: number | string;
   /** Vapor pressure deficit (kPa), nieuwere firmware */
   vpd?: number | string;
@@ -22,6 +26,8 @@ export interface WeerLive {
   windspd_avg10m_kmh?: number;
   windgust_kmh?: number;
   maxdailygust_kmh?: number;
+  /** Tijdstip (HH:MM, Amsterdam) van de hoogste daggust; GW1100 stuurt geen tijd. */
+  maxdailygust_time?: string | null;
   dailyrain_mm?: number;
   /** WS90 piezo-regen (mm); gekopieerd naar dailyrain_mm bij ingest. */
   dailyrain_piezo_mm?: number;

@@ -58,6 +58,8 @@ export function WindCompass({ data }: WindCompassProps) {
   const windAvg = Number(data.windspd_avg10m_kmh ?? 0);
   const windGust = Number(data.windgust_kmh ?? 0);
   const maxGust = Number(data.maxdailygust_kmh ?? 0);
+  const maxGustTime =
+    typeof data.maxdailygust_time === "string" ? data.maxdailygust_time : null;
 
   return (
     <Card variant="weather" className="overflow-hidden">
@@ -134,7 +136,12 @@ export function WindCompass({ data }: WindCompassProps) {
             <p className="text-[0.6rem] text-surface-muted">km/u</p>
             <p className="mt-2 inline-flex items-center gap-0.5 text-[0.65rem] tabular-nums text-orange-400">
               <ArrowUp className="h-3 w-3 shrink-0" aria-hidden />
-              {maxGust.toFixed(1)} vandaag
+              {maxGust.toFixed(1)}
+              {maxGustTime ? (
+                <span className="ml-1 text-surface-muted">{maxGustTime}</span>
+              ) : (
+                <span className="ml-1">vandaag</span>
+              )}
             </p>
           </div>
         </div>

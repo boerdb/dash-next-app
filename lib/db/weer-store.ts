@@ -20,6 +20,7 @@ import {
   mergeVandaagTempMinMax,
   type VandaagTempMinMax,
 } from "@/lib/weer/temp-minmax";
+import { applyMaxGustTime } from "@/lib/weer/max-gust-time";
 import { meetMomentFromWeer, NL_TZ_OFFSET } from "@/lib/db/nl-time";
 import { syncRegenFromIngest } from "@/lib/db/weer-regen-store";
 import { persistBliksemAfterLiveUpdate } from "@/lib/db/weer-bliksem-store";
@@ -40,21 +41,32 @@ interface CacheRow extends RowDataPacket {
 interface TempMinMaxRow extends RowDataPacket {
   tmin: number | null;
   tmax: number | null;
+  tmin_at: string | null;
+  tmax_at: string | null;
 }
 
 async function fetchVandaagTempMinMax(dag: string): Promise<VandaagTempMinMax> {
   const pool = getPool();
   // meet_moment = Amsterdam wall clock (server_timestamp), geen UTC.
+  // Subqueries geven het (eerste) tijdstip waarop het extreem werd gemeten.
   const [rows] = await pool.query<TempMinMaxRow[]>(
-    `SELECT ROUND(MIN(temp_c), 1) AS tmin, ROUND(MAX(temp_c), 1) AS tmax
+    `SELECT
+       ROUND(MIN(temp_c), 1) AS tmin,
+       ROUND(MAX(temp_c), 1) AS tmax,
+       (SELECT DATE_FORMAT(meet_moment, '%H:%i') FROM metingen
+        WHERE DATE(meet_moment) = ? ORDER BY temp_c ASC, meet_moment ASC LIMIT 1) AS tmin_at,
+       (SELECT DATE_FORMAT(meet_moment, '%H:%i') FROM metingen
+        WHERE DATE(meet_moment) = ? ORDER BY temp_c DESC, meet_moment ASC LIMIT 1) AS tmax_at
      FROM metingen
      WHERE DATE(meet_moment) = ?`,
-    [dag]
+    [dag, dag, dag]
   );
   const row = rows[0];
   return {
     min: row?.tmin != null ? Number(row.tmin) : null,
     max: row?.tmax != null ? Number(row.tmax) : null,
+    minAt: row?.tmin_at ?? null,
+    maxAt: row?.tmax_at ?? null,
   };
 }
 
@@ -82,7 +94,8 @@ export async function readWeerLiveCache(): Promise<WeerLive | null> {
 
 export async function writeWeerLiveCache(data: WeerLive): Promise<WeerLive> {
   const previous = await readWeerLiveCache();
-  const enriched = enrichWeerLive(data);
+  const withGust = applyMaxGustTime(data, previous);
+  const enriched = enrichWeerLive(withGust);
   const withStorm = resolveLightningStormRisk(enriched, previous);
   const pool = getPool();
   await pool.query(
