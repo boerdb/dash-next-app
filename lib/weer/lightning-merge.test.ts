@@ -8,6 +8,8 @@ import {
   pickBestLightningFields,
   resolveLightningStormRisk,
   shouldAccelerateLightningPoll,
+  shouldClearStormRiskLatch,
+  STORM_LATCH_CLEAR_RISE_HPA,
   STORM_RISK_LATCH_MS,
 } from "./lightning-storm";
 import { isWh57Detected } from "./sensor-status";
@@ -136,6 +138,59 @@ describe("mapGatewayLightning", () => {
       lightning: [{ distance: "--.-", count: "0" }],
     });
     assert.equal(mapped.lightning_km, undefined);
+  });
+});
+
+describe("shouldClearStormRiskLatch", () => {
+  it("klaart niet bij na-storm ruis (kleine drukstijging)", () => {
+    assert.equal(
+      shouldClearStormRiskLatch({
+        barom_trend_direction: "up",
+        barom_trend_delta_hpa: 0.9,
+      }),
+      false
+    );
+  });
+
+  it("klaart wel bij decisief drukherstel", () => {
+    assert.equal(
+      shouldClearStormRiskLatch({
+        barom_trend_direction: "up",
+        barom_trend_delta_hpa: STORM_LATCH_CLEAR_RISE_HPA,
+      }),
+      true
+    );
+  });
+
+  it("klaart niet bij dalende druk", () => {
+    assert.equal(
+      shouldClearStormRiskLatch({
+        barom_trend_direction: "down",
+        barom_trend_delta_hpa: -3,
+      }),
+      false
+    );
+  });
+});
+
+describe("resolveLightningStormRisk latch-stabiliteit", () => {
+  it("blijft gelatcht bij jitterende drukstijging onder drempel", () => {
+    const now = Date.now();
+    const until = new Date(now + STORM_RISK_LATCH_MS)
+      .toLocaleString("sv-SE", { timeZone: "Europe/Amsterdam" })
+      .replace("T", " ")
+      .slice(0, 19);
+    const previous = {
+      lightning_storm_risk: true,
+      lightning_storm_risk_until: until,
+    };
+    // Geen actieve trigger, alleen lichte drukstijging (ruis).
+    const resolved = resolveLightningStormRisk(
+      { barom_trend_direction: "up", barom_trend_delta_hpa: 0.9 },
+      previous,
+      now
+    );
+    assert.equal(resolved.lightning_storm_risk, true);
   });
 });
 

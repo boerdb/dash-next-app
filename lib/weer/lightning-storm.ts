@@ -6,6 +6,12 @@ const WH57_MAX_KM = 40;
 const NL_TZ = "Europe/Amsterdam";
 /** Console houdt onweersicoon vaak uren actief na trigger. */
 export const STORM_RISK_LATCH_MS = 4 * 60 * 60 * 1000;
+/**
+ * Druk-herstel (3-uurstrend) dat de latch vervroegd opheft. Bewust ruim boven
+ * de na-storm ruis (~0.5-0.9 hPa): met de snelle GW1100-sampling jittert de
+ * trend rond kleinere drempels, wat anders het onweer-icoon liet flikkeren.
+ */
+export const STORM_LATCH_CLEAR_RISE_HPA = 2.0;
 
 /** Live-poll interval weerpagina (ms). */
 export const LIGHTNING_POLL_NORMAL_MS = 30_000;
@@ -82,7 +88,7 @@ export function shouldClearStormRiskLatch(data: WeerLive): boolean {
   return (
     data.barom_trend_direction === "up" &&
     Number.isFinite(delta) &&
-    delta >= 0.8
+    delta >= STORM_LATCH_CLEAR_RISE_HPA
   );
 }
 
