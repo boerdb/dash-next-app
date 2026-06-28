@@ -47,6 +47,19 @@ describe("parseEcowittPayload", () => {
     assert.equal(r.ws90_cap_voltage_v, 4);
   });
 
+  it("wist afstand en tijd bij lightning_num 0", () => {
+    const r = parseEcowittPayload({
+      dateutc: "2026-06-29 00:05:00",
+      lightning: "18",
+      lightning_num: "0",
+      lightning_time: "41476065",
+      wh57batt: "5",
+    });
+    assert.equal(r.lightning_num, 0);
+    assert.equal(r.lightning_km, null);
+    assert.equal(r.lightning_time, null);
+  });
+
   it("accepteert WH90-spanning al in volt (HP2550)", () => {
     const r = parseEcowittPayload({
       wh90batt: "3.18",

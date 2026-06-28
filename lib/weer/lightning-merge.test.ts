@@ -178,11 +178,29 @@ describe("mapGatewayLightning", () => {
     assert.equal(mapped.wh57batt, "5");
   });
 
-  it("negeert placeholder waarden", () => {
+  it("negeert placeholder afstand", () => {
     const mapped = mapGatewayLightning({
-      lightning: [{ distance: "--.-", count: "0" }],
+      lightning: [{ distance: "--.-", count: "3" }],
     });
     assert.equal(mapped.lightning_km, undefined);
+    assert.equal(mapped.lightning_num, 3);
+  });
+
+  it("wist afstand en tijd bij count 0", () => {
+    const mapped = mapGatewayLightning({
+      lightning: [
+        {
+          distance: "18",
+          count: "0",
+          timestamp: "12345678",
+          battery: "5",
+        },
+      ],
+    });
+    assert.equal(mapped.lightning_num, 0);
+    assert.equal(mapped.lightning_km, null);
+    assert.equal(mapped.lightning_time, null);
+    assert.equal(mapped.wh57batt, "5");
   });
 });
 

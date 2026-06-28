@@ -126,6 +126,12 @@ export function parseEcowittPayload(
     metric.lightning_time = null;
     metric.lightning_time_raw = null;
   }
+  if (metric.lightning_num === 0) {
+    metric.lightning_km = null;
+    metric.lightning = null;
+    metric.lightning_time = null;
+    metric.lightning_time_raw = null;
+  }
 
   const wh90 = num(input.wh90batt);
   if (wh90 !== undefined) {

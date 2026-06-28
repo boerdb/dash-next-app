@@ -23,8 +23,14 @@ import { applyMaxGustTime } from "@/lib/weer/max-gust-time";
 import { meetMomentFromWeer, NL_TZ_OFFSET } from "@/lib/db/nl-time";
 import { syncRegenFromIngest } from "@/lib/db/weer-regen-store";
 import { persistBliksemAfterLiveUpdate } from "@/lib/db/weer-bliksem-store";
-import { shouldPersistBliksemLive } from "@/lib/weer/bliksem-dag";
-import { regenDagSyncFromIngest, regenMmFromWeer } from "@/lib/weer/regen-dag";
+import {
+  regenDagSyncFromIngest,
+  regenMmFromWeer,
+} from "@/lib/weer/regen-dag";
+import {
+  resolveDailyLightningStrike,
+  shouldPersistBliksemLive,
+} from "@/lib/weer/bliksem-dag";
 
 const CACHE_MAX_AGE_MS = 10 * 60 * 1000;
 /** Gateway-poll bij rustig weer (wind/sensoren sneller dan de ~1 min upload). */
@@ -62,7 +68,8 @@ export async function writeWeerLiveCache(
   const withTempMinMax = options?.trackGatewayTempMinMax
     ? applyGatewayTempMinMax(withGust, previous)
     : carryForwardTempMinMax(withGust, previous);
-  const enriched = enrichWeerLive(withTempMinMax);
+  const withLightning = resolveDailyLightningStrike(withTempMinMax, previous);
+  const enriched = enrichWeerLive(withLightning);
   const withStorm = resolveLightningStormRisk(enriched, previous);
   const pool = getPool();
   await pool.query(

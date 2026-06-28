@@ -183,8 +183,22 @@ export function mapGatewayLightning(
   const block = raw.lightning?.[0];
   if (!block) return {};
 
-  const lightning_km = parseGatewayDistance(block.distance);
   const lightning_num = parseGatewayCount(block.count);
+  if (lightning_num === 0) {
+    const out: Partial<WeerLive> = {
+      lightning_num: 0,
+      lightning_km: null,
+      lightning: null,
+      lightning_time: null,
+      lightning_time_raw: null,
+    };
+    if (block.battery != null && block.battery !== "") {
+      out.wh57batt = block.battery;
+    }
+    return out;
+  }
+
+  const lightning_km = parseGatewayDistance(block.distance);
   const lightning_time =
     parseGatewayTimestamp(block.timestamp, dateutc) ??
     parseGatewayTimestamp(block.date, dateutc);

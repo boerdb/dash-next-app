@@ -4,6 +4,7 @@ import {
   bliksemCountFromWeer,
   bliksemDagSyncFromIngest,
   resolveDailyLightningCount,
+  resolveDailyLightningStrike,
   shouldPersistBliksemLive,
 } from "./bliksem-dag";
 
@@ -43,6 +44,49 @@ describe("bliksemDagSyncFromIngest", () => {
 describe("bliksemCountFromWeer", () => {
   it("valt terug op 0", () => {
     assert.equal(bliksemCountFromWeer({}), 0);
+  });
+});
+
+describe("resolveDailyLightningStrike", () => {
+  it("wist afstand en tijd bij teller 0", () => {
+    const r = resolveDailyLightningStrike({
+      date_tracked: "2026-06-29",
+      lightning_num: 0,
+      lightning_km: 18,
+      lightning_time: "2026-06-28 23:45:00",
+      wh57batt: "5",
+    });
+    assert.equal(r.lightning_num, 0);
+    assert.equal(r.lightning_km, null);
+    assert.equal(r.lightning_time, null);
+  });
+
+  it("wist gisteren bij dagwissel zonder teller", () => {
+    const r = resolveDailyLightningStrike(
+      {
+        date_tracked: "2026-06-29",
+        wh57batt: "5",
+      },
+      {
+        date_tracked: "2026-06-28",
+        lightning_num: 314,
+        lightning_km: 22,
+        lightning_time: "2026-06-28 20:15:00",
+      }
+    );
+    assert.equal(r.lightning_km, null);
+    assert.equal(r.lightning_time, null);
+  });
+
+  it("behoudt inslag bij teller > 0", () => {
+    const r = resolveDailyLightningStrike({
+      date_tracked: "2026-06-29",
+      lightning_num: 2,
+      lightning_km: 12,
+      lightning_time: "2026-06-29 14:30:00",
+    });
+    assert.equal(r.lightning_km, 12);
+    assert.equal(r.lightning_time, "2026-06-29 14:30:00");
   });
 });
 

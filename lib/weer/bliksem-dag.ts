@@ -1,5 +1,6 @@
 import type { WeerLive } from "@/lib/api/types";
 import { hasLightningSensor } from "@/lib/weer/sensor-status";
+import { todayAmsterdamDate } from "@/lib/weer/regen-jaar-labels";
 
 /** WH57 dagteller (ontladingen vandaag). */
 export function resolveDailyLightningCount(
@@ -8,6 +9,42 @@ export function resolveDailyLightningCount(
   if (data.lightning_num == null) return undefined;
   const n = Number(data.lightning_num);
   return Number.isFinite(n) && n >= 0 ? Math.round(n) : undefined;
+}
+
+function clearedLightningStrike(data: WeerLive): WeerLive {
+  return {
+    ...data,
+    lightning_km: null,
+    lightning: null,
+    lightning_time: null,
+    lightning_time_raw: null,
+  };
+}
+
+/**
+ * WH57 reset alleen lightning_num om middernacht; afstand/tijd blijven soms staan
+ * in gateway/ingest. Zonder inslagen vandaag (teller 0) horen die velden leeg.
+ */
+export function resolveDailyLightningStrike(
+  data: WeerLive,
+  previous: WeerLive | null = null,
+  now: Date = new Date()
+): WeerLive {
+  const today = todayAmsterdamDate(now);
+  const day = data.date_tracked ?? today;
+  const count = resolveDailyLightningCount(data);
+  const dayChanged =
+    previous?.date_tracked != null && previous.date_tracked !== day;
+
+  if (count === 0) {
+    return clearedLightningStrike({ ...data, date_tracked: day });
+  }
+
+  if (dayChanged && (count == null || count === 0)) {
+    return clearedLightningStrike({ ...data, date_tracked: day });
+  }
+
+  return { ...data, date_tracked: day };
 }
 
 export function bliksemCountFromWeer(data: WeerLive): number {
