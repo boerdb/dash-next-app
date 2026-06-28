@@ -108,13 +108,13 @@ describe("applyGatewayTempMinMax", () => {
     assert.equal(r.temp_min_time, "05:40");
   });
 
-  it("verwijdert ingest-spike als min gelijk aan actuele temp", () => {
+  it("behoudt max als actuele temp op dagminimum staat", () => {
     const prev = {
       date_tracked: DAY,
       temp_min_c: 20.5,
-      temp_max_c: 21.8,
-      temp_min_time: "00:04",
-      temp_max_time: "00:12",
+      temp_max_c: 25.2,
+      temp_min_time: "05:40",
+      temp_max_time: "15:10",
     };
     const r = applyGatewayTempMinMax(
       { temp_c: 20.5, date_tracked: DAY },
@@ -122,8 +122,8 @@ describe("applyGatewayTempMinMax", () => {
       AFTERNOON
     );
     assert.equal(r.temp_min_c, 20.5);
-    assert.equal(r.temp_max_c, 20.5);
-    assert.equal(r.temp_max_time, "00:04");
+    assert.equal(r.temp_max_c, 25.2);
+    assert.equal(r.temp_max_time, "15:10");
   });
 });
 

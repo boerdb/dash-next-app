@@ -67,9 +67,6 @@ export function applyGatewayTempMinMax(
   let max = prevMax;
   let minTime = previous?.temp_min_time ?? time;
   let maxTime = previous?.temp_max_time ?? time;
-  const prevMinBefore = prevMin;
-  const prevMaxBefore = prevMax;
-
   if (tempR < min) {
     min = tempR;
     minTime = time;
@@ -77,18 +74,6 @@ export function applyGatewayTempMinMax(
   if (tempR > max) {
     max = tempR;
     maxTime = time;
-  }
-
-  // Spurious max from Ecowitt-ingest (bv. deploy-test tempf=71.2 → 21.8 °C)
-  if (
-    max > tempR &&
-    prevMinBefore === tempR &&
-    min === tempR &&
-    prevMaxBefore === max &&
-    max - tempR > 0.3
-  ) {
-    max = tempR;
-    maxTime = minTime;
   }
 
   return {
