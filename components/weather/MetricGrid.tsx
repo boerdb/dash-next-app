@@ -15,8 +15,6 @@ import { shouldShowWindChill } from "@/lib/weer/wind-chill-display";
 import { formatBaromTrendDelta } from "@/lib/weer/barom-trend";
 import { regenMmFromWeer } from "@/lib/weer/regen-dag";
 import { resolveRainRateMm } from "@/lib/weer/ws90-rain";
-import { getWindDirection, resolveWindDegrees } from "@/lib/utils/wind";
-import { WindArrow } from "@/components/weather/WindArrow";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -71,11 +69,7 @@ function FooterStat({ label, value }: { label: string; value: React.ReactNode })
 }
 
 export function MetricGrid({ data }: MetricGridProps) {
-  const windDeg = resolveWindDegrees(data);
   const uv = Number(data.uv ?? 0);
-  const windSpeed = Number(data.windspeed_kmh ?? data.windspd_avg10m_kmh ?? 0);
-  const windAvg = Number(data.windspd_avg10m_kmh ?? 0);
-  const windGust = Number(data.windgust_kmh ?? 0);
   const showHitteIndex = shouldShowHeatIndex(data);
   const showWindChill = shouldShowWindChill(data);
   const rainTodayMm = regenMmFromWeer(data);
@@ -92,24 +86,7 @@ export function MetricGrid({ data }: MetricGridProps) {
   return (
     <Card variant="weather" className="overflow-hidden">
       <CardContent className="p-0">
-        <div className="grid grid-cols-1 divide-y divide-card-border sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4 lg:divide-x lg:divide-y-0">
-          <StatCell
-            label={`Wind · ${getWindDirection(windDeg)}`}
-            value={
-              <>
-                {windSpeed.toFixed(1)}
-                <span className="ml-1 text-sm font-normal text-surface-muted">km/u</span>
-              </>
-            }
-            detail={
-              <>
-                Gem. 10 min {windAvg.toFixed(1)} · Stoot {windGust.toFixed(1)} km/u
-              </>
-            }
-          >
-            <WindArrow degrees={windDeg} className="text-sky-400" size={28} />
-          </StatCell>
-
+        <div className="grid grid-cols-1 divide-y divide-card-border sm:grid-cols-3 sm:divide-x sm:divide-y-0">
           <StatCell
             label="Regen vandaag"
             value={

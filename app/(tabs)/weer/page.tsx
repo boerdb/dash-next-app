@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { WeatherHero } from "@/components/weather/WeatherHero";
 import { WeerSection } from "@/components/weather/WeerSection";
 import { MetricGrid } from "@/components/weather/MetricGrid";
+import { WindCompass } from "@/components/weather/WindCompass";
 import { SensorExtrasCard } from "@/components/weather/SensorExtrasCard";
 import { TideCard } from "@/components/weather/TideCard";
 import { KnmiWarningsCard } from "@/components/weather/KnmiWarningsCard";
@@ -196,6 +197,7 @@ export default function WeerPage() {
           />
 
           <WeerSection title="Weerstation" subtitle="Ecowitt · live elke minuut">
+            <WindCompass data={weer} />
             <MetricGrid data={weer} />
             <SensorExtrasCard data={weer} />
           </WeerSection>
