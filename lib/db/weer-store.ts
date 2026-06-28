@@ -15,7 +15,10 @@ import {
   GATEWAY_LIGHTNING_SUPPLEMENT_MS,
   shouldAccelerateLightningPoll,
 } from "@/lib/weer/lightning-storm";
-import { applyGatewayTempMinMax } from "@/lib/weer/gateway-temp-minmax";
+import {
+  applyGatewayTempMinMax,
+  carryForwardTempMinMax,
+} from "@/lib/weer/gateway-temp-minmax";
 import { applyMaxGustTime } from "@/lib/weer/max-gust-time";
 import { meetMomentFromWeer, NL_TZ_OFFSET } from "@/lib/db/nl-time";
 import { syncRegenFromIngest } from "@/lib/db/weer-regen-store";
@@ -50,10 +53,15 @@ export async function readWeerLiveCache(): Promise<WeerLive | null> {
   return parsePayload(row);
 }
 
-export async function writeWeerLiveCache(data: WeerLive): Promise<WeerLive> {
+export async function writeWeerLiveCache(
+  data: WeerLive,
+  options?: { trackGatewayTempMinMax?: boolean }
+): Promise<WeerLive> {
   const previous = await readWeerLiveCache();
   const withGust = applyMaxGustTime(data, previous);
-  const withTempMinMax = applyGatewayTempMinMax(withGust, previous);
+  const withTempMinMax = options?.trackGatewayTempMinMax
+    ? applyGatewayTempMinMax(withGust, previous)
+    : carryForwardTempMinMax(withGust, previous);
   const enriched = enrichWeerLive(withTempMinMax);
   const withStorm = resolveLightningStormRisk(enriched, previous);
   const pool = getPool();
@@ -162,7 +170,7 @@ export async function supplementWeerFromGateway(): Promise<WeerLive | null> {
 
   const merged = applyWindAvg10m({ ...previous, ...fields }, previous);
   const enriched = enrichWeerLive(merged);
-  const saved = await writeWeerLiveCache(enriched);
+  const saved = await writeWeerLiveCache(enriched, { trackGatewayTempMinMax: true });
   if (saved) {
     try {
       await persistBliksemAfterLiveUpdate(saved, previous);

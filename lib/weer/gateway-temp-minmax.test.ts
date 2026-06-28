@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { applyGatewayTempMinMax } from "./gateway-temp-minmax";
+import { applyGatewayTempMinMax, carryForwardTempMinMax } from "./gateway-temp-minmax";
 
 const MORNING = new Date("2026-06-29T05:00:00Z");
 const AFTERNOON = new Date("2026-06-29T14:00:00Z");
@@ -106,5 +106,42 @@ describe("applyGatewayTempMinMax", () => {
     assert.equal(r.temp_min_c, 12);
     assert.equal(r.temp_max_c, 22);
     assert.equal(r.temp_min_time, "05:40");
+  });
+
+  it("verwijdert ingest-spike als min gelijk aan actuele temp", () => {
+    const prev = {
+      date_tracked: DAY,
+      temp_min_c: 20.5,
+      temp_max_c: 21.8,
+      temp_min_time: "00:04",
+      temp_max_time: "00:12",
+    };
+    const r = applyGatewayTempMinMax(
+      { temp_c: 20.5, date_tracked: DAY },
+      prev,
+      AFTERNOON
+    );
+    assert.equal(r.temp_min_c, 20.5);
+    assert.equal(r.temp_max_c, 20.5);
+    assert.equal(r.temp_max_time, "00:04");
+  });
+});
+
+describe("carryForwardTempMinMax", () => {
+  it("behoudt min/max bij ingest-update", () => {
+    const prev = {
+      date_tracked: DAY,
+      temp_min_c: 20.5,
+      temp_max_c: 20.5,
+      temp_min_time: "00:04",
+      temp_max_time: "00:04",
+    };
+    const r = carryForwardTempMinMax(
+      { temp_c: 21.8, date_tracked: DAY },
+      prev,
+      MORNING
+    );
+    assert.equal(r.temp_min_c, 20.5);
+    assert.equal(r.temp_max_c, 20.5);
   });
 });

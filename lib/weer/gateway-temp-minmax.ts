@@ -22,7 +22,7 @@ export function applyGatewayTempMinMax(
   previous: WeerLive | null,
   now: Date = new Date()
 ): WeerLive {
-  const today = data.date_tracked ?? todayAmsterdamDate();
+  const today = todayAmsterdamDate(now);
   const temp = num(data.temp_c);
 
   if (temp == null) {
@@ -67,6 +67,8 @@ export function applyGatewayTempMinMax(
   let max = prevMax;
   let minTime = previous?.temp_min_time ?? time;
   let maxTime = previous?.temp_max_time ?? time;
+  const prevMinBefore = prevMin;
+  const prevMaxBefore = prevMax;
 
   if (tempR < min) {
     min = tempR;
@@ -77,6 +79,18 @@ export function applyGatewayTempMinMax(
     maxTime = time;
   }
 
+  // Spurious max from Ecowitt-ingest (bv. deploy-test tempf=71.2 → 21.8 °C)
+  if (
+    max > tempR &&
+    prevMinBefore === tempR &&
+    min === tempR &&
+    prevMaxBefore === max &&
+    max - tempR > 0.3
+  ) {
+    max = tempR;
+    maxTime = minTime;
+  }
+
   return {
     ...data,
     date_tracked: today,
@@ -84,5 +98,30 @@ export function applyGatewayTempMinMax(
     temp_max_c: max,
     temp_min_time: minTime,
     temp_max_time: maxTime,
+  };
+}
+
+/** Behoud min/max bij Ecowitt-ingest; alleen gateway-polls mogen bijwerken. */
+export function carryForwardTempMinMax(
+  data: WeerLive,
+  previous: WeerLive | null,
+  now: Date = new Date()
+): WeerLive {
+  const today = todayAmsterdamDate(now);
+  if (
+    !previous ||
+    previous.date_tracked !== today ||
+    previous.temp_min_c == null ||
+    previous.temp_max_c == null
+  ) {
+    return { ...data, date_tracked: today };
+  }
+  return {
+    ...data,
+    date_tracked: today,
+    temp_min_c: previous.temp_min_c,
+    temp_max_c: previous.temp_max_c,
+    temp_min_time: previous.temp_min_time ?? null,
+    temp_max_time: previous.temp_max_time ?? null,
   };
 }
