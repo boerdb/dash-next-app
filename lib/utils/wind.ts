@@ -41,3 +41,18 @@ export function resolveWindDegrees(data: {
 export function windArrowRotation(fromDegrees: number): number {
   return ((fromDegrees % 360) + 360) % 360;
 }
+
+/**
+ * Volgende, doorlopende rotatie zodat de CSS-transitie altijd de korte weg
+ * (≤180°) draait. Voorkomt dat de pijl bij de 0°/360°-grens of west↔oost de
+ * lange weg dwars over de wijzerplaat zwaait.
+ */
+export function nextArrowRotation(
+  prevRotation: number,
+  fromDegrees: number
+): number {
+  const target = windArrowRotation(fromDegrees);
+  const current = ((prevRotation % 360) + 360) % 360;
+  const delta = ((((target - current) % 360) + 540) % 360) - 180;
+  return prevRotation + delta;
+}

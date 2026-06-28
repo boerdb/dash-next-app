@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { ArrowUp } from "lucide-react";
 import type { WeerLive } from "@/lib/api/types";
 import {
   getWindDirection,
+  nextArrowRotation,
   resolveWindDegrees,
   windArrowRotation,
 } from "@/lib/utils/wind";
@@ -52,7 +54,12 @@ export function WindCompass({ data }: WindCompassProps) {
     data.winddir != null && !Number.isNaN(Number(data.winddir))
       ? Number(data.winddir)
       : resolveWindDegrees(data);
-  const rotation = windArrowRotation(realtimeDeg);
+
+  // Continue rotatie: altijd de korte weg draaien, ook over de 0°/360°-grens.
+  const [rotation, setRotation] = useState(() => windArrowRotation(realtimeDeg));
+  useEffect(() => {
+    setRotation((prev) => nextArrowRotation(prev, realtimeDeg));
+  }, [realtimeDeg]);
 
   const windSpeed = Number(data.windspeed_kmh ?? data.windspd_avg10m_kmh ?? 0);
   const windAvg = Number(data.windspd_avg10m_kmh ?? 0);
