@@ -57,9 +57,13 @@ export function WindCompass({ data }: WindCompassProps) {
 
   // Continue rotatie: altijd de korte weg draaien, ook over de 0°/360°-grens.
   const [rotation, setRotation] = useState(() => windArrowRotation(realtimeDeg));
+  const [canAnimate, setCanAnimate] = useState(false);
   useEffect(() => {
     setRotation((prev) => nextArrowRotation(prev, realtimeDeg));
   }, [realtimeDeg]);
+  useEffect(() => {
+    setCanAnimate(true);
+  }, []);
 
   const windSpeed = Number(data.windspeed_kmh ?? data.windspd_avg10m_kmh ?? 0);
   const windAvg = Number(data.windspd_avg10m_kmh ?? 0);
@@ -97,10 +101,14 @@ export function WindCompass({ data }: WindCompassProps) {
                 className="text-cyan-400/25"
               />
               <CompassTicks />
+              <circle cx={CENTER} cy={CENTER} r="3" className="text-sky-400" fill="currentColor" />
               <g
-                transform={`rotate(${rotation} ${CENTER} ${CENTER})`}
-                style={{ transition: "transform 0.7s ease" }}
                 className="text-sky-400"
+                style={{
+                  transform: `rotate(${rotation}deg)`,
+                  transformOrigin: `${CENTER}px ${CENTER}px`,
+                  transition: canAnimate ? "transform 0.7s ease" : undefined,
+                }}
               >
                 <line
                   x1={CENTER}
@@ -117,7 +125,6 @@ export function WindCompass({ data }: WindCompassProps) {
                   fill="currentColor"
                 />
               </g>
-              <circle cx={CENTER} cy={CENTER} r="3" className="text-sky-400" fill="currentColor" />
             </svg>
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-[0.5rem] font-medium uppercase tracking-[0.18em] text-surface-muted">
