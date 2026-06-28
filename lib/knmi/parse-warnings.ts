@@ -86,7 +86,7 @@ export function parseKnmiWarningsXml(
   const provinceCode = province.trim().toUpperCase();
   const merged = new Map<
     string,
-    KnmiWarningItem & { fromMs: number; toMs: number }
+    Omit<KnmiWarningItem, "active"> & { fromMs: number; toMs: number }
   >();
   let maxLevel: KnmiWarningLevel = 0;
 
