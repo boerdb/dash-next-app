@@ -7,7 +7,6 @@ import { getPool } from "@/lib/db/pool";
 import { applyDbRainPeriodTotals } from "@/lib/db/weer-regen-store";
 import { syncTodayBliksemFromLiveCache } from "@/lib/db/weer-bliksem-store";
 import {
-  applyVandaagTempMinMax,
   maybeSupplementFromGateway,
   readWeerLiveCache,
 } from "@/lib/db/weer-store";
@@ -50,8 +49,7 @@ export async function fetchWeerLiveFromDb(): Promise<WeerLive> {
   });
   const cached = await readWeerLiveCache();
   if (cached) {
-    const withMinMax = await applyVandaagTempMinMax(cached);
-    const withTrend = await applyBaromTrend(withMinMax);
+    const withTrend = await applyBaromTrend(cached);
     const enriched = enrichWeerLive(withTrend);
     const withStorm = resolveLightningStormRisk(enriched, cached);
     return applyDbRainPeriodTotals(withStorm);
