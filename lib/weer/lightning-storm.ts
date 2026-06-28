@@ -93,12 +93,16 @@ export function shouldClearStormRiskLatch(data: WeerLive): boolean {
 }
 
 /**
- * Daadwerkelijke WH57-activiteit: recente inslag binnen bereik of een door de
- * sensor gemeld onweersfront. Dit (en alleen dit) start/verlengt de latch en
- * stuurt de onweer-hero aan.
+ * Daadwerkelijke WH57-activiteit: een recente, getimede inslag binnen bereik.
+ * Dit (en alleen dit) start/verlengt de latch en stuurt de onweer-hero aan.
+ *
+ * Bewust NIET op `isLightningStormFront`: de GW1100 blijft de afstand van de
+ * laatste inslag uren melden, dus "afstand zonder tijd" is geen betrouwbaar
+ * front-signaal. Een echte nieuwe inslag krijgt via de Ecowitt-upload direct
+ * een numerieke `lightning_time` en wordt zo wél als recent herkend.
  */
 export function hasActualLightningActivity(data: WeerLive): boolean {
-  return isRecentLightningStrikeNearby(data) || isLightningStormFront(data);
+  return isRecentLightningStrikeNearby(data);
 }
 
 /**
