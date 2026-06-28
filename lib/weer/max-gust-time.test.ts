@@ -22,6 +22,18 @@ describe("applyMaxGustTime", () => {
     assert.equal(r.maxdailygust_time, "08:00");
   });
 
+  it("behoudt tijd bij afrondingsverschil gateway vs ingest", () => {
+    const prev = { maxdailygust_kmh: 20.2, maxdailygust_time: "14:22" };
+    const r = applyMaxGustTime({ maxdailygust_kmh: 20.17 }, prev, NOON);
+    assert.equal(r.maxdailygust_time, "14:22");
+  });
+
+  it("vernieuwt tijd niet bij gelijke afgeronde waarde", () => {
+    const prev = { maxdailygust_kmh: 20.1, maxdailygust_time: "09:15" };
+    const r = applyMaxGustTime({ maxdailygust_kmh: 20.12 }, prev, NOON);
+    assert.equal(r.maxdailygust_time, "09:15");
+  });
+
   it("vernieuwt tijd bij dag-reset (lagere waarde)", () => {
     const prev = { maxdailygust_kmh: 40, maxdailygust_time: "23:50" };
     const r = applyMaxGustTime({ maxdailygust_kmh: 5 }, prev, NOON);
