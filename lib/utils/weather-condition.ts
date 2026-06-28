@@ -7,17 +7,18 @@ import {
   openMeteoImpliesRain,
   openMeteoImpliesSnow,
   openMeteoImpliesThunder,
-  pickDarkerSkyCondition,
+  pickSunnierSkyCondition,
 } from "@/lib/open-meteo/condition";
 import { isRecentLightningStrikeNearby } from "@/lib/weer/lightning-storm";
 
+/** Lokale instraling mag het model alleen ophelderen (schaduw op sensor ≠ bewolkt). */
 function blendWithLocalSolar(
   meteoCondition: WeatherCondition,
   solarWm2: number
 ): WeatherCondition {
   if (!isClearSkyCondition(meteoCondition)) return meteoCondition;
   const local = conditionFromShortwaveRadiation(solarWm2);
-  return pickDarkerSkyCondition(meteoCondition, local);
+  return pickSunnierSkyCondition(meteoCondition, local);
 }
 
 function isStationFoggy(data: WeerLive): boolean {

@@ -76,3 +76,37 @@ describe("getWeatherCondition · onweer", () => {
     assert.equal(condition, "thunder");
   });
 });
+
+describe("getWeatherCondition · lokale zon", () => {
+  const sunnyMeteo: OpenMeteoSky = {
+    cloudCoverPct: 20,
+    weatherCode: 1,
+    precipitationMm: 0,
+    shortwaveRadiationWm2: 650,
+  };
+
+  it("verdonkert niet bij lage lokale straling (sensor in schaduw)", () => {
+    const condition = getWeatherCondition(
+      { temp_c: 22, solarradiation: 80 },
+      "day",
+      false,
+      sunnyMeteo
+    );
+    assert.equal(condition, "sunny");
+  });
+
+  it("heldert wél op als model bewolkt maar zon schijnt lokaal", () => {
+    const condition = getWeatherCondition(
+      { temp_c: 22, solarradiation: 700 },
+      "day",
+      false,
+      {
+        cloudCoverPct: 90,
+        weatherCode: 3,
+        precipitationMm: 0,
+        shortwaveRadiationWm2: 100,
+      }
+    );
+    assert.equal(condition, "sunny");
+  });
+});
