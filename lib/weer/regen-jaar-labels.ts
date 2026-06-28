@@ -15,8 +15,8 @@ const MONTH_SHORT = [
 
 const TZ = "Europe/Amsterdam";
 
-export function todayAmsterdamDate(): string {
-  return new Date().toLocaleDateString("sv-SE", { timeZone: TZ });
+export function todayAmsterdamDate(at: Date = new Date()): string {
+  return at.toLocaleDateString("sv-SE", { timeZone: TZ });
 }
 
 export function currentJaarAmsterdam(): number {
