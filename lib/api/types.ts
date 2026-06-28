@@ -274,6 +274,8 @@ export interface KnmiWarningItem {
   phenomenonLabel: string;
   validFrom: string;
   validTo: string;
+  /** Geldt de waarschuwing nu (±tolerantie rond het tijdvak)? */
+  active: boolean;
   texts: string[];
 }
 

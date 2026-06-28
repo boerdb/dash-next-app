@@ -9,10 +9,7 @@ import {
   openMeteoImpliesThunder,
   pickDarkerSkyCondition,
 } from "@/lib/open-meteo/condition";
-import {
-  computeLightningStormRisk,
-  isRecentLightningStrikeNearby,
-} from "@/lib/weer/lightning-storm";
+import { isRecentLightningStrikeNearby } from "@/lib/weer/lightning-storm";
 
 function blendWithLocalSolar(
   meteoCondition: WeatherCondition,
@@ -35,10 +32,29 @@ function isStationWindy(data: WeerLive): boolean {
   return wind >= 40 || gust >= 55;
 }
 
+/**
+ * Onweer-hero alleen bij échte WH57-activiteit: een recente inslag of de
+ * gelatchte stormkans (die nu uitsluitend door echte activiteit wordt gezet).
+ * De onweersgevoelige-lucht-heuristiek zet de hero bewust NIET op onweer.
+ */
 function isStationThunder(data: WeerLive): boolean {
   if (isRecentLightningStrikeNearby(data)) return true;
-  if (data.lightning_storm_risk === true) return true;
-  return computeLightningStormRisk(data);
+  return data.lightning_storm_risk === true;
+}
+
+/**
+ * Externe bevestiging van actueel onweer: Open-Meteo weercode 95-99 (nowcast)
+ * of een actieve KNMI-onweerwaarschuwing. Geeft "storm" bij hagel (≥96).
+ */
+function externalThunderCondition(
+  openMeteoSky: OpenMeteoSky | null | undefined,
+  knmiThunder: boolean
+): WeatherCondition | null {
+  if (openMeteoSky && openMeteoImpliesThunder(openMeteoSky.weatherCode)) {
+    return openMeteoSky.weatherCode >= 96 ? "storm" : "thunder";
+  }
+  if (knmiThunder) return "thunder";
+  return null;
 }
 
 function isStationRainy(data: WeerLive): boolean {
@@ -65,11 +81,17 @@ export function getWeatherCondition(
   data: WeerLive | null,
   period: DayPeriod = "day",
   sunBelowHorizon = false,
-  openMeteoSky?: OpenMeteoSky | null
+  openMeteoSky?: OpenMeteoSky | null,
+  knmiThunder = false
 ): WeatherCondition {
-  if (!data) return period === "night" ? "night" : "cloudy";
+  const external = externalThunderCondition(openMeteoSky, knmiThunder);
+  if (!data) {
+    if (external) return external;
+    return period === "night" ? "night" : "cloudy";
+  }
 
-  if (isStationThunder(data)) return "thunder";
+  if (isStationThunder(data)) return external ?? "thunder";
+  if (external) return external;
   if (isStationRainy(data)) return "rain";
   if (isStationFoggy(data)) return "fog";
   if (isStationWindy(data)) return "wind";

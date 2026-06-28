@@ -2,9 +2,12 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
   computeLightningStormRisk,
+  getLightningStatus,
   getLightningStatusLabel,
+  hasActualLightningActivity,
   isBarometerStormForecast,
   isConvectiveStormSetup,
+  isThunderProneAirmass,
   pickBestLightningFields,
   resolveLightningStormRisk,
   shouldAccelerateLightningPoll,
@@ -47,7 +50,7 @@ describe("lightning storm risk", () => {
         temp_c: 32,
         humidity: 55,
       }),
-      "Kans op onweer (barometer)"
+      "Onweersgevoelige lucht · dalende druk"
     );
     assert.equal(
       getLightningStatusLabel({ wh57batt: "5" }),
@@ -68,7 +71,49 @@ describe("lightning storm risk", () => {
     assert.equal(computeLightningStormRisk(data), true);
     assert.equal(
       getLightningStatusLabel(data),
-      "Kans op onweer · warm & vochtig"
+      "Onweersgevoelige lucht · warm & vochtig"
+    );
+  });
+
+  it("airmass-heuristiek latcht niet en geeft geen onweer-hero", () => {
+    const airmass = {
+      wh57batt: "5",
+      temp_c: 34,
+      humidity: 55,
+      hitte_index_c: 40.2,
+      barom_trend_direction: "steady" as const,
+      barom_trend_delta_hpa: -0.4,
+    };
+    assert.equal(isThunderProneAirmass(airmass), true);
+    assert.equal(hasActualLightningActivity(airmass), false);
+    assert.equal(getLightningStatus(airmass), "airmass");
+    // Geen echte activiteit → latch blijft uit.
+    const resolved = resolveLightningStormRisk(airmass, null);
+    assert.equal(resolved.lightning_storm_risk, false);
+  });
+
+  it("echte inslag latcht wél", () => {
+    const now = Date.now();
+    const strikeTime = new Date(now - 4 * 60_000)
+      .toLocaleString("sv-SE", { timeZone: "Europe/Amsterdam" })
+      .replace("T", " ")
+      .slice(0, 19);
+    const live = { wh57batt: "5", lightning_km: 8, lightning_time: strikeTime };
+    assert.equal(hasActualLightningActivity(live), true);
+    const resolved = resolveLightningStormRisk(live, null, now);
+    assert.equal(resolved.lightning_storm_risk, true);
+  });
+
+  it("versnelt poll niet bij enkel onweersgevoelige lucht", () => {
+    assert.equal(
+      shouldAccelerateLightningPoll({
+        wh57batt: "5",
+        temp_c: 34,
+        humidity: 55,
+        hitte_index_c: 40.2,
+        lightning_km: 0,
+      }),
+      false
     );
   });
 

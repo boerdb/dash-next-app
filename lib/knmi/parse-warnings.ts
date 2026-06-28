@@ -12,8 +12,13 @@ export interface KnmiWarningItem {
   phenomenonLabel: string;
   validFrom: string;
   validTo: string;
+  /** Geldt de waarschuwing nu (±tolerantie rond het tijdvak)? */
+  active: boolean;
   texts: string[];
 }
+
+/** Tolerantie rond het waarschuwingstijdvak om "nu actief" te bepalen. */
+const KNMI_ACTIVE_TOLERANCE_MS = 3 * 60 * 60 * 1000;
 
 export interface KnmiWarningsParsed {
   province: string;
@@ -75,7 +80,8 @@ function mergeKey(level: number, phenomenonId: string, texts: string[]): string 
  */
 export function parseKnmiWarningsXml(
   xml: string,
-  province: string
+  province: string,
+  now: number = Date.now()
 ): KnmiWarningsParsed {
   const provinceCode = province.trim().toUpperCase();
   const merged = new Map<
@@ -141,7 +147,14 @@ export function parseKnmiWarningsXml(
 
   const warnings = [...merged.values()]
     .sort((a, b) => a.fromMs - b.fromMs)
-    .map(({ fromMs: _f, toMs: _t, ...item }) => item);
+    .map(({ fromMs, toMs, ...item }) => ({
+      ...item,
+      active:
+        fromMs > 0 &&
+        toMs > 0 &&
+        now >= fromMs - KNMI_ACTIVE_TOLERANCE_MS &&
+        now <= toMs + KNMI_ACTIVE_TOLERANCE_MS,
+    }));
 
   return {
     province: provinceCode,

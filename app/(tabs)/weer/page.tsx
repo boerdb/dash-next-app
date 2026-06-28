@@ -18,6 +18,7 @@ import { getAstronomyInfo, toAstronomieApi } from "@/lib/astronomy/sun-moon";
 import { jsonFetcher, FetchError } from "@/lib/fetcher";
 import { useRevalidateOnVisible } from "@/lib/hooks/use-revalidate-on-visible";
 import { getWeatherCondition } from "@/lib/utils/weather-condition";
+import { hasActiveKnmiThunderWarning } from "@/lib/knmi/thunder";
 import { formatWeerUpdateLabel } from "@/lib/weer/update-label";
 import {
   LIGHTNING_POLL_ACTIVE_MS,
@@ -162,19 +163,26 @@ export default function WeerPage() {
 
   const updateLabel = formatWeerUpdateLabel(weer?.server_timestamp);
 
+  const knmiThunder = useMemo(
+    () => hasActiveKnmiThunderWarning(knmiWaarschuwingen),
+    [knmiWaarschuwingen]
+  );
+
   const condition = useMemo(
     () =>
       getWeatherCondition(
         weer ?? null,
         astroData.period,
         astroData.sunBelowHorizon,
-        openMeteoForecast?.currentSky
+        openMeteoForecast?.currentSky,
+        knmiThunder
       ),
     [
       weer,
       astroData.period,
       astroData.sunBelowHorizon,
       openMeteoForecast?.currentSky,
+      knmiThunder,
     ]
   );
   const showSkeleton = weerLoading && !weer && !weerError;

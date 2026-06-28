@@ -91,6 +91,7 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
                     "h-4 w-4",
                     recentStrike && "text-violet-300",
                     lightningStatus === "risk" && "text-amber-300",
+                    lightningStatus === "airmass" && "text-amber-300/60",
                     lightningStatus === "idle" && wh57Detected && "text-emerald-400/80",
                     lightningStatus === "idle" && !wh57Detected && "text-surface-muted"
                   )}
@@ -110,6 +111,10 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
                 ) : lightningStatus === "risk" ? (
                   <span className="inline-flex rounded-full bg-amber-500/15 px-2 py-0.5 text-[0.6rem] font-medium uppercase tracking-wide text-amber-200">
                     Kans op onweer
+                  </span>
+                ) : lightningStatus === "airmass" ? (
+                  <span className="inline-flex rounded-full bg-amber-500/10 px-2 py-0.5 text-[0.6rem] font-medium uppercase tracking-wide text-amber-200/70">
+                    Onweersgevoelig
                   </span>
                 ) : null}
               </div>
@@ -137,6 +142,7 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
                   className={cn(
                     "text-sm",
                     lightningStatus === "risk" && "text-amber-200/90",
+                    lightningStatus === "airmass" && "text-amber-200/70",
                     lightningStatus === "idle" && wh57Detected && "text-emerald-200/80",
                     lightningStatus === "idle" && !wh57Detected && "text-surface-muted"
                   )}

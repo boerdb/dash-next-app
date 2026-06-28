@@ -92,12 +92,27 @@ export function shouldClearStormRiskLatch(data: WeerLive): boolean {
   );
 }
 
+/**
+ * Daadwerkelijke WH57-activiteit: recente inslag binnen bereik of een door de
+ * sensor gemeld onweersfront. Dit (en alleen dit) start/verlengt de latch en
+ * stuurt de onweer-hero aan.
+ */
+export function hasActualLightningActivity(data: WeerLive): boolean {
+  return isRecentLightningStrikeNearby(data) || isLightningStormFront(data);
+}
+
+/**
+ * Onweersgevoelige luchtmassa op basis van druk/temp/vocht. Een ruwe proxy
+ * (geen CAPE/forecast), dus puur informatief: latcht NIET en zet de hero NIET
+ * op onweer. Voorkomt vals-positief "kans op onweer" op warme dagen.
+ */
+export function isThunderProneAirmass(data: WeerLive): boolean {
+  return isBarometerStormForecast(data) || isConvectiveStormSetup(data);
+}
+
+/** Alle onweersindicatoren samen (echte activiteit + gevoelige lucht). */
 export function computeLightningStormRisk(data: WeerLive): boolean {
-  if (isRecentLightningStrikeNearby(data)) return true;
-  if (isLightningStormFront(data)) return true;
-  if (isBarometerStormForecast(data)) return true;
-  if (isConvectiveStormSetup(data)) return true;
-  return false;
+  return hasActualLightningActivity(data) || isThunderProneAirmass(data);
 }
 
 /** Berekent stormkans incl. latch (voor ingest én live). */
@@ -107,7 +122,7 @@ export function resolveLightningStormRisk(
   now = Date.now()
 ): WeerLive {
   if (shouldClearStormRiskLatch(data)) {
-    const immediate = computeLightningStormRisk(data);
+    const immediate = hasActualLightningActivity(data);
     return {
       ...data,
       lightning_storm_risk: immediate,
@@ -115,7 +130,7 @@ export function resolveLightningStormRisk(
     };
   }
 
-  const immediate = computeLightningStormRisk(data);
+  const immediate = hasActualLightningActivity(data);
   if (immediate) {
     return {
       ...data,
@@ -171,40 +186,46 @@ export function pickBestLightningFields(
   };
 }
 
-export type LightningStatusKind = "strike" | "risk" | "idle";
+export type LightningStatusKind = "strike" | "risk" | "airmass" | "idle";
 
 export type LightningRiskReason =
   | "strike"
   | "storm_front"
+  | "latched"
   | "barometer"
   | "convective"
-  | "latched"
   | null;
 
 export function getLightningRiskReason(data: WeerLive): LightningRiskReason {
   if (isRecentLightningStrikeNearby(data)) return "strike";
   if (isLightningStormFront(data)) return "storm_front";
-  if (isBarometerStormForecast(data)) return "barometer";
-  if (isConvectiveStormSetup(data)) return "convective";
-  if (data.lightning_storm_risk && data.lightning_storm_risk_until) {
+  if (data.lightning_storm_risk === true && data.lightning_storm_risk_until) {
     return "latched";
   }
+  if (isBarometerStormForecast(data)) return "barometer";
+  if (isConvectiveStormSetup(data)) return "convective";
   return null;
 }
 
 export function getLightningStatus(data: WeerLive): LightningStatusKind {
   if (isRecentLightningStrikeNearby(data)) return "strike";
-  if (data.lightning_storm_risk === true) return "risk";
-  if (computeLightningStormRisk(data)) return "risk";
+  if (data.lightning_storm_risk === true || hasActualLightningActivity(data)) {
+    return "risk";
+  }
+  if (isThunderProneAirmass(data)) return "airmass";
   return "idle";
 }
 
-/** Snellere live-poll + gateway-sync bij actief onweer / WH57-detectie. */
+/**
+ * Snellere live-poll + gateway-sync bij echte onweersactiviteit / WH57-teller.
+ * Een onweersgevoelige luchtmassa (airmass) alléén versnelt bewust NIET.
+ */
 export function shouldAccelerateLightningPoll(
   data: WeerLive | null | undefined
 ): boolean {
   if (!data) return false;
-  if (getLightningStatus(data) !== "idle") return true;
+  const status = getLightningStatus(data);
+  if (status === "strike" || status === "risk") return true;
   const km = data.lightning_km;
   if (km != null && km > 0 && km <= WH57_MAX_KM) return true;
   if (hasLightningSensor(data)) {
@@ -218,8 +239,8 @@ export function getLightningStatusLabel(data: WeerLive): string {
   const reason = getLightningRiskReason(data);
   if (reason === "strike") return "Recente inslag gedetecteerd";
   if (reason === "storm_front") return "WH57 detecteert onweersfront";
-  if (reason === "barometer") return "Kans op onweer (barometer)";
-  if (reason === "convective") return "Kans op onweer · warm & vochtig";
   if (reason === "latched") return "Kans op onweer · nog actief";
+  if (reason === "barometer") return "Onweersgevoelige lucht · dalende druk";
+  if (reason === "convective") return "Onweersgevoelige lucht · warm & vochtig";
   return "WH57 actief · geen inslagen";
 }

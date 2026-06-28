@@ -28,4 +28,16 @@ describe("parseKnmiWarningsXml", () => {
     assert.equal(empty.maxLevel, 0);
     assert.equal(empty.warnings.length, 0);
   });
+
+  it("markeert active=true binnen het tijdvak (±tolerantie)", () => {
+    const now = Date.parse("2026-05-29T12:30:00");
+    const result = parseKnmiWarningsXml(fixture, "FR", now);
+    assert.equal(result.warnings[0].active, true);
+  });
+
+  it("markeert active=false ruim buiten het tijdvak", () => {
+    const now = Date.parse("2026-05-30T12:00:00");
+    const result = parseKnmiWarningsXml(fixture, "FR", now);
+    assert.equal(result.warnings[0].active, false);
+  });
 });
