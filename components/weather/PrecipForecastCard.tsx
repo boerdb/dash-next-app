@@ -20,6 +20,20 @@ import { chartTooltipStyle, useChartTheme } from "@/lib/hooks/use-chart-theme";
 
 const CHART_HEIGHT = 120;
 
+function precipYMax(slots: { mm: number }[]): number {
+  const max = Math.max(0, ...slots.map((s) => s.mm));
+  if (max <= 0) return 1;
+  if (max < 0.5) return 0.5;
+  return Math.ceil(max * 1.15 * 10) / 10;
+}
+
+function formatPrecipTick(value: number): string {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "";
+  const formatted = n < 1 && n > 0 ? n.toFixed(1) : Number.isInteger(n) ? `${n}` : n.toFixed(1);
+  return `${formatted} mm`;
+}
+
 export function PrecipForecastCard() {
   const chartTheme = useChartTheme();
   const gradientId = useId().replace(/:/g, "");
@@ -63,6 +77,7 @@ export function PrecipForecastCard() {
     mm: s.precipitationMm,
     pop: s.probabilityPct,
   }));
+  const yMax = precipYMax(chartData);
 
   return (
     <Card variant="weather" className="border-sky-500/20">
@@ -75,7 +90,7 @@ export function PrecipForecastCard() {
         </p>
         <ChartContainer height={CHART_HEIGHT}>
           <ResponsiveContainer width="100%" height={CHART_HEIGHT} minWidth={0}>
-            <BarChart data={chartData} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
+            <BarChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#38bdf8" stopOpacity={0.9} />
@@ -91,10 +106,13 @@ export function PrecipForecastCard() {
                 interval="preserveStartEnd"
               />
               <YAxis
+                domain={[0, yMax]}
+                allowDecimals
                 tick={{ fill: chartTheme.tick, fontSize: 8 }}
                 tickLine={false}
                 axisLine={false}
-                width={28}
+                width={40}
+                tickFormatter={formatPrecipTick}
               />
               <Tooltip
                 contentStyle={{
