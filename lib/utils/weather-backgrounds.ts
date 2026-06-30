@@ -33,9 +33,19 @@ const darkConditions = new Set<WeatherCondition>([
 const overlayDark =
   "linear-gradient(to bottom, rgba(0,0,0,0.48) 0%, rgba(0,0,0,0.18) 50%, rgba(0,0,0,0.42) 100%)";
 
+/** Lichtere scrim zodat bewolkt niet als noodweer oogt. */
+const overlayLight =
+  "linear-gradient(to bottom, rgba(0,0,0,0.20) 0%, rgba(0,0,0,0.04) 55%, rgba(0,0,0,0.16) 100%)";
+
+const lightConditions = new Set<WeatherCondition>(["cloudy"]);
+
 export function getWeatherBackgroundStyle(condition: WeatherCondition): CSSProperties {
   const { image } = weatherBackgrounds[condition];
-  const scrim = darkConditions.has(condition) ? overlayDark : overlay;
+  const scrim = darkConditions.has(condition)
+    ? overlayDark
+    : lightConditions.has(condition)
+      ? overlayLight
+      : overlay;
   return {
     backgroundImage: `${scrim}, url(${image})`,
     backgroundSize: "cover",

@@ -65,7 +65,14 @@ export function WeatherHero({
       style={getWeatherBackgroundStyle(condition)}
     >
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/30" />
+        <div
+          className={cn(
+            "absolute inset-0 bg-gradient-to-b",
+            condition === "cloudy"
+              ? "from-black/15 via-transparent to-black/15"
+              : "from-black/35 via-black/10 to-black/30"
+          )}
+        />
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-b from-transparent to-background sm:h-20" />
       </div>
       <div className="relative z-10 text-center [text-shadow:0_1px_10px_rgba(0,0,0,0.75)]">
