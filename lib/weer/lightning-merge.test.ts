@@ -143,6 +143,22 @@ describe("lightning storm risk", () => {
       "Kans op onweer · nog actief"
     );
   });
+
+  it("heft verlopen latch op (Amsterdam-timestamp op UTC-server)", () => {
+    const now = Date.parse("2026-07-01T22:05:00Z"); // 2026-07-02 00:05 Amsterdam
+    const previous = {
+      wh57batt: "5",
+      lightning_storm_risk: true,
+      lightning_storm_risk_until: "2026-07-01 22:41:23",
+    };
+    const resolved = resolveLightningStormRisk(
+      { wh57batt: "5", temp_c: 17.2 },
+      previous,
+      now
+    );
+    assert.equal(resolved.lightning_storm_risk, false);
+    assert.equal(resolved.lightning_storm_risk_until, null);
+  });
 });
 
 describe("mergeWeerLiveBySource", () => {

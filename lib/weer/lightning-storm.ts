@@ -1,4 +1,5 @@
 import type { WeerLive } from "@/lib/api/types";
+import { parseAmsterdamDateTime } from "@/lib/db/nl-time";
 import { isRecentLightningStrike } from "@/lib/weer/lightning-time";
 import { hasLightningSensor } from "@/lib/weer/sensor-status";
 
@@ -33,8 +34,7 @@ function latchUntilIso(now: number): string {
 
 function parseUntilIso(iso: string | null | undefined): number | null {
   if (!iso) return null;
-  const t = new Date(iso.replace(" ", "T")).getTime();
-  return Number.isNaN(t) ? null : t;
+  return parseAmsterdamDateTime(iso);
 }
 
 /** Recente inslag binnen WH57-bereik. */
