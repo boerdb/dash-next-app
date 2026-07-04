@@ -19,6 +19,7 @@ import {
   applyGatewayTempMinMax,
   carryForwardTempMinMax,
 } from "@/lib/weer/gateway-temp-minmax";
+import { applyDailyExtremes } from "@/lib/weer/daily-extremes";
 import { applyMaxGustTime } from "@/lib/weer/max-gust-time";
 import { meetMomentFromWeer, NL_TZ_OFFSET } from "@/lib/db/nl-time";
 import { syncRegenFromIngest } from "@/lib/db/weer-regen-store";
@@ -65,9 +66,10 @@ export async function writeWeerLiveCache(
 ): Promise<WeerLive> {
   const previous = await readWeerLiveCache();
   const withGust = applyMaxGustTime(data, previous);
+  const withExtremes = applyDailyExtremes(withGust, previous);
   const withTempMinMax = options?.trackGatewayTempMinMax
-    ? applyGatewayTempMinMax(withGust, previous)
-    : carryForwardTempMinMax(withGust, previous);
+    ? applyGatewayTempMinMax(withExtremes, previous)
+    : carryForwardTempMinMax(withExtremes, previous);
   const withLightning = resolveDailyLightningStrike(withTempMinMax, previous);
   const enriched = enrichWeerLive(withLightning);
   const withStorm = resolveLightningStormRisk(enriched, previous);

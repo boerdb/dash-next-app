@@ -28,6 +28,33 @@ export interface WeerLive {
   maxdailygust_kmh?: number;
   /** Tijdstip (HH:MM, Amsterdam) van de hoogste daggust; GW1100 stuurt geen tijd. */
   maxdailygust_time?: string | null;
+  /** Hoogste windsnelheid vandaag (km/u). */
+  maxdailywind_kmh?: number | string;
+  maxdailywind_time?: string | null;
+  humidity_min?: number | string;
+  humidity_max?: number | string;
+  humidity_min_time?: string | null;
+  humidity_max_time?: string | null;
+  baromrel_min_hpa?: number | string;
+  baromrel_max_hpa?: number | string;
+  baromrel_min_time?: string | null;
+  baromrel_max_time?: string | null;
+  baromabs_min_hpa?: number | string;
+  baromabs_max_hpa?: number | string;
+  baromabs_min_time?: string | null;
+  baromabs_max_time?: string | null;
+  solar_max?: number | string;
+  solar_max_time?: string | null;
+  uv_max?: number | string;
+  uv_max_time?: string | null;
+  tempin_min_c?: number | string;
+  tempin_max_c?: number | string;
+  tempin_min_time?: string | null;
+  tempin_max_time?: string | null;
+  humidityin_min?: number | string;
+  humidityin_max?: number | string;
+  humidityin_min_time?: string | null;
+  humidityin_max_time?: string | null;
   dailyrain_mm?: number;
   /** WS90 piezo-regen (mm); gekopieerd naar dailyrain_mm bij ingest. */
   dailyrain_piezo_mm?: number;

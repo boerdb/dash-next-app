@@ -5,9 +5,11 @@ import useSWR, { mutate as swrMutate } from "swr";
 import dynamic from "next/dynamic";
 import { WeatherHero } from "@/components/weather/WeatherHero";
 import { WeerSection } from "@/components/weather/WeerSection";
-import { MetricGrid } from "@/components/weather/MetricGrid";
-import { WindCompass } from "@/components/weather/WindCompass";
-import { SensorExtrasCard } from "@/components/weather/SensorExtrasCard";
+import {
+  WeatherLightningDashboard,
+  WeatherMetricsDashboard,
+  WeatherWindDashboard,
+} from "@/components/weather/WeatherRosetteDashboard";
 import { TideCard } from "@/components/weather/TideCard";
 import { KnmiWarningsCard } from "@/components/weather/KnmiWarningsCard";
 import { PrecipForecastCard } from "@/components/weather/PrecipForecastCard";
@@ -204,10 +206,13 @@ export default function WeerPage() {
             updateLabel={updateLabel}
           />
 
+          <div className="space-y-3">
+            <WeatherWindDashboard data={weer} />
+            <WeatherLightningDashboard data={weer} />
+          </div>
+
           <WeerSection title="Weerstation" subtitle="Ecowitt · live elke minuut">
-            <WindCompass data={weer} />
-            <MetricGrid data={weer} />
-            <SensorExtrasCard data={weer} />
+            <WeatherMetricsDashboard data={weer} historie={historie} />
           </WeerSection>
 
           <div className="grid gap-8 md:grid-cols-2 md:gap-6 md:items-start">
