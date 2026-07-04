@@ -30,7 +30,7 @@ function applyRange(
 ): WeerLive {
   if (current == null) {
     if (!previous || previous.date_tracked !== today) return data;
-    const out = { ...data };
+    const out: WeerLive = { ...data };
     if (keys.min) out[keys.min] = previous[keys.min];
     out[keys.max] = previous[keys.max];
     if (keys.minTime) out[keys.minTime] = previous[keys.minTime] ?? null;
@@ -40,7 +40,7 @@ function applyRange(
 
   const curR = round1(current);
   const time = nowAmsterdamHHmm(now);
-  const out = { ...data, date_tracked: today };
+  const out: WeerLive = { ...data, date_tracked: today };
 
   if (!previous || previous.date_tracked !== today || previous[keys.max] == null) {
     if (!maxOnly && keys.min) out[keys.min] = curR;
@@ -83,7 +83,7 @@ export function applyDailyExtremes(
   now: Date = new Date()
 ): WeerLive {
   const today = todayAmsterdamDate(now);
-  let out = { ...data, date_tracked: today };
+  let out: WeerLive = { ...data, date_tracked: today };
 
   out = applyRange(
     out,
