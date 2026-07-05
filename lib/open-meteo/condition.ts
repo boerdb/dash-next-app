@@ -45,16 +45,19 @@ export function isClearSkyCondition(
 export function conditionFromOpenMeteo(
   weatherCode: number,
   cloudCoverPct: number,
-  shortwaveRadiationWm2?: number | null
+  shortwaveRadiationWm2?: number | null,
+  ignorePrecipitation = false
 ): WeatherCondition {
   if (weatherCode === 45 || weatherCode === 48) return "fog";
-  if (weatherCode >= 71 && weatherCode <= 77) return "snow";
-  if (weatherCode >= 95 && weatherCode <= 99) {
-    return weatherCode >= 96 ? "storm" : "thunder";
+  if (!ignorePrecipitation) {
+    if (weatherCode >= 71 && weatherCode <= 77) return "snow";
+    if (weatherCode >= 95 && weatherCode <= 99) {
+      return weatherCode >= 96 ? "storm" : "thunder";
+    }
+    if (weatherCode >= 51 && weatherCode <= 67) return "rain";
+    if (weatherCode >= 80 && weatherCode <= 82) return "rain";
+    if (weatherCode >= 85 && weatherCode <= 86) return "snow";
   }
-  if (weatherCode >= 51 && weatherCode <= 67) return "rain";
-  if (weatherCode >= 80 && weatherCode <= 82) return "rain";
-  if (weatherCode >= 85 && weatherCode <= 86) return "snow";
 
   let fromModel: ClearSkyCondition = "cloudy";
   if (weatherCode === 0) fromModel = "sunny";

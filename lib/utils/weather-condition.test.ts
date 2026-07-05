@@ -110,3 +110,33 @@ describe("getWeatherCondition · lokale zon", () => {
     assert.equal(condition, "sunny");
   });
 });
+
+describe("getWeatherCondition · regen", () => {
+  const rainyMeteo: OpenMeteoSky = {
+    cloudCoverPct: 90,
+    weatherCode: 61,
+    precipitationMm: 0.4,
+    shortwaveRadiationWm2: 80,
+  };
+
+  it("toont regen bij actieve station-intensiteit", () => {
+    const condition = getWeatherCondition(
+      { temp_c: 18, rainrate_mm: 0.8, solarradiation: 50 },
+      "day",
+      false,
+      rainyMeteo
+    );
+    assert.equal(condition, "rain");
+  });
+
+  it("negeert Open-Meteo-regen zodra het station droog is", () => {
+    const condition = getWeatherCondition(
+      { temp_c: 18, rainrate_mm: 0, solarradiation: 400 },
+      "day",
+      false,
+      rainyMeteo
+    );
+    assert.notEqual(condition, "rain");
+    assert.equal(condition, "partly-cloudy");
+  });
+});

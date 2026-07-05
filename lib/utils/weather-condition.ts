@@ -63,18 +63,28 @@ function isStationRainy(data: WeerLive): boolean {
   return rate > 0;
 }
 
-function skyFromOpenMeteo(sky: OpenMeteoSky): WeatherCondition {
+/** Station meldt expliciet 0 mm/u — dan heeft live-data voorrang boven Open-Meteo-regen. */
+function isStationDry(data: WeerLive): boolean {
+  if (data.rainrate_mm === undefined || data.rainrate_mm === "") return false;
+  const rate = Number(data.rainrate_mm);
+  return Number.isFinite(rate) && rate <= 0;
+}
+
+function skyFromOpenMeteo(sky: OpenMeteoSky, ignorePrecipitation = false): WeatherCondition {
   const code = sky.weatherCode;
   if (openMeteoImpliesThunder(code)) {
     return code >= 96 ? "storm" : "thunder";
   }
-  if (openMeteoImpliesSnow(code)) return "snow";
-  if (openMeteoImpliesRain(code) || sky.precipitationMm > 0) return "rain";
+  if (!ignorePrecipitation) {
+    if (openMeteoImpliesSnow(code)) return "snow";
+    if (openMeteoImpliesRain(code) || sky.precipitationMm > 0) return "rain";
+  }
   if (code === 45 || code === 48) return "fog";
   return conditionFromOpenMeteo(
     code,
     sky.cloudCoverPct,
-    sky.shortwaveRadiationWm2
+    sky.shortwaveRadiationWm2,
+    ignorePrecipitation
   );
 }
 
@@ -104,9 +114,10 @@ export function getWeatherCondition(
   if ( period === "dawn" ) return "dawn";
 
   const stationSolar = Number(data.solarradiation);
+  const stationDry = isStationDry(data);
 
   if (openMeteoSky) {
-    const meteo = skyFromOpenMeteo(openMeteoSky);
+    const meteo = skyFromOpenMeteo(openMeteoSky, stationDry);
     if (Number.isFinite(stationSolar) && stationSolar >= 0) {
       return blendWithLocalSolar(meteo, stationSolar);
     }
