@@ -65,9 +65,8 @@ function isStationRainy(data: WeerLive): boolean {
 
 /** Station meldt expliciet 0 mm/u — dan heeft live-data voorrang boven Open-Meteo-regen. */
 function isStationDry(data: WeerLive): boolean {
-  if (data.rainrate_mm === undefined || data.rainrate_mm === "") return false;
-  const rate = Number(data.rainrate_mm);
-  return Number.isFinite(rate) && rate <= 0;
+  if (data.rainrate_mm === undefined) return false;
+  return Number.isFinite(data.rainrate_mm) && data.rainrate_mm <= 0;
 }
 
 function skyFromOpenMeteo(sky: OpenMeteoSky, ignorePrecipitation = false): WeatherCondition {
