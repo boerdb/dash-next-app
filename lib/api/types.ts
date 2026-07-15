@@ -192,10 +192,20 @@ import type {
 } from "@/lib/homewizard/battery";
 
 export type { BatterijGroep, BatterijHistorie, BatterijLive } from "@/lib/homewizard/battery";
+export type { FaseLive, FaseUnit } from "@/lib/homewizard/p1-phases";
 export type { EnphaseLive } from "@/lib/enphase/types";
 
 export interface EnergieApiRaw {
   active_power_w?: number;
+  active_power_l1_w?: number;
+  active_power_l2_w?: number;
+  active_power_l3_w?: number;
+  active_voltage_l1_v?: number;
+  active_voltage_l2_v?: number;
+  active_voltage_l3_v?: number;
+  active_current_l1_a?: number;
+  active_current_l2_a?: number;
+  active_current_l3_a?: number;
   active_tariff?: number;
   total_power_import_kwh?: number;
   total_power_export_kwh?: number;
@@ -218,6 +228,8 @@ export interface EnergieApiRaw {
 
 export interface EnergieLive {
   stroom_nu: number;
+  /** Per-fase P1-data; null als slimme meter geen fasevelden levert. */
+  fases: import("@/lib/homewizard/p1-phases").FaseLive | null;
   tarief: number;
   stroom_vandaag_in: number | string;
   stroom_vandaag_uit: number | string;

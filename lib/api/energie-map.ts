@@ -1,4 +1,5 @@
 import { aggregateBatterijen } from "@/lib/homewizard/battery";
+import { mapP1Phases } from "@/lib/homewizard/p1-phases";
 import {
   computeWaterMeterstandM3,
   formatWaterMeterstandOpgave,
@@ -20,6 +21,7 @@ export function mapEnergieLive(data: EnergieApiRaw): EnergieLive {
 
   return {
     stroom_nu: Number(data.active_power_w ?? 0),
+    fases: mapP1Phases(data),
     tarief: Number(data.active_tariff ?? 0),
     stroom_vandaag_in: data.vandaag_stroom_in_kwh ?? 0,
     stroom_vandaag_uit: data.vandaag_stroom_out_kwh ?? 0,

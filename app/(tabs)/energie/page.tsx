@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import useSWR from "swr";
 import dynamic from "next/dynamic";
 import { BatteryPanel } from "@/components/energy/BatteryPanel";
+import { PhasePanel } from "@/components/energy/PhasePanel";
 import { PowerHero } from "@/components/energy/PowerHero";
 import { DailyStats } from "@/components/energy/DailyStats";
 import { PullToRefresh } from "@/components/shared/PullToRefresh";
@@ -84,6 +85,12 @@ export default function EnergiePage() {
       ) : energie ? (
         <div className="space-y-8 pb-2">
           <PowerHero data={energie} />
+
+          {energie.fases ? (
+            <WeerSection title="Fasen" subtitle="P1-meter · live per fase">
+              <PhasePanel data={energie} />
+            </WeerSection>
+          ) : null}
 
           <div className="grid gap-8 md:grid-cols-2 md:gap-6 md:items-start">
             <WeerSection title="Vandaag" subtitle="Stroom · gas · water">
