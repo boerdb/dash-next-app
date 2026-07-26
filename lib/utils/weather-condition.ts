@@ -10,6 +10,7 @@ import {
   pickSunnierSkyCondition,
 } from "@/lib/open-meteo/condition";
 import { isRecentLightningStrikeNearby } from "@/lib/weer/lightning-storm";
+import { resolveRainRateMm } from "@/lib/weer/ws90-rain";
 
 /** Lokale instraling mag het model alleen ophelderen (schaduw op sensor ≠ bewolkt). */
 function blendWithLocalSolar(
@@ -59,14 +60,15 @@ function externalThunderCondition(
 }
 
 function isStationRainy(data: WeerLive): boolean {
-  const rate = Number(data.rainrate_mm) || 0;
+  const rate = resolveRainRateMm(data) ?? 0;
   return rate > 0;
 }
 
 /** Station meldt expliciet 0 mm/u — dan heeft live-data voorrang boven Open-Meteo-regen. */
 function isStationDry(data: WeerLive): boolean {
-  if (data.rainrate_mm === undefined) return false;
-  return Number.isFinite(data.rainrate_mm) && data.rainrate_mm <= 0;
+  const rate = resolveRainRateMm(data);
+  if (rate === undefined) return false;
+  return rate <= 0;
 }
 
 function skyFromOpenMeteo(sky: OpenMeteoSky, ignorePrecipitation = false): WeatherCondition {

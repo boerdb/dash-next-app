@@ -1,6 +1,12 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { applyWs90RainPrimary, hasPiezoRain, overlayDbRainPeriodTotals, resolveRainRateMm } from "./ws90-rain";
+import {
+  applyWs90RainPrimary,
+  hasPiezoRain,
+  isPiezoRainRateFloor,
+  overlayDbRainPeriodTotals,
+  resolveRainRateMm,
+} from "./ws90-rain";
 
 describe("applyWs90RainPrimary", () => {
   it("kopieert piezo naar standaard regenvelden", () => {
@@ -58,10 +64,38 @@ describe("resolveRainRateMm", () => {
     assert.equal(resolveRainRateMm({ rainrate_piezo_mm: 0 }), 0);
   });
 
-  it("prefereert genormaliseerd veld", () => {
+  it("corrigeert vast piezo-minimum via uurtotaal", () => {
     assert.equal(
-      resolveRainRateMm({ rainrate_mm: 0.6, rainrate_piezo_mm: 0.1 }),
-      0.6
+      resolveRainRateMm({
+        rainrate_mm: 0.6,
+        rainrate_piezo_mm: 0.6,
+        rrain_piezo: 0.024,
+        hourlyrain_mm: 2.4,
+      }),
+      2.4
     );
+  });
+
+  it("onderdrukt piezo-minimum zonder uuraccumulatie", () => {
+    assert.equal(
+      resolveRainRateMm({
+        rainrate_mm: 0.6,
+        rainrate_piezo_mm: 0.6,
+        rrain_piezo: 0.024,
+      }),
+      0
+    );
+  });
+
+  it("laat hogere piezo-intensiteit ongemoeid", () => {
+    assert.equal(resolveRainRateMm({ rainrate_mm: 3.2 }), 3.2);
+  });
+});
+
+describe("isPiezoRainRateFloor", () => {
+  it("herkent WS90-minimum", () => {
+    assert.equal(isPiezoRainRateFloor(0.6), true);
+    assert.equal(isPiezoRainRateFloor(0.1), false);
+    assert.equal(isPiezoRainRateFloor(1.2), false);
   });
 });
