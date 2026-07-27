@@ -84,6 +84,7 @@ describe("applyGatewayTempMinMax", () => {
       temp_max_c: 25,
       temp_min_time: "05:00",
       temp_max_time: "16:00",
+      temp_minmax_date: "2026-06-28",
     };
     const r = applyGatewayTempMinMax(
       { temp_c: 17, date_tracked: DAY },
@@ -92,6 +93,25 @@ describe("applyGatewayTempMinMax", () => {
     );
     assert.equal(r.temp_min_c, 17);
     assert.equal(r.temp_max_c, 17);
+    assert.equal(r.temp_minmax_date, DAY);
+    assert.equal(r.temp_min_time, r.temp_max_time);
+  });
+
+  it("reset wanneer date_tracked al vandaag is maar min/max van gisteren", () => {
+    const midnight = new Date("2026-06-29T00:10:00+02:00");
+    const prev = {
+      date_tracked: DAY,
+      temp_min_c: 15.7,
+      temp_max_c: 21,
+      temp_min_time: "14:42",
+      temp_max_time: "12:26",
+    };
+    const r = applyGatewayTempMinMax({ temp_c: 18.2, date_tracked: DAY }, prev, midnight);
+    assert.equal(r.temp_min_c, 18.2);
+    assert.equal(r.temp_max_c, 18.2);
+    assert.equal(r.temp_minmax_date, DAY);
+    assert.notEqual(r.temp_min_time, "14:42");
+    assert.notEqual(r.temp_max_time, "12:26");
   });
 
   it("behoudt min/max zonder temp in update", () => {
@@ -135,6 +155,7 @@ describe("carryForwardTempMinMax", () => {
       temp_max_c: 20.5,
       temp_min_time: "00:04",
       temp_max_time: "00:04",
+      temp_minmax_date: DAY,
     };
     const r = carryForwardTempMinMax(
       { temp_c: 21.8, date_tracked: DAY },
@@ -143,5 +164,32 @@ describe("carryForwardTempMinMax", () => {
     );
     assert.equal(r.temp_min_c, 20.5);
     assert.equal(r.temp_max_c, 20.5);
+  });
+
+  it("reset bij dagwissel en verwijdert verouderde min/max uit ingest", () => {
+    const midnight = new Date("2026-06-29T00:05:00+02:00");
+    const prev = {
+      date_tracked: "2026-06-28",
+      temp_min_c: 15.7,
+      temp_max_c: 21,
+      temp_min_time: "14:42",
+      temp_max_time: "12:26",
+      temp_minmax_date: "2026-06-28",
+    };
+    const r = carryForwardTempMinMax(
+      {
+        temp_c: 18.2,
+        date_tracked: DAY,
+        temp_min_c: 15.7,
+        temp_max_c: 21,
+        temp_min_time: "14:42",
+        temp_max_time: "12:26",
+      },
+      prev,
+      midnight
+    );
+    assert.equal(r.temp_min_c, 18.2);
+    assert.equal(r.temp_max_c, 18.2);
+    assert.equal(r.temp_minmax_date, DAY);
   });
 });

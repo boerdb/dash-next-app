@@ -15,6 +15,8 @@ export interface WeerLive {
   temp_min_time?: string | null;
   /** Tijdstip (HH:MM, Amsterdam) van de dag-maximumtemperatuur. */
   temp_max_time?: string | null;
+  /** Kalenderdag (YYYY-MM-DD, Amsterdam) waarop temp_min/max gelden. */
+  temp_minmax_date?: string;
   dauwpunt?: number | string;
   /** Vapor pressure deficit (kPa), nieuwere firmware */
   vpd?: number | string;
