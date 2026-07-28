@@ -16,6 +16,17 @@ const nextConfig: NextConfig = {
     "192.168.1.0/24",
     "dash.clvs.nl",
   ],
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve = config.resolve || {};
+      config.resolve.fallback = {
+        ...(config.resolve.fallback || {}),
+        http: false,
+        https: false,
+      };
+    }
+    return config;
+  },
 };
 
 export default withSerwist(nextConfig);
