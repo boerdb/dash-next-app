@@ -28,6 +28,7 @@ def safe_print(text: str) -> None:
     sys.stdout.buffer.write(b"\n")
 
 safe_print(run(f"cd {APP} && git pull"))
+safe_print(run(f"cd {APP} && rm -rf .next"))
 safe_print(run(f"cd {APP} && npm run build", wait=600))
 safe_print(run(f"cd {APP} && pm2 restart dash-next-app --update-env"))
 time.sleep(4)
