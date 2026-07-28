@@ -1,51 +1,29 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
-import useSWR, { mutate as swrMutate } from "swr";
 import dynamic from "next/dynamic";
 import { WeatherHero } from "@/components/weather/WeatherHero";
-import { WeerSection } from "@/components/weather/WeerSection";
-import {
-  WeatherLightningDashboard,
-  WeatherMetricsDashboard,
-  WeatherWindDashboard,
-} from "@/components/weather/WeatherRosetteDashboard";
+import { Section } from "@/components/ui/section";
+import { WindRosette } from "@/components/weather/WindRosette";
+import { LightningPanel } from "@/components/weather/LightningPanel";
+import { StationMetrics } from "@/components/weather/StationMetrics";
 import { TideCard } from "@/components/weather/TideCard";
 import { KnmiWarningsCard } from "@/components/weather/KnmiWarningsCard";
 import { PrecipForecastCard } from "@/components/weather/PrecipForecastCard";
 import { PullToRefresh } from "@/components/shared/PullToRefresh";
-import { DataError } from "@/components/shared/DataError";
+import { StatusPanel } from "@/components/ui/status-panel";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getAstronomyInfo, toAstronomieApi } from "@/lib/astronomy/sun-moon";
-import { jsonFetcher, FetchError } from "@/lib/fetcher";
-import { useRevalidateOnVisible } from "@/lib/hooks/use-revalidate-on-visible";
-import { getWeatherCondition } from "@/lib/utils/weather-condition";
-import { hasActiveKnmiThunderWarning } from "@/lib/knmi/thunder";
-import { formatWeerUpdateLabel } from "@/lib/weer/update-label";
-import {
-  LIGHTNING_POLL_ACTIVE_MS,
-  LIGHTNING_POLL_NORMAL_MS,
-  shouldAccelerateLightningPoll,
-} from "@/lib/weer/lightning-storm";
-import type {
-  AstronomieApi,
-  GetijdenResponse,
-  KnmiWaarschuwingenApi,
-  PrecipForecastResponse,
-  WeerHistorie,
-  WeerLive,
-} from "@/lib/api/types";
+import { useWeerData } from "@/lib/hooks/use-weer";
 
 const TemperatureChart = dynamic(
   () =>
     import("@/components/weather/TemperatureChart").then((m) => m.TemperatureChart),
-  { ssr: false, loading: () => <Skeleton className="h-48 w-full rounded-2xl" /> }
+  { ssr: false, loading: () => <Skeleton className="h-48 w-full" /> }
 );
 
 const RainYearChart = dynamic(
   () =>
     import("@/components/weather/RainYearChart").then((m) => m.RainYearChart),
-  { ssr: false, loading: () => <Skeleton className="h-52 w-full rounded-2xl" /> }
+  { ssr: false, loading: () => <Skeleton className="h-52 w-full" /> }
 );
 
 const LightningYearChart = dynamic(
@@ -53,7 +31,7 @@ const LightningYearChart = dynamic(
     import("@/components/weather/LightningYearChart").then(
       (m) => m.LightningYearChart
     ),
-  { ssr: false, loading: () => <Skeleton className="h-52 w-full rounded-2xl" /> }
+  { ssr: false, loading: () => <Skeleton className="h-52 w-full" /> }
 );
 
 const PrecipitationRadar = dynamic(
@@ -61,139 +39,26 @@ const PrecipitationRadar = dynamic(
     import("@/components/weather/PrecipitationRadar").then(
       (m) => m.PrecipitationRadar
     ),
-  { ssr: false, loading: () => <Skeleton className="h-[300px] w-full rounded-2xl" /> }
+  { ssr: false, loading: () => <Skeleton className="h-[300px] w-full" /> }
 );
-
-const swrFreshOnOpen = {
-  revalidateOnMount: true,
-  revalidateOnFocus: true,
-  revalidateIfStale: true,
-  keepPreviousData: true,
-} as const;
-
-const defaultAstro: AstronomieApi = {
-  period: "day",
-  sunriseLabel: "—",
-  sunsetLabel: "—",
-  daylightHoursLabel: "—",
-  sunProgress: 0.5,
-  sunBelowHorizon: false,
-  sunAltitudeDeg: 0,
-  moon: {
-    phase: 0.5,
-    fraction: 0.5,
-    label: "Maan",
-    illuminationPct: 50,
-    riseLabel: null,
-    setLabel: null,
-  },
-};
 
 export default function WeerPage() {
   const {
-    data: weer,
-    error: weerError,
-    isLoading: weerLoading,
-    mutate: mutateWeer,
-  } = useSWR<WeerLive, FetchError>("/api/weer/live", jsonFetcher, {
-    refreshInterval: (latest) =>
-      shouldAccelerateLightningPoll(latest)
-        ? LIGHTNING_POLL_ACTIVE_MS
-        : LIGHTNING_POLL_NORMAL_MS,
-    dedupingInterval: 2_000,
-    shouldRetryOnError: true,
-    errorRetryCount: 3,
-    ...swrFreshOnOpen,
-  });
+    weer,
+    weerError,
+    weerLoading,
+    historie,
+    getijden,
+    getijBron,
+    astroData,
+    knmiWaarschuwingen,
+    openMeteoForecast,
+    updateLabel,
+    condition,
+    refreshAll,
+    mutateWeer,
+  } = useWeerData();
 
-  const { data: historie, mutate: mutateHistorie } = useSWR<WeerHistorie, FetchError>(
-    "/api/weer/historie",
-    jsonFetcher,
-    { refreshInterval: 30_000, ...swrFreshOnOpen }
-  );
-
-  const { data: getijdenData, mutate: mutateGetijden } = useSWR<GetijdenResponse>(
-    "/api/weer/getijden",
-    jsonFetcher,
-    { refreshInterval: 900_000, ...swrFreshOnOpen }
-  );
-  const getijden = getijdenData?.items ?? [];
-  const getijBron = getijdenData?.source ?? "rws";
-
-  const { data: astro, mutate: mutateAstro } = useSWR<AstronomieApi>(
-    "/api/weer/astronomie",
-    jsonFetcher,
-    { refreshInterval: 300_000, ...swrFreshOnOpen }
-  );
-
-  const { data: knmiWaarschuwingen, mutate: mutateKnmi } = useSWR<
-    KnmiWaarschuwingenApi | null,
-    FetchError
-  >("/api/weer/knmi-waarschuwingen", knmiFetcher, {
-    refreshInterval: 600_000,
-    shouldRetryOnError: false,
-    ...swrFreshOnOpen,
-  });
-
-  const { data: openMeteoForecast } = useSWR<PrecipForecastResponse, FetchError>(
-    "/api/weer/regen-voorspelling",
-    jsonFetcher,
-    {
-      refreshInterval: 1_800_000,
-      shouldRetryOnError: false,
-      dedupingInterval: 5_000,
-      ...swrFreshOnOpen,
-    }
-  );
-
-  const astroFallback = useMemo(() => {
-    try {
-      return toAstronomieApi(getAstronomyInfo());
-    } catch {
-      return defaultAstro;
-    }
-  }, []);
-
-  const astroData = astro ?? astroFallback;
-
-  const refreshAll = useCallback(async () => {
-    await Promise.all([
-      mutateWeer(),
-      mutateHistorie(),
-      mutateGetijden(),
-      mutateAstro(),
-      mutateKnmi(),
-      swrMutate("/api/weer/radar"),
-      swrMutate("/api/weer/regen-voorspelling"),
-    ]);
-  }, [mutateWeer, mutateHistorie, mutateGetijden, mutateAstro, mutateKnmi]);
-
-  useRevalidateOnVisible(refreshAll);
-
-  const updateLabel = formatWeerUpdateLabel(weer?.server_timestamp);
-
-  const knmiThunder = useMemo(
-    () => hasActiveKnmiThunderWarning(knmiWaarschuwingen),
-    [knmiWaarschuwingen]
-  );
-
-  const condition = useMemo(
-    () =>
-      getWeatherCondition(
-        weer ?? null,
-        astroData.period,
-        astroData.sunBelowHorizon,
-        openMeteoForecast?.currentSky,
-        knmiThunder
-      ),
-    [
-      weer,
-      astroData.period,
-      astroData.sunBelowHorizon,
-      openMeteoForecast?.currentSky,
-      knmiThunder,
-    ]
-  );
   const showSkeleton = weerLoading && !weer && !weerError;
 
   return (
@@ -201,9 +66,9 @@ export default function WeerPage() {
       {showSkeleton ? (
         <WeerSkeleton />
       ) : weerError && !weer ? (
-        <DataError message={weerError.message} onRetry={() => mutateWeer()} />
+        <StatusPanel message={weerError.message} onRetry={() => mutateWeer()} />
       ) : weer ? (
-        <div className="space-y-8 pb-2">
+        <div className="space-y-[var(--space-section)] pb-2">
           {knmiWaarschuwingen ? <KnmiWarningsCard data={knmiWaarschuwingen} /> : null}
 
           <WeatherHero
@@ -213,84 +78,66 @@ export default function WeerPage() {
             updateLabel={updateLabel}
           />
 
-          <div className="space-y-3">
-            <WeatherWindDashboard data={weer} />
-            <WeatherLightningDashboard data={weer} />
+          <div className="grid gap-4 lg:grid-cols-2">
+            <WindRosette data={weer} />
+            <LightningPanel data={weer} />
           </div>
 
-          <WeerSection title="Weerstation" subtitle="Ecowitt · live elke minuut">
-            <WeatherMetricsDashboard data={weer} historie={historie} />
-          </WeerSection>
+          <Section title="Weerstation" subtitle="Ecowitt · live elke minuut" accent="weather">
+            <StationMetrics data={weer} historie={historie} />
+          </Section>
 
-          <div className="grid gap-8 md:grid-cols-2 md:gap-6 md:items-start">
-            <WeerSection title="Regenvoorspelling" subtitle="Open-Meteo · komende 48 uur">
-              <PrecipForecastCard />
-            </WeerSection>
+          <div className="grid gap-[var(--space-section)] lg:grid-cols-2">
+            <Section title="Regenvoorspelling" subtitle="Open-Meteo · komende 48 uur" accent="weather">
+              <PrecipForecastCard data={openMeteoForecast} />
+            </Section>
 
-            <WeerSection title="Neerslagradar" subtitle="Nederland · RainViewer">
+            <Section title="Neerslagradar" subtitle="Nederland · RainViewer">
               <PrecipitationRadar />
-            </WeerSection>
+            </Section>
           </div>
 
-          <WeerSection
+          <Section
             title="Historie"
             subtitle="Eigen weerstation"
             collapsible
             defaultOpen={false}
           >
-            <div className="space-y-3 md:space-y-4">
-              {historie?.labels?.length ? (
-                <TemperatureChart data={historie} />
-              ) : null}
-              <div className="grid gap-3 md:grid-cols-2 md:gap-4">
+            <div className="space-y-4">
+              {historie?.labels?.length ? <TemperatureChart data={historie} /> : null}
+              <div className="grid gap-4 lg:grid-cols-2">
                 <RainYearChart />
                 <LightningYearChart />
               </div>
             </div>
-          </WeerSection>
+          </Section>
 
-          <WeerSection
+          <Section
             title="Getij"
             subtitle="Harlingen · Waddenzee"
             collapsible
             defaultOpen={false}
           >
             <TideCard getijden={getijden} bron={getijBron} />
-          </WeerSection>
+          </Section>
         </div>
       ) : (
-        <DataError onRetry={() => mutateWeer()} />
+        <StatusPanel onRetry={() => mutateWeer()} />
       )}
     </PullToRefresh>
   );
 }
 
-async function knmiFetcher(url: string): Promise<KnmiWaarschuwingenApi | null> {
-  const res = await fetch(url, { cache: "no-store" });
-  if (res.status === 503) return null;
-  if (!res.ok) {
-    const body = (await res.json().catch(() => ({}))) as { error?: string };
-    throw new FetchError(body.error ?? "KNMI waarschuwingen niet beschikbaar", res.status);
-  }
-  return (await res.json()) as KnmiWaarschuwingenApi;
-}
-
 function WeerSkeleton() {
   return (
-    <div className="space-y-8">
-      <Skeleton className="-mx-4 h-72 w-[calc(100%+2rem)] rounded-b-3xl sm:-mx-6 sm:w-[calc(100%+3rem)] md:-mx-8 md:w-[calc(100%+4rem)]" />
-      <div className="space-y-3">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-52 w-full rounded-2xl" />
+    <div className="space-y-[var(--space-section)]">
+      <Skeleton className="-mx-4 h-72 rounded-b-[var(--radius-lg)] sm:-mx-6 lg:mx-0" />
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Skeleton className="h-52 w-full" />
+        <Skeleton className="h-52 w-full" />
       </div>
-      <div className="space-y-3">
-        <Skeleton className="h-4 w-28" />
-        <Skeleton className="h-32 w-full rounded-2xl" />
-      </div>
-      <div className="space-y-3">
-        <Skeleton className="h-4 w-32" />
-        <Skeleton className="h-[300px] w-full rounded-2xl" />
-      </div>
+      <Skeleton className="h-64 w-full" />
+      <Skeleton className="h-[300px] w-full" />
     </div>
   );
 }

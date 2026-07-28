@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { PwaProvider } from "@/components/PwaProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { themeBootScript } from "@/lib/theme/apply-theme";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,16 +35,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
-    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
-  ],
+  themeColor: "#dfe4ec",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
 };
-
-const themeScript = `(function(){try{var k='theme';var t=localStorage.getItem(k);var d=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme:dark)').matches);document.documentElement.classList.toggle('dark',d);document.documentElement.style.colorScheme=d?'dark':'light';}catch(e){}})()`;
 
 export default function RootLayout({
   children,
@@ -53,7 +49,7 @@ export default function RootLayout({
   return (
     <html lang="nl" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-dvh antialiased`}

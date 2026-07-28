@@ -1,7 +1,6 @@
 "use client";
 
 import { useId } from "react";
-import useSWR from "swr";
 import {
   Bar,
   BarChart,
@@ -12,14 +11,12 @@ import {
   YAxis,
 } from "recharts";
 import type { PrecipForecastResponse } from "@/lib/api/types";
-import { jsonFetcher, FetchError } from "@/lib/fetcher";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChartContainer } from "@/components/ui/chart-container";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ChartFrame } from "@/components/ui/chart-frame";
+import { Surface, SurfaceBody } from "@/components/ui/surface";
 import { chartTooltipStyle, useChartTheme } from "@/lib/hooks/use-chart-theme";
 
-const CHART_HEIGHT = 120;
+const CHART_HEIGHT = 180;
 
 function precipYMax(slots: { mm: number }[]): number {
   const max = Math.max(0, ...slots.map((s) => s.mm));
@@ -35,35 +32,28 @@ function formatPrecipTick(value: number): string {
   return `${formatted} mm`;
 }
 
-export function PrecipForecastCard() {
+interface PrecipForecastCardProps {
+  data?: PrecipForecastResponse | null;
+  error?: string;
+  onRetry?: () => void;
+}
+
+export function PrecipForecastCard({ data, error, onRetry }: PrecipForecastCardProps) {
   const chartTheme = useChartTheme();
   const gradientId = useId().replace(/:/g, "");
-  const { data, error, isLoading, mutate } = useSWR<PrecipForecastResponse, FetchError>(
-    "/api/weer/regen-voorspelling",
-    jsonFetcher,
-    { refreshInterval: 1_800_000, revalidateOnFocus: true }
-  );
-
-  if (isLoading && !data) {
-    return (
-      <Card variant="weather">
-        <CardContent>
-          <Skeleton className="h-[120px] w-full rounded-xl" />
-        </CardContent>
-      </Card>
-    );
-  }
 
   if (error && !data) {
     return (
-      <Card variant="weather" className="border-dashed border-card-border">
-        <CardContent className="text-center text-sm text-surface-muted">
-          <p>{error.message}</p>
-          <Button type="button" variant="outline" size="sm" onClick={() => mutate()} className="mt-3">
-            Opnieuw laden
-          </Button>
-        </CardContent>
-      </Card>
+      <Surface level="flat">
+        <SurfaceBody className="text-center text-sm text-surface-muted">
+          <p>{error}</p>
+          {onRetry ? (
+            <Button type="button" variant="outline" size="sm" onClick={onRetry} className="mt-3">
+              Opnieuw laden
+            </Button>
+          ) : null}
+        </SurfaceBody>
+      </Surface>
     );
   }
 
@@ -77,15 +67,12 @@ export function PrecipForecastCard() {
   const yMax = precipYMax(chartData);
 
   return (
-    <Card variant="weather">
-      <CardContent>
-        <p className="mb-1 text-xs font-medium text-surface-muted">
-          Verwachte neerslag · komende {data.hours} uur
+    <Surface level="raised">
+      <SurfaceBody>
+        <p className="text-caption mb-4 text-surface-muted">
+          Verwachte neerslag · komende {data.hours} uur · mm per uur
         </p>
-        <p className="text-caption mb-3 text-surface-muted">
-          Open-Meteo model · Harlingen · mm per uur
-        </p>
-        <ChartContainer height={CHART_HEIGHT}>
+        <ChartFrame height={CHART_HEIGHT}>
           <ResponsiveContainer width="100%" height={CHART_HEIGHT} minWidth={0}>
             <BarChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <defs>
@@ -130,8 +117,8 @@ export function PrecipForecastCard() {
               />
             </BarChart>
           </ResponsiveContainer>
-        </ChartContainer>
-      </CardContent>
-    </Card>
+        </ChartFrame>
+      </SurfaceBody>
+    </Surface>
   );
 }

@@ -16,6 +16,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { WeerBliksemJaarResponse } from "@/lib/api/types";
 import { jsonFetcher } from "@/lib/fetcher";
 import { Card, CardContent } from "@/components/ui/card";
+import { ChartNavButton } from "@/components/ui/button";
 import { ChartContainer } from "@/components/ui/chart-container";
 import { chartTooltipStyle, useChartTheme } from "@/lib/hooks/use-chart-theme";
 
@@ -82,27 +83,25 @@ export function LightningYearChart() {
         <div className="mb-3 flex items-center justify-between gap-2">
           <p className="text-xs font-medium text-surface-muted">Ontladingen per maand</p>
           <div className="flex items-center gap-1">
-            <button
+            <ChartNavButton
               type="button"
               disabled={!data.kan_vorige_jaar}
               onClick={() => setJaar(jaar - 1)}
-              className="rounded-lg p-1.5 text-surface-muted hover:bg-surface-subtle disabled:opacity-30"
               aria-label="Vorig jaar"
             >
               <ChevronLeft className="h-4 w-4" />
-            </button>
+            </ChartNavButton>
             <span className="min-w-[4rem] text-center text-sm font-medium text-foreground">
               {data.jaar}
             </span>
-            <button
+            <ChartNavButton
               type="button"
               disabled={!data.kan_volgende_jaar}
               onClick={() => setJaar(jaar + 1)}
-              className="rounded-lg p-1.5 text-surface-muted hover:bg-surface-subtle disabled:opacity-30"
               aria-label="Volgend jaar"
             >
               <ChevronRight className="h-4 w-4" />
-            </button>
+            </ChartNavButton>
           </div>
         </div>
 

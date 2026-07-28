@@ -2,6 +2,7 @@
 
 import { Zap } from "lucide-react";
 import type { EnergieLive } from "@/lib/api/types";
+import { Surface, SurfaceBody } from "@/components/ui/surface";
 import { cn } from "@/lib/utils";
 
 interface PowerHeroProps {
@@ -13,69 +14,79 @@ export function PowerHero({ data }: PowerHeroProps) {
   const isPeak = data.tarief === 2;
 
   return (
-    <section
-      className={cn(
-        "relative -mx-4 overflow-hidden rounded-b-3xl border-b border-card-border px-4 pb-6 pt-5 sm:-mx-6 md:-mx-8",
-        exporting ? "bg-accent-export-soft" : "bg-accent-energy-soft"
-      )}
-    >
-      <div className="relative z-10">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <p className="text-caption font-medium uppercase text-hero-muted">
-              {exporting ? "Terugleveren" : "Netafname"}
-            </p>
-            <h1
+    <div className="lg:grid lg:grid-cols-[1fr_auto] lg:items-end lg:gap-8">
+      <Surface
+        level="raised"
+        className={cn(
+          "relative overflow-hidden border-t-[3px]",
+          exporting ? "border-t-accent-export" : "border-t-accent-energy"
+        )}
+      >
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-0",
+            exporting ? "bg-accent-export-soft" : "bg-accent-energy-soft"
+          )}
+          aria-hidden
+        />
+        <SurfaceBody className="relative">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-label text-surface-muted">
+                {exporting ? "Terugleveren" : "Netafname"}
+              </p>
+              <h1
+                className={cn(
+                  "mt-1 flex items-baseline gap-1 leading-none",
+                  exporting ? "text-accent-export" : "text-accent-energy"
+                )}
+              >
+                <span className="text-2xl font-bold tabular-nums">
+                  {Math.abs(data.stroom_nu)}
+                </span>
+                <span className="text-2xl font-normal text-surface-muted">W</span>
+              </h1>
+              {exporting ? (
+                <p className="text-caption mt-1 text-accent-export">
+                  Levert terug aan het net
+                </p>
+              ) : null}
+            </div>
+            <Zap
               className={cn(
-                "mt-1 text-6xl font-bold tabular-nums leading-none",
+                "h-10 w-10 shrink-0",
                 exporting ? "text-accent-export" : "text-accent-energy"
               )}
-            >
-              {Math.abs(data.stroom_nu)}
-              <span className="ml-1 text-2xl font-normal text-hero-muted">W</span>
-            </h1>
-            {exporting ? (
-              <p className="mt-1 text-sm text-accent-export">Levert terug aan het net</p>
-            ) : null}
+            />
           </div>
-          <Zap
-            className={cn(
-              "h-10 w-10 shrink-0",
-              exporting ? "text-accent-export" : "text-accent-energy"
-            )}
-          />
-        </div>
+        </SurfaceBody>
+      </Surface>
 
-        <div className="mx-auto mt-4 flex max-w-sm flex-wrap items-center justify-center gap-x-4 gap-y-1 rounded-2xl border border-card-border bg-card px-4 py-2.5 text-sm text-foreground shadow-[var(--elevation-shadow)]">
-          <span>
-            Tarief{" "}
-            <strong
+      <Surface level="flat" className="mt-4 lg:mt-0">
+        <SurfaceBody className="space-y-3">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-label text-surface-muted">Tarief</span>
+            <span
               className={cn(
                 "font-semibold",
                 isPeak ? "text-accent-energy" : "text-accent-weather"
               )}
             >
               {isPeak ? "Piek" : "Dal"}
-            </strong>
-          </span>
-          <span className="hidden text-surface-muted sm:inline">|</span>
-          <span>
-            Vandaag in{" "}
-            <strong className="font-semibold tabular-nums text-foreground">
-              {data.stroom_vandaag_in}
-            </strong>{" "}
-            kWh
-          </span>
-          <span className="hidden text-surface-muted sm:inline">|</span>
-          <span>
-            Uit{" "}
-            <strong className="font-semibold tabular-nums text-accent-export">
-              {data.stroom_vandaag_uit}
-            </strong>{" "}
-            kWh
-          </span>
-        </div>
-      </div>
-    </section>
+            </span>
+          </div>
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-label text-surface-muted">Vandaag in</span>
+            <span className="font-semibold tabular-nums">{data.stroom_vandaag_in} kWh</span>
+          </div>
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-label text-surface-muted">Vandaag uit</span>
+            <span className="font-semibold tabular-nums text-accent-export">
+              {data.stroom_vandaag_uit} kWh
+            </span>
+          </div>
+        </SurfaceBody>
+      </Surface>
+    </div>
   );
 }

@@ -8,13 +8,17 @@ export default function TabsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mx-auto min-h-dvh w-full max-w-lg bg-background bg-gradient-to-b from-[var(--gradient-from)] via-[var(--gradient-via)] to-[var(--gradient-to)] pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:max-w-3xl lg:max-w-5xl">
+    <div className="app-shell min-h-dvh">
       <EnergiePrefetch />
-      <main className="px-4 sm:px-6 md:px-8">
-        <AppHeader />
-        {children}
-      </main>
-      <BottomNav />
+      <div className="mx-auto flex min-h-dvh w-full max-w-md md:max-w-none lg:max-w-6xl">
+        <BottomNav />
+        <div className="flex min-h-dvh min-w-0 flex-1 flex-col pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
+          <main className="flex-1 px-4 sm:px-6 lg:px-8">
+            <AppHeader />
+            {children}
+          </main>
+        </div>
+      </div>
     </div>
   );
 }

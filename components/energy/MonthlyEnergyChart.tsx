@@ -18,6 +18,7 @@ import type { EnergieMaandDag, EnergieMaandResponse } from "@/lib/api/types";
 import { dagTitelLang } from "@/lib/energie/maand-labels";
 import { jsonFetcher } from "@/lib/fetcher";
 import { Card, CardContent } from "@/components/ui/card";
+import { ChartNavButton } from "@/components/ui/button";
 import { ChartContainer } from "@/components/ui/chart-container";
 import { chartTooltipStyle, useChartTheme } from "@/lib/hooks/use-chart-theme";
 
@@ -48,7 +49,7 @@ function DagDetail({
 }) {
   const verbruik = dag.net_in_kwh + dag.batterij_kwh;
   return (
-    <div className="mt-4 space-y-3 border-t border-card-border pt-4">
+    <div className="mt-4 space-y-3 border-t border-border-subtle pt-4">
       <div>
         <p className="text-sm font-medium text-foreground">{dagTitelLang(dag.dag)}</p>
         <p className="text-xs text-surface-muted">
@@ -184,7 +185,7 @@ export function MonthlyEnergyChart() {
         <div className="mb-3 flex items-center justify-between gap-2">
           <p className="text-xs font-medium text-surface-muted">Dagbalans stroom</p>
           <div className="flex items-center gap-1">
-            <button
+            <ChartNavButton
               type="button"
               disabled={!data.kan_vorige_maand}
               onClick={() => {
@@ -192,15 +193,14 @@ export function MonthlyEnergyChart() {
                 setJaar(p.jaar);
                 setMaand(p.maand);
               }}
-              className="rounded-lg p-1.5 text-surface-muted hover:bg-surface-subtle disabled:opacity-30"
               aria-label="Vorige maand"
             >
               <ChevronLeft className="h-4 w-4" />
-            </button>
+            </ChartNavButton>
             <span className="min-w-[7rem] text-center text-sm font-medium text-foreground">
               {data.maand_label}
             </span>
-            <button
+            <ChartNavButton
               type="button"
               disabled={!data.kan_volgende_maand}
               onClick={() => {
@@ -208,11 +208,10 @@ export function MonthlyEnergyChart() {
                 setJaar(n.jaar);
                 setMaand(n.maand);
               }}
-              className="rounded-lg p-1.5 text-surface-muted hover:bg-surface-subtle disabled:opacity-30"
               aria-label="Volgende maand"
             >
               <ChevronRight className="h-4 w-4" />
-            </button>
+            </ChartNavButton>
           </div>
         </div>
 

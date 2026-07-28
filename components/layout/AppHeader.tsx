@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 const titles: Record<string, string> = {
   "/weer": "Weer",
@@ -13,9 +12,8 @@ export function AppHeader() {
   const title = titles[pathname] ?? "Dashboard";
 
   return (
-    <header className="sticky top-0 z-40 -mx-4 mb-4 flex items-center justify-between gap-3 border-b border-card-border bg-nav-bg px-4 pb-3 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] sm:-mx-6 sm:px-6 md:-mx-8 md:px-8">
-      <h1 className="text-sm font-semibold tracking-wide text-foreground">{title}</h1>
-      <ThemeToggle />
+    <header className="sticky top-0 z-40 -mx-4 mb-6 flex items-center border-b border-border bg-nav-bg/95 px-4 pb-4 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] backdrop-blur-sm sm:-mx-6 sm:px-6 lg:-mx-0 lg:px-0 lg:pb-6">
+      <h1 className="text-lg font-semibold tracking-tight text-foreground">{title}</h1>
     </header>
   );
 }

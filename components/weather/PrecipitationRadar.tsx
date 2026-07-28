@@ -245,7 +245,7 @@ export function PrecipitationRadar() {
 
         <div
           ref={setMapContainerRef}
-          className="radar-map z-0 w-full overflow-hidden rounded-xl border border-card-border"
+          className="radar-map z-0 w-full overflow-hidden rounded-xl border border-border-subtle"
           style={{ height: MAP_HEIGHT }}
         />
 

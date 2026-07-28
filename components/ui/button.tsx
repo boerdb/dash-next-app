@@ -2,19 +2,18 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 rounded-[var(--radius-sm)] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:pointer-events-none disabled:opacity-40",
   {
     variants: {
       variant: {
-        primary: "bg-primary text-white hover:bg-primary/90",
-        ghost:
-          "text-surface-muted hover:bg-surface-subtle hover:text-foreground",
-        outline:
-          "border border-card-border bg-card text-foreground hover:bg-surface-subtle",
+        primary: "bg-primary px-4 py-2 text-white",
+        ghost: "px-3 py-2 text-surface-muted hover:bg-surface-subtle hover:text-foreground",
+        outline: "border border-border px-4 py-2 text-foreground hover:bg-surface-subtle",
       },
       size: {
-        default: "px-4 py-2",
-        sm: "px-3 py-1.5 text-xs",
+        default: "h-10",
+        sm: "h-8 px-3 text-xs",
+        icon: "h-9 w-9 p-0",
       },
     },
     defaultVariants: {
@@ -24,10 +23,6 @@ const buttonVariants = cva(
   }
 );
 
-export type ButtonVariant = NonNullable<
-  VariantProps<typeof buttonVariants>["variant"]
->;
-
 export function Button({
   className,
   variant,
@@ -36,8 +31,32 @@ export function Button({
 }: React.ButtonHTMLAttributes<HTMLButtonElement> &
   VariantProps<typeof buttonVariants>) {
   return (
+    <button className={cn(buttonVariants({ variant, size }), className)} {...props} />
+  );
+}
+
+export function IconButton({
+  className,
+  variant = "ghost",
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement> &
+  Pick<VariantProps<typeof buttonVariants>, "variant">) {
+  return (
     <button
-      className={cn(buttonVariants({ variant, size }), className)}
+      className={cn(buttonVariants({ variant, size: "icon" }), className)}
+      {...props}
+    />
+  );
+}
+
+export function ChartNavButton({
+  className,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <IconButton
+      variant="ghost"
+      className={cn("text-surface-muted hover:text-foreground", className)}
       {...props}
     />
   );

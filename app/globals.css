@@ -1,123 +1,150 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
-:root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --primary: #0284c7;
-  --accent-weather: #0284c7;
-  --accent-energy: #d97706;
-  --accent-export: #059669;
-  --accent-weather-soft: #eff6ff;
-  --accent-energy-soft: #fffbeb;
-  --accent-export-soft: #ecfdf5;
-  --card: #ffffff;
-  --card-border: #e2e8f0;
-  --surface-muted: #64748b;
-  --surface-subtle: #f1f5f9;
-  --surface-inset: #f8fafc;
-  --nav-bg: #f8fafc;
-  --gradient-from: #f8fafc;
-  --gradient-via: #f1f5f9;
-  --gradient-to: #f8fafc;
-  --elevation-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.08),
-    0 1px 2px -1px rgba(15, 23, 42, 0.06);
-  --hero-foreground: #0f172a;
-  --hero-muted: #64748b;
-  --moon-dark: #0f172a;
-  --moon-light: #cbd5e1;
-  --chart-grid: rgba(15, 23, 42, 0.08);
-  --chart-tick: #64748b;
-  --chart-tooltip-bg: #ffffff;
-  --chart-tooltip-border: #e2e8f0;
-  --chart-tooltip-label: #64748b;
-  --chart-cursor: rgba(15, 23, 42, 0.06);
-  --chart-ref-line: rgba(15, 23, 42, 0.15);
-  --chart-weather: #0284c7;
-  --chart-weather-light: #7dd3fc;
-  --chart-energy: #d97706;
-  --chart-energy-light: #fde68a;
-  --chart-battery: #7c3aed;
-  --chart-net: #6366f1;
-  --chart-export: #ca8a04;
-  --chart-solar: #eab308;
-  --chart-temperature: #0284c7;
-  --chart-rain: #0284c7;
-  --chart-rain-light: #7dd3fc;
-  --chart-lightning: #d97706;
-  --chart-lightning-light: #fde68a;
-  --nav-inactive: #94a3b8;
-  --nav-hover: #475569;
-  --text-label: 0.75rem;
-  --text-caption: 0.6875rem;
-  --tracking-label: 0.05em;
+/* ── Day palette (default, no pure white) ── */
+:root,
+[data-theme="day"] {
+  --background: #cdd5e3;
+  --foreground: #152032;
+  --surface: #e4eaf3;
+  --surface-raised: #f2f5fa;
+  --surface-muted: #4a5568;
+  --surface-subtle: #d8e0ec;
+  --border: #b8c4d4;
+  --border-subtle: #c8d2e0;
+  --primary: #1d4ed8;
+  --accent-weather: #1d4ed8;
+  --accent-energy: #c2410c;
+  --accent-export: #047857;
+  --accent-danger: #be123c;
+  --accent-violet: #6d28d9;
+  --accent-weather-soft: rgba(29, 78, 216, 0.12);
+  --accent-energy-soft: rgba(194, 65, 12, 0.12);
+  --accent-export-soft: rgba(4, 120, 87, 0.12);
+  --accent-violet-soft: rgba(109, 40, 217, 0.12);
+  --nav-bg: rgba(242, 245, 250, 0.92);
+  --nav-inactive: #7a8699;
+  --nav-hover: #2d3748;
+  --hero-foreground: #152032;
+  --hero-muted: #4a5568;
+  --gradient-from: #b8c9e2;
+  --gradient-via: #cdd5e3;
+  --gradient-to: #d5dce8;
+  --elevation-shadow: 0 1px 3px rgba(21, 32, 50, 0.1),
+    0 6px 16px rgba(21, 32, 50, 0.06);
+  --moon-dark: #1b2432;
+  --moon-light: #eef1f6;
+  --chart-grid: rgba(27, 36, 50, 0.08);
+  --chart-tick: #5a6577;
+  --chart-tooltip-bg: #f5f7fa;
+  --chart-tooltip-border: #c8d0dc;
+  --chart-tooltip-label: #5a6577;
+  --chart-cursor: rgba(27, 36, 50, 0.06);
+  --chart-ref-line: rgba(27, 36, 50, 0.12);
+  --chart-weather: #2563eb;
+  --chart-weather-light: #93c5fd;
+  --chart-energy: #b45309;
+  --chart-energy-light: #fcd34d;
+  --chart-battery: #6d28d9;
+  --chart-net: #4f46e5;
+  --chart-export: #047857;
+  --chart-solar: #ca8a04;
+  --chart-temperature: #2563eb;
+  --chart-rain: #2563eb;
+  --chart-rain-light: #93c5fd;
+  --chart-lightning: #b45309;
+  --chart-lightning-light: #fcd34d;
+  --radius-sm: 0.625rem;
+  --radius-lg: 1rem;
+  --text-xs: 0.6875rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+  --text-4xl: 3rem;
+  --text-label: 0.6875rem;
+  --text-caption: 0.75rem;
+  --tracking-label: 0.06em;
+  --space-section: 2rem;
+  --space-stack: 1rem;
 }
 
-.dark {
-  --background: #0f172a;
-  --foreground: #e2e8f0;
-  --primary: #38bdf8;
-  --accent-weather: #38bdf8;
+/* ── Night palette (deep marine, no pure black/white) ── */
+[data-theme="night"] {
+  --background: #0b1220;
+  --foreground: #dfe6f0;
+  --surface: #131c2e;
+  --surface-raised: #1a2439;
+  --surface-muted: #8b9ab1;
+  --surface-subtle: #1a2439;
+  --border: #2a3548;
+  --border-subtle: #222d3f;
+  --primary: #60a5fa;
+  --accent-weather: #60a5fa;
   --accent-energy: #fbbf24;
   --accent-export: #34d399;
-  --accent-weather-soft: #172554;
-  --accent-energy-soft: #422006;
-  --accent-export-soft: #064e3b;
-  --card: #1e293b;
-  --card-border: #334155;
-  --surface-muted: #94a3b8;
-  --surface-subtle: #1e293b;
-  --surface-inset: #0f172a;
-  --nav-bg: #0f172a;
-  --gradient-from: #0f172a;
-  --gradient-via: #131f35;
-  --gradient-to: #0f172a;
-  --elevation-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25),
-    0 1px 2px -1px rgba(0, 0, 0, 0.2);
-  --hero-foreground: #f1f5f9;
-  --hero-muted: #94a3b8;
-  --moon-dark: #0f172a;
-  --moon-light: #e2e8f0;
+  --accent-danger: #fb7185;
+  --accent-violet: #a78bfa;
+  --accent-weather-soft: rgba(96, 165, 250, 0.14);
+  --accent-energy-soft: rgba(251, 191, 36, 0.14);
+  --accent-export-soft: rgba(52, 211, 153, 0.14);
+  --accent-violet-soft: rgba(167, 139, 250, 0.14);
+  --nav-bg: rgba(19, 28, 46, 0.92);
+  --nav-inactive: #6b7a90;
+  --nav-hover: #c5d0e0;
+  --hero-foreground: #dfe6f0;
+  --hero-muted: #8b9ab1;
+  --gradient-from: #0b1220;
+  --gradient-via: #101a2e;
+  --gradient-to: #0b1220;
+  --elevation-shadow: 0 1px 2px rgba(0, 0, 0, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.15);
+  --moon-dark: #0b1220;
+  --moon-light: #dfe6f0;
   --chart-grid: rgba(255, 255, 255, 0.06);
-  --chart-tick: #94a3b8;
-  --chart-tooltip-bg: #1e293b;
-  --chart-tooltip-border: #334155;
-  --chart-tooltip-label: #94a3b8;
+  --chart-tick: #8b9ab1;
+  --chart-tooltip-bg: #1a2439;
+  --chart-tooltip-border: #2a3548;
+  --chart-tooltip-label: #8b9ab1;
   --chart-cursor: rgba(255, 255, 255, 0.06);
-  --chart-ref-line: rgba(255, 255, 255, 0.15);
-  --chart-weather: #38bdf8;
-  --chart-weather-light: #7dd3fc;
+  --chart-ref-line: rgba(255, 255, 255, 0.12);
+  --chart-weather: #60a5fa;
+  --chart-weather-light: #93c5fd;
   --chart-energy: #fbbf24;
   --chart-energy-light: #fde68a;
   --chart-battery: #a78bfa;
   --chart-net: #818cf8;
-  --chart-export: #eab308;
+  --chart-export: #34d399;
   --chart-solar: #facc15;
-  --chart-temperature: #38bdf8;
-  --chart-rain: #38bdf8;
-  --chart-rain-light: #7dd3fc;
+  --chart-temperature: #60a5fa;
+  --chart-rain: #60a5fa;
+  --chart-rain-light: #93c5fd;
   --chart-lightning: #fbbf24;
   --chart-lightning-light: #fde68a;
-  --nav-inactive: #64748b;
-  --nav-hover: #cbd5e1;
+  --elevation-shadow: 0 1px 2px rgba(0, 0, 0, 0.25),
+    0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
   --color-primary: var(--primary);
   --color-accent-weather: var(--accent-weather);
   --color-accent-energy: var(--accent-energy);
   --color-accent-export: var(--accent-export);
+  --color-accent-danger: var(--accent-danger);
+  --color-accent-violet: var(--accent-violet);
   --color-accent-weather-soft: var(--accent-weather-soft);
   --color-accent-energy-soft: var(--accent-energy-soft);
   --color-accent-export-soft: var(--accent-export-soft);
-  --color-card: var(--card);
-  --color-card-border: var(--card-border);
-  --color-surface-muted: var(--surface-muted);
-  --color-surface-subtle: var(--surface-subtle);
-  --color-surface-inset: var(--surface-inset);
+  --color-accent-violet-soft: var(--accent-violet-soft);
   --color-nav-bg: var(--nav-bg);
   --color-nav-inactive: var(--nav-inactive);
   --color-nav-hover: var(--nav-hover);
@@ -140,11 +167,37 @@
   --font-mono: var(--font-geist-mono);
 }
 
+html {
+  color-scheme: light;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+[data-theme="night"] {
+  color-scheme: dark;
+}
+
 body {
-  background: var(--background);
+  background: linear-gradient(
+    165deg,
+    var(--gradient-from) 0%,
+    var(--gradient-via) 45%,
+    var(--gradient-to) 100%
+  );
+  background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: var(--text-base);
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+.app-shell {
+  background: linear-gradient(
+    165deg,
+    var(--gradient-from) 0%,
+    var(--gradient-via) 45%,
+    var(--gradient-to) 100%
+  );
 }
 
 * {
@@ -161,6 +214,20 @@ body {
   font-size: var(--text-caption);
 }
 
+.text-metric {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.text-metric-lg {
+  font-size: var(--text-4xl);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
 .radar-map .leaflet-container {
   height: 100%;
   width: 100%;
@@ -170,7 +237,7 @@ body {
 
 .radar-map .leaflet-control-attribution {
   font-size: 9px;
-  background: var(--surface-inset) !important;
+  background: var(--surface) !important;
   color: var(--surface-muted) !important;
 }
 

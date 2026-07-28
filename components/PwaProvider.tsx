@@ -114,7 +114,7 @@ export function PwaProvider() {
   if (updateReloading) {
     return (
       <div className="fixed bottom-20 left-4 right-4 z-[60] mx-auto max-w-lg md:max-w-3xl lg:max-w-5xl">
-        <div className="rounded-2xl border border-sky-500/30 bg-card px-4 py-3 text-center text-sm text-foreground shadow-xl">
+        <div className="rounded-2xl border border-sky-500/30 bg-surface-raised px-4 py-3 text-center text-sm text-foreground shadow-xl">
           Bezig met bijwerken…
         </div>
       </div>
@@ -167,7 +167,7 @@ function InstallBanner({
 }) {
   return (
     <div className="fixed bottom-20 left-4 right-4 z-[60] mx-auto max-w-lg md:max-w-3xl lg:max-w-5xl">
-      <div className="rounded-2xl border border-sky-500/30 bg-card p-4 shadow-xl">
+      <div className="rounded-2xl border border-sky-500/30 bg-surface-raised p-4 shadow-xl">
         <div className="flex gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-500/20">
             <Icon className="h-5 w-5 text-sky-400" />

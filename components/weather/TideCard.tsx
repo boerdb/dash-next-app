@@ -69,7 +69,7 @@ export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
           </span>
         </div>
 
-        <div className="grid grid-cols-4 gap-2 border-b border-card-border pb-2 text-[0.65rem] uppercase text-surface-muted">
+        <div className="grid grid-cols-4 gap-2 border-b border-border-subtle pb-2 text-[0.65rem] uppercase text-surface-muted">
           <span>Getij</span>
           <span>Tijd</span>
           <span className="text-center">Verschil</span>
@@ -83,13 +83,13 @@ export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
           return (
             <Fragment key={`${g.dagKey}-${g.type}-${g.tijd}`}>
               {showDayHeader && (
-                <p className="border-b border-card-border pb-1 pt-3 text-[0.7rem] font-semibold uppercase tracking-wide text-surface-muted first:pt-0">
+                <p className="border-b border-border-subtle pb-1 pt-3 text-[0.7rem] font-semibold uppercase tracking-wide text-surface-muted first:pt-0">
                   {g.dagLabel}
                 </p>
               )}
               <div
                 className={cn(
-                  "grid grid-cols-4 gap-2 border-b border-card-border py-3 text-sm transition-colors",
+                  "grid grid-cols-4 gap-2 border-b border-border-subtle py-3 text-sm transition-colors",
                   isActive &&
                     "rounded-xl border border-accent-weather/30 bg-accent-weather/10 px-2 -mx-2"
                 )}
