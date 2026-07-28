@@ -79,7 +79,14 @@ const defaultAstro: AstronomieApi = {
   sunProgress: 0.5,
   sunBelowHorizon: false,
   sunAltitudeDeg: 0,
-  moon: { phase: 0.5, fraction: 0.5, label: "Maan", illuminationPct: 50 },
+  moon: {
+    phase: 0.5,
+    fraction: 0.5,
+    label: "Maan",
+    illuminationPct: 50,
+    riseLabel: null,
+    setLabel: null,
+  },
 };
 
 export default function WeerPage() {
