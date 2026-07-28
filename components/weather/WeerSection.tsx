@@ -23,7 +23,7 @@ function SectionHeader({
 }) {
   return (
     <>
-      <h2 className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-surface-muted">
+      <h2 className="text-label font-semibold text-surface-muted">
         {title}
       </h2>
       {subtitle ? (

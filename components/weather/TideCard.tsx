@@ -91,13 +91,13 @@ export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
                 className={cn(
                   "grid grid-cols-4 gap-2 border-b border-card-border py-3 text-sm transition-colors",
                   isActive &&
-                    "rounded-xl border border-sky-400/40 bg-sky-500/15 px-2 -mx-2 shadow-[0_0_20px_-8px_rgba(56,189,248,0.6)]"
+                    "rounded-xl border border-accent-weather/30 bg-accent-weather/10 px-2 -mx-2"
                 )}
               >
-                <span className={cn("font-semibold", isActive && "text-sky-300")}>
+                <span className={cn("font-semibold", isActive && "text-accent-weather")}>
                   {g.type === "HW" ? "Vloed" : "Eb"}
                   {isActive && (
-                    <span className="ml-1.5 rounded bg-sky-500/30 px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide text-sky-200">
+                    <span className="text-caption ml-1.5 rounded bg-accent-weather/20 px-1.5 py-0.5 font-bold uppercase text-accent-weather">
                       Nu
                     </span>
                   )}
@@ -105,7 +105,7 @@ export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
                 <span
                   className={cn(
                     "text-foreground",
-                    isActive && "font-semibold text-white"
+                    isActive && "font-semibold text-foreground"
                   )}
                 >
                   {g.tijd}
@@ -120,8 +120,8 @@ export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
                 </span>
                 <span
                   className={cn(
-                    "text-right font-semibold text-sky-400",
-                    isActive && "text-sky-300"
+                    "text-right font-semibold text-accent-weather",
+                    isActive && "text-accent-weather"
                   )}
                 >
                   {g.hoogte}m

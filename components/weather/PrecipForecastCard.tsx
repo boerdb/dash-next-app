@@ -14,6 +14,7 @@ import {
 import type { PrecipForecastResponse } from "@/lib/api/types";
 import { jsonFetcher, FetchError } from "@/lib/fetcher";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { ChartContainer } from "@/components/ui/chart-container";
 import { Skeleton } from "@/components/ui/skeleton";
 import { chartTooltipStyle, useChartTheme } from "@/lib/hooks/use-chart-theme";
@@ -58,13 +59,9 @@ export function PrecipForecastCard() {
       <Card variant="weather" className="border-dashed border-card-border">
         <CardContent className="text-center text-sm text-surface-muted">
           <p>{error.message}</p>
-          <button
-            type="button"
-            onClick={() => mutate()}
-            className="mt-3 rounded-lg bg-sky-500/20 px-3 py-1.5 text-xs font-medium text-sky-600 dark:text-sky-300"
-          >
+          <Button type="button" variant="outline" size="sm" onClick={() => mutate()} className="mt-3">
             Opnieuw laden
-          </button>
+          </Button>
         </CardContent>
       </Card>
     );
@@ -80,12 +77,12 @@ export function PrecipForecastCard() {
   const yMax = precipYMax(chartData);
 
   return (
-    <Card variant="weather" className="border-sky-500/20">
+    <Card variant="weather">
       <CardContent>
         <p className="mb-1 text-xs font-medium text-surface-muted">
           Verwachte neerslag · komende {data.hours} uur
         </p>
-        <p className="mb-3 text-[0.65rem] text-surface-muted">
+        <p className="text-caption mb-3 text-surface-muted">
           Open-Meteo model · Harlingen · mm per uur
         </p>
         <ChartContainer height={CHART_HEIGHT}>
@@ -93,8 +90,8 @@ export function PrecipForecastCard() {
             <BarChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#38bdf8" stopOpacity={0.9} />
-                  <stop offset="100%" stopColor="#38bdf8" stopOpacity={0.2} />
+                  <stop offset="0%" stopColor={chartTheme.rain} stopOpacity={0.9} />
+                  <stop offset="100%" stopColor={chartTheme.rain} stopOpacity={0.2} />
                 </linearGradient>
               </defs>
               <CartesianGrid stroke={chartTheme.grid} vertical={false} />

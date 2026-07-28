@@ -109,7 +109,7 @@ export function DailyStats({ data }: DailyStatsProps) {
                 <span className="text-sm font-normal text-surface-muted">m³</span>
               </>
             }
-            accent="text-amber-100 dark:text-amber-100"
+            accent="text-accent-energy"
           />
           <MiniStat
             icon={

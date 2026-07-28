@@ -1,6 +1,7 @@
 "use client";
 
 import type { AstronomieApi } from "@/lib/api/types";
+import { useChartTheme } from "@/lib/hooks/use-chart-theme";
 
 interface SunMoonArcProps {
   astro: AstronomieApi;
@@ -19,9 +20,6 @@ function sunPoint(progress: number) {
     y: BASE_Y - R * Math.sin(angle),
   };
 }
-
-const MOON_DARK = "#0f172a";
-const MOON_LIGHT = "#e2e8f0";
 
 /** Zichtbaar verlicht deel bij twee gelijke cirkels (donkere cirkel bovenop). */
 function visibleLitArea(separation: number, r: number): number {
@@ -56,10 +54,14 @@ function moonShadowCx(fraction: number, r: number, waxing: boolean): number {
 function MoonPhaseDisc({
   phase,
   fraction,
+  moonDark,
+  moonLight,
   size = 28,
 }: {
   phase: number;
   fraction: number;
+  moonDark: string;
+  moonLight: string;
   size?: number;
 }) {
   const waxing = phase < 0.5;
@@ -76,7 +78,7 @@ function MoonPhaseDisc({
         className="shrink-0"
         aria-hidden
       >
-        <circle cx={r} cy={r} r={r - 0.5} fill={MOON_DARK} />
+        <circle cx={r} cy={r} r={r - 0.5} fill={moonDark} />
       </svg>
     );
   }
@@ -90,7 +92,7 @@ function MoonPhaseDisc({
         className="shrink-0"
         aria-hidden
       >
-        <circle cx={r} cy={r} r={r - 0.5} fill={MOON_LIGHT} />
+        <circle cx={r} cy={r} r={r - 0.5} fill={moonLight} />
       </svg>
     );
   }
@@ -111,14 +113,15 @@ function MoonPhaseDisc({
         </clipPath>
       </defs>
       <g clipPath={`url(#${clipId})`}>
-        <circle cx={r} cy={r} r={r} fill={MOON_LIGHT} />
-        <circle cx={shadowCx} cy={r} r={r} fill={MOON_DARK} />
+        <circle cx={r} cy={r} r={r} fill={moonLight} />
+        <circle cx={shadowCx} cy={r} r={r} fill={moonDark} />
       </g>
     </svg>
   );
 }
 
 export function SunMoonArc({ astro }: SunMoonArcProps) {
+  const chartTheme = useChartTheme();
   const sunUp =
     !astro.sunBelowHorizon &&
     astro.sunProgress >= 0 &&
@@ -133,32 +136,19 @@ export function SunMoonArc({ astro }: SunMoonArcProps) {
         className="w-full overflow-visible"
         aria-label={`Zonopkomst ${astro.sunriseLabel}, ${astro.daylightHoursLabel} daglicht, zonondergang ${astro.sunsetLabel}`}
       >
-        <defs>
-          <linearGradient id="sunArcGlow" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.3" />
-            <stop offset="50%" stopColor="#fde68a" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="#fb923c" stopOpacity="0.3" />
-          </linearGradient>
-        </defs>
         <path
           d={arcPath}
           fill="none"
-          stroke="rgba(255,255,255,0.15)"
+          stroke={chartTheme.lightning}
           strokeWidth="2"
-          strokeDasharray="5 4"
-        />
-        <path
-          d={arcPath}
-          fill="none"
-          stroke="url(#sunArcGlow)"
-          strokeWidth="2.5"
+          strokeDasharray="6 4"
           strokeLinecap="round"
         />
 
         {sunUp && (
           <g transform={`translate(${sun.x}, ${sun.y})`}>
-            <circle r="16" fill="#fbbf24" opacity="0.25" />
-            <circle r="11" fill="#fde68a" />
+            <circle r="16" fill={chartTheme.lightning} opacity="0.25" />
+            <circle r="11" fill={chartTheme.lightningLight} />
             {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
               <line
                 key={deg}
@@ -166,11 +156,11 @@ export function SunMoonArc({ astro }: SunMoonArcProps) {
                 y1={-15}
                 x2={0}
                 y2={-19}
-                stroke="#fde68a"
+                stroke={chartTheme.lightningLight}
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 transform={`rotate(${deg})`}
-                opacity={0.75}
+                opacity="0.75"
               />
             ))}
           </g>
@@ -183,6 +173,8 @@ export function SunMoonArc({ astro }: SunMoonArcProps) {
                 <MoonPhaseDisc
                   phase={astro.moon.phase}
                   fraction={astro.moon.fraction}
+                  moonDark={chartTheme.tooltipBg}
+                  moonLight={chartTheme.tick}
                   size={32}
                 />
               </div>
@@ -214,7 +206,7 @@ export function SunMoonArc({ astro }: SunMoonArcProps) {
           x={CX}
           y={BASE_Y + 28}
           textAnchor="middle"
-          fill="#fde68a"
+          fill={chartTheme.lightningLight}
           fontSize="11"
           fontWeight="600"
         >
@@ -226,6 +218,8 @@ export function SunMoonArc({ astro }: SunMoonArcProps) {
         <MoonPhaseDisc
           phase={astro.moon.phase}
           fraction={astro.moon.fraction}
+          moonDark={chartTheme.tooltipBg}
+          moonLight={chartTheme.tick}
           size={26}
         />
         <div className="text-left text-sm leading-tight">

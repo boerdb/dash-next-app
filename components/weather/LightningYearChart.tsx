@@ -20,7 +20,6 @@ import { ChartContainer } from "@/components/ui/chart-container";
 import { chartTooltipStyle, useChartTheme } from "@/lib/hooks/use-chart-theme";
 
 const CHART_HEIGHT = 200;
-const COLOR_LIGHTNING = "#fbbf24";
 
 function jaarUrl(jaar: number) {
   return `/api/weer/bliksem/jaar?jaar=${jaar}`;
@@ -78,7 +77,7 @@ export function LightningYearChart() {
   const hasAnyData = chartData.some((m) => m.ontadingen > 0);
 
   return (
-    <Card variant="weather" className="border-amber-500/20">
+    <Card variant="weather">
       <CardContent>
         <div className="mb-3 flex items-center justify-between gap-2">
           <p className="text-xs font-medium text-surface-muted">Ontladingen per maand</p>
@@ -141,7 +140,7 @@ export function LightningYearChart() {
                   fontSize: 12,
                 }}
                 labelStyle={{ color: chartTheme.tooltipLabel }}
-                itemStyle={{ color: "#fde68a" }}
+                itemStyle={{ color: chartTheme.lightningLight }}
                 formatter={(value) => [
                   `${formatCount(Number(value))} ontladingen`,
                   "Bliksem",
@@ -153,8 +152,8 @@ export function LightningYearChart() {
                     key={entry.maand}
                     fill={
                       selectedMaand?.maand === entry.maand
-                        ? "#fde68a"
-                        : COLOR_LIGHTNING
+                        ? chartTheme.lightningLight
+                        : chartTheme.lightning
                     }
                   />
                 ))}
@@ -165,7 +164,7 @@ export function LightningYearChart() {
 
         <p className="mt-3 text-center text-sm text-surface-muted">
           Totaal {data.jaar}:{" "}
-          <span className="font-semibold text-amber-300">
+          <span className="font-semibold text-accent-energy">
             {formatCount(data.jaar_totaal)} ontladingen
           </span>
         </p>

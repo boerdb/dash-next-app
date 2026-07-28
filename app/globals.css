@@ -3,57 +3,104 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f4f6fb;
-  --foreground: #1a1f2e;
+  --background: #f8fafc;
+  --foreground: #0f172a;
   --primary: #0284c7;
   --accent-weather: #0284c7;
   --accent-energy: #d97706;
-  --card: rgba(255, 255, 255, 0.92);
-  --card-border: rgba(15, 23, 42, 0.1);
+  --accent-export: #059669;
+  --accent-weather-soft: #eff6ff;
+  --accent-energy-soft: #fffbeb;
+  --accent-export-soft: #ecfdf5;
+  --card: #ffffff;
+  --card-border: #e2e8f0;
   --surface-muted: #64748b;
-  --surface-subtle: rgba(15, 23, 42, 0.05);
-  --surface-inset: rgba(15, 23, 42, 0.04);
-  --nav-bg: rgba(244, 246, 251, 0.95);
-  --gradient-from: #e2e8f0;
-  --gradient-via: #f4f6fb;
-  --gradient-to: #e2e8f0;
-  --hero-scrim: rgba(255, 255, 255, 0.15);
+  --surface-subtle: #f1f5f9;
+  --surface-inset: #f8fafc;
+  --nav-bg: #f8fafc;
+  --gradient-from: #f8fafc;
+  --gradient-via: #f1f5f9;
+  --gradient-to: #f8fafc;
+  --elevation-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.08),
+    0 1px 2px -1px rgba(15, 23, 42, 0.06);
+  --hero-foreground: #0f172a;
+  --hero-muted: #64748b;
+  --moon-dark: #0f172a;
+  --moon-light: #cbd5e1;
   --chart-grid: rgba(15, 23, 42, 0.08);
   --chart-tick: #64748b;
   --chart-tooltip-bg: #ffffff;
-  --chart-tooltip-border: rgba(15, 23, 42, 0.12);
+  --chart-tooltip-border: #e2e8f0;
   --chart-tooltip-label: #64748b;
   --chart-cursor: rgba(15, 23, 42, 0.06);
   --chart-ref-line: rgba(15, 23, 42, 0.15);
+  --chart-weather: #0284c7;
+  --chart-weather-light: #7dd3fc;
+  --chart-energy: #d97706;
+  --chart-energy-light: #fde68a;
+  --chart-battery: #7c3aed;
+  --chart-net: #6366f1;
+  --chart-export: #ca8a04;
+  --chart-solar: #eab308;
+  --chart-temperature: #0284c7;
+  --chart-rain: #0284c7;
+  --chart-rain-light: #7dd3fc;
+  --chart-lightning: #d97706;
+  --chart-lightning-light: #fde68a;
   --nav-inactive: #94a3b8;
   --nav-hover: #475569;
+  --text-label: 0.75rem;
+  --text-caption: 0.6875rem;
+  --tracking-label: 0.05em;
 }
 
 .dark {
-  --background: #0c1222;
-  --foreground: #ededed;
+  --background: #0f172a;
+  --foreground: #e2e8f0;
   --primary: #38bdf8;
   --accent-weather: #38bdf8;
   --accent-energy: #fbbf24;
-  --card: rgba(255, 255, 255, 0.05);
-  --card-border: rgba(255, 255, 255, 0.1);
-  --surface-muted: #a1a1aa;
-  --surface-subtle: rgba(255, 255, 255, 0.05);
-  --surface-inset: rgba(0, 0, 0, 0.2);
-  --nav-bg: rgba(12, 18, 34, 0.95);
-  --gradient-from: #020617;
-  --gradient-via: #0c1222;
-  --gradient-to: #020617;
-  --hero-scrim: rgba(0, 0, 0, 0.25);
-  --chart-grid: rgba(255, 255, 255, 0.05);
-  --chart-tick: #a1a1aa;
-  --chart-tooltip-bg: #1e1e1e;
-  --chart-tooltip-border: rgba(255, 255, 255, 0.1);
-  --chart-tooltip-label: #a1a1aa;
+  --accent-export: #34d399;
+  --accent-weather-soft: #172554;
+  --accent-energy-soft: #422006;
+  --accent-export-soft: #064e3b;
+  --card: #1e293b;
+  --card-border: #334155;
+  --surface-muted: #94a3b8;
+  --surface-subtle: #1e293b;
+  --surface-inset: #0f172a;
+  --nav-bg: #0f172a;
+  --gradient-from: #0f172a;
+  --gradient-via: #131f35;
+  --gradient-to: #0f172a;
+  --elevation-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25),
+    0 1px 2px -1px rgba(0, 0, 0, 0.2);
+  --hero-foreground: #f1f5f9;
+  --hero-muted: #94a3b8;
+  --moon-dark: #0f172a;
+  --moon-light: #e2e8f0;
+  --chart-grid: rgba(255, 255, 255, 0.06);
+  --chart-tick: #94a3b8;
+  --chart-tooltip-bg: #1e293b;
+  --chart-tooltip-border: #334155;
+  --chart-tooltip-label: #94a3b8;
   --chart-cursor: rgba(255, 255, 255, 0.06);
-  --chart-ref-line: rgba(255, 255, 255, 0.2);
-  --nav-inactive: #71717a;
-  --nav-hover: #d4d4d8;
+  --chart-ref-line: rgba(255, 255, 255, 0.15);
+  --chart-weather: #38bdf8;
+  --chart-weather-light: #7dd3fc;
+  --chart-energy: #fbbf24;
+  --chart-energy-light: #fde68a;
+  --chart-battery: #a78bfa;
+  --chart-net: #818cf8;
+  --chart-export: #eab308;
+  --chart-solar: #facc15;
+  --chart-temperature: #38bdf8;
+  --chart-rain: #38bdf8;
+  --chart-rain-light: #7dd3fc;
+  --chart-lightning: #fbbf24;
+  --chart-lightning-light: #fde68a;
+  --nav-inactive: #64748b;
+  --nav-hover: #cbd5e1;
 }
 
 @theme inline {
@@ -62,6 +109,10 @@
   --color-primary: var(--primary);
   --color-accent-weather: var(--accent-weather);
   --color-accent-energy: var(--accent-energy);
+  --color-accent-export: var(--accent-export);
+  --color-accent-weather-soft: var(--accent-weather-soft);
+  --color-accent-energy-soft: var(--accent-energy-soft);
+  --color-accent-export-soft: var(--accent-export-soft);
   --color-card: var(--card);
   --color-card-border: var(--card-border);
   --color-surface-muted: var(--surface-muted);
@@ -70,6 +121,21 @@
   --color-nav-bg: var(--nav-bg);
   --color-nav-inactive: var(--nav-inactive);
   --color-nav-hover: var(--nav-hover);
+  --color-hero-foreground: var(--hero-foreground);
+  --color-hero-muted: var(--hero-muted);
+  --color-chart-weather: var(--chart-weather);
+  --color-chart-weather-light: var(--chart-weather-light);
+  --color-chart-energy: var(--chart-energy);
+  --color-chart-energy-light: var(--chart-energy-light);
+  --color-chart-battery: var(--chart-battery);
+  --color-chart-net: var(--chart-net);
+  --color-chart-export: var(--chart-export);
+  --color-chart-solar: var(--chart-solar);
+  --color-chart-temperature: var(--chart-temperature);
+  --color-chart-rain: var(--chart-rain);
+  --color-chart-rain-light: var(--chart-rain-light);
+  --color-chart-lightning: var(--chart-lightning);
+  --color-chart-lightning-light: var(--chart-lightning-light);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -83,6 +149,16 @@ body {
 
 * {
   -webkit-tap-highlight-color: transparent;
+}
+
+.text-label {
+  font-size: var(--text-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.text-caption {
+  font-size: var(--text-caption);
 }
 
 .radar-map .leaflet-container {

@@ -20,7 +20,6 @@ interface PowerChartProps {
 }
 
 const CHART_HEIGHT = 180;
-const SERIES_COLOR = "#ffce00";
 
 export function PowerChart({ data }: PowerChartProps) {
   const chartTheme = useChartTheme();
@@ -31,12 +30,13 @@ export function PowerChart({ data }: PowerChartProps) {
   }));
   const pointCount = chartData.filter((d) => d.watt != null).length;
   const sparse = pointCount > 0 && pointCount < 8;
+  const seriesColor = chartTheme.energy;
 
   return (
     <Card variant="energy">
       <CardContent>
         <p className="mb-1 text-xs font-medium text-surface-muted">Netvermogen · 24 uur</p>
-        <p className="mb-3 text-[0.65rem] text-surface-muted">
+        <p className="text-caption mb-3 text-surface-muted">
           Positief = afname · negatief = teruglevering
         </p>
         {pointCount === 0 && (
@@ -54,8 +54,8 @@ export function PowerChart({ data }: PowerChartProps) {
             <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={SERIES_COLOR} stopOpacity={0.25} />
-                  <stop offset="100%" stopColor={SERIES_COLOR} stopOpacity={0} />
+                  <stop offset="0%" stopColor={seriesColor} stopOpacity={0.25} />
+                  <stop offset="100%" stopColor={seriesColor} stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid stroke={chartTheme.grid} vertical={false} />
@@ -75,12 +75,12 @@ export function PowerChart({ data }: PowerChartProps) {
               <Area
                 type="monotone"
                 dataKey="watt"
-                stroke={SERIES_COLOR}
+                stroke={seriesColor}
                 strokeWidth={2}
                 fill={`url(#${fillId})`}
                 connectNulls={false}
-                dot={sparse ? { r: 3, fill: SERIES_COLOR, strokeWidth: 0 } : false}
-                activeDot={{ r: 4, fill: "#fde68a" }}
+                dot={sparse ? { r: 3, fill: seriesColor, strokeWidth: 0 } : false}
+                activeDot={{ r: 4, fill: chartTheme.energyLight }}
               />
             </AreaChart>
           </ResponsiveContainer>

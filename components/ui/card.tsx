@@ -1,35 +1,36 @@
+import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-const cardVariants = {
-  default: "border-card-border bg-card",
-  weather:
-    "border-sky-500/20 bg-gradient-to-br from-sky-100/70 via-card to-card dark:from-sky-950/40",
-  energy:
-    "border-amber-500/20 bg-gradient-to-br from-amber-100/60 via-card to-card dark:from-amber-950/30",
-} as const;
+const cardVariants = cva(
+  "rounded-2xl border shadow-[var(--elevation-shadow)]",
+  {
+    variants: {
+      variant: {
+        default: "border-card-border bg-card",
+        weather: "border-accent-weather/20 bg-accent-weather-soft",
+        energy: "border-accent-energy/20 bg-accent-energy-soft",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+);
 
-export type CardVariant = keyof typeof cardVariants;
+export type CardVariant = NonNullable<VariantProps<typeof cardVariants>["variant"]>;
 
 export function Card({
   className,
   variant = "default",
   children,
   ...props
-}: React.HTMLAttributes<HTMLDivElement> & { variant?: CardVariant }) {
+}: React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof cardVariants>) {
   return (
-    <div
-      className={cn(
-        "rounded-2xl border backdrop-blur-xl shadow-lg",
-        cardVariants[variant],
-        className
-      )}
-      {...props}
-    >
+    <div className={cn(cardVariants({ variant }), className)} {...props}>
       {children}
     </div>
   );
 }
-
 
 export function CardContent({
   className,

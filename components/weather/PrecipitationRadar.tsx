@@ -39,6 +39,14 @@ const MAP_HEIGHT = 280;
 /** RainViewer ververst elke ~10 min; poll elke minuut voor nieuwste frame. */
 const RADAR_POLL_MS = 60_000;
 
+function readThemeColor(name: string, fallback: string): string {
+  if (typeof window === "undefined") return fallback;
+  return (
+    getComputedStyle(document.documentElement).getPropertyValue(name).trim() ||
+    fallback
+  );
+}
+
 export function PrecipitationRadar() {
   const mapInstance = useRef<LeafletMap | null>(null);
   const radarLayer = useRef<TileLayer | null>(null);
@@ -129,9 +137,9 @@ export function PrecipitationRadar() {
         [HARLINGEN_MARKER.latitude, HARLINGEN_MARKER.longitude],
         {
           radius: 7,
-          color: "#1e293b",
+          color: readThemeColor("--foreground", "#0f172a"),
           weight: 2,
-          fillColor: "#fbbf24",
+          fillColor: readThemeColor("--accent-energy", "#d97706"),
           fillOpacity: 1,
         }
       )
@@ -229,9 +237,9 @@ export function PrecipitationRadar() {
   }
 
   return (
-    <Card variant="weather" className="border-sky-500/20">
+    <Card variant="weather">
       <CardContent>
-        <p className="mb-3 text-[0.65rem] text-surface-muted">
+        <p className="text-caption mb-3 text-surface-muted">
           Kustlijnen door neerslag · gele stip = Harlingen
         </p>
 
@@ -262,7 +270,7 @@ export function PrecipitationRadar() {
             disabled={frames.length < 2}
             className={cn(
               "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium",
-              "bg-sky-500/20 text-sky-200 hover:bg-sky-500/30 disabled:opacity-40"
+              "bg-accent-weather/15 text-accent-weather hover:bg-accent-weather/25 disabled:opacity-40"
             )}
           >
             {playing ? (
@@ -299,7 +307,7 @@ export function PrecipitationRadar() {
           <span>
             {currentFrame?.label ?? "Laden…"}
             {followLive && safeIndex === lastIndex ? (
-              <span className="text-sky-300/90"> · live</span>
+              <span className="text-accent-weather/90"> · live</span>
             ) : null}
           </span>
           {!followLive ? (
@@ -311,7 +319,7 @@ export function PrecipitationRadar() {
                 setFrameIndex(lastIndex);
                 void mutate();
               }}
-              className="rounded-md bg-sky-500/20 px-2 py-0.5 text-sky-200 hover:bg-sky-500/30"
+              className="rounded-md bg-accent-weather/15 px-2 py-0.5 text-accent-weather hover:bg-accent-weather/25"
             >
               Nu
             </button>

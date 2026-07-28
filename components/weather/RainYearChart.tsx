@@ -20,7 +20,6 @@ import { ChartContainer } from "@/components/ui/chart-container";
 import { chartTooltipStyle, useChartTheme } from "@/lib/hooks/use-chart-theme";
 
 const CHART_HEIGHT = 200;
-const COLOR_RAIN = "#38bdf8";
 
 function jaarUrl(jaar: number) {
   return `/api/weer/regen/jaar?jaar=${jaar}`;
@@ -78,7 +77,7 @@ export function RainYearChart() {
   const hasAnyData = chartData.some((m) => m.regen_mm > 0);
 
   return (
-    <Card variant="weather" className="border-sky-500/20">
+    <Card variant="weather">
       <CardContent>
         <div className="mb-3 flex items-center justify-between gap-2">
           <p className="text-xs font-medium text-surface-muted">Regen per maand</p>
@@ -141,7 +140,7 @@ export function RainYearChart() {
                   fontSize: 12,
                 }}
                 labelStyle={{ color: chartTheme.tooltipLabel }}
-                itemStyle={{ color: "#7dd3fc" }}
+                itemStyle={{ color: chartTheme.rainLight }}
                 formatter={(value) => [formatMm(Number(value)), "Regen"]}
               />
               <Bar dataKey="regen_mm" radius={[4, 4, 0, 0]}>
@@ -150,8 +149,8 @@ export function RainYearChart() {
                     key={entry.maand}
                     fill={
                       selectedMaand?.maand === entry.maand
-                        ? "#7dd3fc"
-                        : COLOR_RAIN
+                        ? chartTheme.rainLight
+                        : chartTheme.rain
                     }
                   />
                 ))}
@@ -162,7 +161,7 @@ export function RainYearChart() {
 
         <p className="mt-3 text-center text-sm text-surface-muted">
           Totaal {data.jaar}:{" "}
-          <span className="font-semibold text-sky-300">
+          <span className="font-semibold text-accent-weather">
             {formatMm(data.jaar_totaal_mm)}
           </span>
         </p>

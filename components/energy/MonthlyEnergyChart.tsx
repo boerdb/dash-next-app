@@ -20,10 +20,8 @@ import { jsonFetcher } from "@/lib/fetcher";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart-container";
 import { chartTooltipStyle, useChartTheme } from "@/lib/hooks/use-chart-theme";
+
 const CHART_HEIGHT = 220;
-const COLOR_NET = "#a78bfa";
-const COLOR_BAT = "#38bdf8";
-const COLOR_EXPORT = "#eab308";
 
 function maandUrl(jaar: number, maand: number) {
   return `/api/energie/maand?jaar=${jaar}&maand=${maand}`;
@@ -41,7 +39,13 @@ function formatKwh(n: number) {
   return `${n.toFixed(2)} kWh`;
 }
 
-function DagDetail({ dag }: { dag: EnergieMaandDag }) {
+function DagDetail({
+  dag,
+  colors,
+}: {
+  dag: EnergieMaandDag;
+  colors: { net: string; battery: string; export: string };
+}) {
   const verbruik = dag.net_in_kwh + dag.batterij_kwh;
   return (
     <div className="mt-4 space-y-3 border-t border-card-border pt-4">
@@ -50,7 +54,7 @@ function DagDetail({ dag }: { dag: EnergieMaandDag }) {
         <p className="text-xs text-surface-muted">
           Verbruik {formatKwh(verbruik)}
           {dag.net_uit_kwh > 0 && (
-            <span className="text-amber-300/90">
+            <span className="text-accent-export">
               {" "}
               · terug {formatKwh(dag.net_uit_kwh)}
             </span>
@@ -62,7 +66,7 @@ function DagDetail({ dag }: { dag: EnergieMaandDag }) {
           <span className="flex items-center gap-2 text-surface-muted">
             <span
               className="h-2.5 w-2.5 rounded-full"
-              style={{ background: COLOR_NET }}
+              style={{ background: colors.net }}
             />
             Van het net
           </span>
@@ -72,7 +76,7 @@ function DagDetail({ dag }: { dag: EnergieMaandDag }) {
           <span className="flex items-center gap-2 text-surface-muted">
             <span
               className="h-2.5 w-2.5 rounded-full"
-              style={{ background: COLOR_BAT }}
+              style={{ background: colors.battery }}
             />
             Van batterijen
           </span>
@@ -84,11 +88,11 @@ function DagDetail({ dag }: { dag: EnergieMaandDag }) {
           <span className="flex items-center gap-2 text-surface-muted">
             <span
               className="h-2.5 w-2.5 rounded-full"
-              style={{ background: COLOR_EXPORT }}
+              style={{ background: colors.export }}
             />
             Teruglevering
           </span>
-          <span className="font-medium text-amber-200">
+          <span className="font-medium text-accent-export">
             {formatKwh(dag.net_uit_kwh)}
           </span>
         </li>
@@ -261,7 +265,7 @@ export function MonthlyEnergyChart() {
                   return [formatKwh(v), labels[String(name)] ?? name];
                 }}
               />
-              <Bar dataKey="net_in_kwh" stackId="pos" fill={COLOR_NET} radius={[0, 0, 0, 0]}>
+              <Bar dataKey="net_in_kwh" stackId="pos" fill={chartTheme.net} radius={[0, 0, 0, 0]}>
                 {chartData.map((_, i) => (
                   <Cell
                     key={`n-${i}`}
@@ -269,7 +273,7 @@ export function MonthlyEnergyChart() {
                   />
                 ))}
               </Bar>
-              <Bar dataKey="batterij_kwh" stackId="pos" fill={COLOR_BAT} radius={[2, 2, 0, 0]}>
+              <Bar dataKey="batterij_kwh" stackId="pos" fill={chartTheme.battery} radius={[2, 2, 0, 0]}>
                 {chartData.map((_, i) => (
                   <Cell
                     key={`b-${i}`}
@@ -277,7 +281,7 @@ export function MonthlyEnergyChart() {
                   />
                 ))}
               </Bar>
-              <Bar dataKey="net_uit_neg" fill={COLOR_EXPORT} radius={[0, 0, 2, 2]}>
+              <Bar dataKey="net_uit_neg" fill={chartTheme.export} radius={[0, 0, 2, 2]}>
                 {chartData.map((entry, i) => (
                   <Cell
                     key={`u-${i}`}
@@ -293,21 +297,28 @@ export function MonthlyEnergyChart() {
 
         <div className="mt-2 flex flex-wrap gap-3 text-[10px] text-surface-muted">
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full" style={{ background: COLOR_NET }} />
+            <span className="h-2 w-2 rounded-full" style={{ background: chartTheme.net }} />
             Van net
           </span>
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full" style={{ background: COLOR_BAT }} />
+            <span className="h-2 w-2 rounded-full" style={{ background: chartTheme.battery }} />
             Batterij
           </span>
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full" style={{ background: COLOR_EXPORT }} />
+            <span className="h-2 w-2 rounded-full" style={{ background: chartTheme.export }} />
             Teruglevering (↑ afname · ↓ terug)
           </span>
         </div>
 
         {selected ? (
-          <DagDetail dag={selected} />
+          <DagDetail
+            dag={selected}
+            colors={{
+              net: chartTheme.net,
+              battery: chartTheme.battery,
+              export: chartTheme.export,
+            }}
+          />
         ) : (
           <p className="mt-3 text-xs text-surface-muted">Tik op een dag voor details.</p>
         )}

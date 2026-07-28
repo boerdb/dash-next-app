@@ -1,16 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid slice">
   <defs>
-    <linearGradient id="sky" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#1e88e5"/>
-      <stop offset="60%" style="stop-color:#64b5f6"/>
-      <stop offset="100%" style="stop-color:#fff9c4"/>
+    <linearGradient id="sunnySky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0284c7"/>
+      <stop offset="50%" style="stop-color:#38bdf8"/>
+      <stop offset="100%" style="stop-color:#bae6fd"/>
     </linearGradient>
-    <radialGradient id="sun" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" style="stop-color:#fff59d"/>
-      <stop offset="100%" style="stop-color:#ffb300;stop-opacity:0"/>
+    <radialGradient id="sunnyGlow" cx="92%" cy="28%" r="30%">
+      <stop offset="0%" style="stop-color:#fef9c3;stop-opacity:0.6"/>
+      <stop offset="100%" style="stop-color:#fde68a;stop-opacity:0"/>
     </radialGradient>
   </defs>
-  <rect width="800" height="400" fill="url(#sky)"/>
-  <circle cx="620" cy="90" r="70" fill="url(#sun)"/>
-  <circle cx="620" cy="90" r="45" fill="#ffeb3b" opacity="0.9"/>
+  <rect width="800" height="400" fill="url(#sunnySky)"/>
+  <rect width="800" height="400" fill="url(#sunnyGlow)"/>
+  <circle cx="800" cy="110" r="80" fill="#fef08a" opacity="0.9"/>
+  <path d="M 0 320 Q 200 280 400 310 T 800 290 L 800 400 L 0 400 Z" fill="#0c4a6e" opacity="0.12"/>
+  <path d="M 0 350 Q 200 320 400 340 T 800 330 L 800 400 L 0 400 Z" fill="#0c4a6e" opacity="0.08"/>
 </svg>

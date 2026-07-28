@@ -63,17 +63,10 @@ function EcowittCard({
   className?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "rounded-2xl border border-card-border bg-surface-inset/60 p-2.5 shadow-sm sm:p-3.5",
-        className
-      )}
-    >
-      <p className="mb-2 text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-surface-muted sm:mb-3 sm:text-[0.65rem] sm:tracking-[0.18em]">
-        {title}
-      </p>
+    <Card className={cn("bg-surface-inset p-2.5 shadow-sm sm:p-3.5", className)}>
+      <p className="text-label mb-2 font-semibold text-surface-muted sm:mb-3">{title}</p>
       {children}
-    </div>
+    </Card>
   );
 }
 
