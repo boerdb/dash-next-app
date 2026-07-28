@@ -348,5 +348,7 @@ export interface AstronomieApi {
     fraction: number;
     label: string;
     illuminationPct: number;
+    riseLabel: string | null;
+    setLabel: string | null;
   };
 }

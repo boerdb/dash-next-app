@@ -22,6 +22,8 @@ export interface AstronomyInfo {
     fraction: number;
     label: string;
     illuminationPct: number;
+    riseLabel: string | null;
+    setLabel: string | null;
   };
 }
 
@@ -100,6 +102,7 @@ export function getAstronomyInfo(
   lng = HARLINGEN.longitude
 ): AstronomyInfo {
   const times = SunCalc.getTimes(date, lat, lng);
+  const moonTimes = SunCalc.getMoonTimes(date, lat, lng);
   const sunPos = SunCalc.getPosition(date, lat, lng);
   const moon = SunCalc.getMoonIllumination(date);
 
@@ -131,6 +134,14 @@ export function getAstronomyInfo(
       fraction: moon.fraction,
       label: getMoonPhaseLabel(moon.phase),
       illuminationPct: Math.round(moon.fraction * 100),
+      riseLabel:
+        moonTimes.rise && !Number.isNaN(moonTimes.rise.getTime())
+          ? formatTimeNl(moonTimes.rise)
+          : null,
+      setLabel:
+        moonTimes.set && !Number.isNaN(moonTimes.set.getTime())
+          ? formatTimeNl(moonTimes.set)
+          : null,
     },
   };
 }

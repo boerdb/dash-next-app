@@ -199,6 +199,11 @@ export function SunMoonArc({ astro }: SunMoonArcProps) {
       </svg>
 
       <div className="mt-2 flex items-center justify-center gap-2.5 rounded-xl border border-white/25 bg-gradient-to-br from-indigo-500/30 to-slate-900/60 px-3 py-2 shadow-[0_4px_16px_rgba(0,0,0,0.2)] ring-1 ring-white/10 backdrop-blur-md">
+        {astro.moon.riseLabel ? (
+          <span className="shrink-0 text-xs font-medium tabular-nums text-white/85">
+            ↑ {astro.moon.riseLabel}
+          </span>
+        ) : null}
         <MoonPhaseDisc
           phase={astro.moon.phase}
           fraction={astro.moon.fraction}
@@ -212,6 +217,11 @@ export function SunMoonArc({ astro }: SunMoonArcProps) {
             {astro.moon.illuminationPct}% verlicht
           </p>
         </div>
+        {astro.moon.setLabel ? (
+          <span className="shrink-0 text-xs font-medium tabular-nums text-white/85">
+            {astro.moon.setLabel} ↓
+          </span>
+        ) : null}
       </div>
     </div>
   );

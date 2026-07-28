@@ -7,7 +7,7 @@ import {
   CloudRain,
   CloudSnow,
   CloudSun,
-  Star,
+  Moon,
   Sun,
   Sunset,
   Wind,
@@ -31,7 +31,7 @@ const icons: Record<WeatherCondition, typeof Sun> = {
   storm: CloudLightning,
   wind: Wind,
   fog: CloudFog,
-  night: Star,
+  night: Moon,
   evening: Sunset,
   dawn: Sun,
 };

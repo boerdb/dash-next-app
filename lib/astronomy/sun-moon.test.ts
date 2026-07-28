@@ -36,4 +36,11 @@ describe("getAstronomyInfo", () => {
     assert.match(info.daylightHoursLabel, /\d/u);
     assert.match(info.daylightHoursLabel, /(uur|u \d+m)/);
   });
+
+  it("levert maanopkomst- en onderganglabels", () => {
+    const info = getAstronomyInfo(new Date("2026-07-28T22:00:00+02:00"));
+    assert.ok(info.moon.riseLabel === null || /^\d{2}:\d{2}$/.test(info.moon.riseLabel));
+    assert.ok(info.moon.setLabel === null || /^\d{2}:\d{2}$/.test(info.moon.setLabel));
+    assert.ok(info.moon.riseLabel != null || info.moon.setLabel != null);
+  });
 });
