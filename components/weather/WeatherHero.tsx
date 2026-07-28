@@ -7,7 +7,7 @@ import {
   CloudRain,
   CloudSnow,
   CloudSun,
-  Moon,
+  Star,
   Sun,
   Sunset,
   Wind,
@@ -31,7 +31,7 @@ const icons: Record<WeatherCondition, typeof Sun> = {
   storm: CloudLightning,
   wind: Wind,
   fog: CloudFog,
-  night: Moon,
+  night: Star,
   evening: Sunset,
   dawn: Sun,
 };
@@ -84,6 +84,7 @@ export function WeatherHero({
             "mx-auto h-9 w-9 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]",
             condition === "sunny" && "text-amber-300",
             condition === "evening" && "text-orange-300",
+            condition === "night" && "text-amber-200",
             (condition === "thunder" || condition === "storm") && "text-violet-300",
             condition === "snow" && "text-sky-300",
             condition === "wind" && "text-teal-300"

@@ -166,22 +166,6 @@ export function SunMoonArc({ astro }: SunMoonArcProps) {
           </g>
         )}
 
-        {astro.period === "night" && (
-          <g transform={`translate(${CX}, ${BASE_Y - 48})`}>
-            <foreignObject x={-16} y={-16} width={32} height={32}>
-              <div className="flex h-8 w-8 items-center justify-center">
-                <MoonPhaseDisc
-                  phase={astro.moon.phase}
-                  fraction={astro.moon.fraction}
-                  moonDark="#1e293b"
-                  moonLight="#f8fafc"
-                  size={32}
-                />
-              </div>
-            </foreignObject>
-          </g>
-        )}
-
         <text
           x={CX - R}
           y={BASE_Y + 14}
