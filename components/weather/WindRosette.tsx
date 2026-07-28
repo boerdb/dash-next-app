@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowUp } from "lucide-react";
 import type { WeerLive } from "@/lib/api/types";
 import {
   getWindDirection,
@@ -8,6 +9,7 @@ import {
 } from "@/lib/utils/wind";
 import { Metric } from "@/components/ui/metric";
 import { Surface, SurfaceBody } from "@/components/ui/surface";
+import { cn } from "@/lib/utils";
 
 const SIZE = 220;
 const CENTER = SIZE / 2;
@@ -17,6 +19,38 @@ function finiteNumber(value: unknown): number | null {
   if (value === undefined || value === null || value === "") return null;
   const n = Number(value);
   return Number.isFinite(n) ? n : null;
+}
+
+function DailyMax({
+  value,
+  time,
+  unit,
+  decimals = 1,
+  className,
+}: {
+  value: unknown;
+  time?: string | null;
+  unit?: string;
+  decimals?: number;
+  className?: string;
+}) {
+  const n = finiteNumber(value);
+  if (n === null) return null;
+  return (
+    <p
+      className={cn(
+        "text-caption mt-2 inline-flex flex-wrap items-center gap-x-1 font-semibold tabular-nums text-accent-energy",
+        className
+      )}
+    >
+      <ArrowUp className="h-3 w-3 shrink-0" aria-hidden />
+      <span>
+        {n.toFixed(decimals)}
+        {unit ? ` ${unit}` : ""}
+      </span>
+      {time ? <span className="font-normal text-surface-muted">{time}</span> : null}
+    </p>
+  );
 }
 
 function CompassTicks() {
@@ -136,18 +170,49 @@ export function WindRosette({ data }: { data: WeerLive }) {
       <SurfaceBody>
         <p className="text-label mb-4 text-surface-muted">Wind</p>
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-          <Metric label="Wind" value={windSpeed.toFixed(1)} unit="km/u" accent="weather" />
+          <div>
+            <Metric label="Wind" value={windSpeed.toFixed(1)} unit="km/u" accent="weather" />
+            <DailyMax
+              value={data.maxdailywind_kmh}
+              time={data.maxdailywind_time}
+              unit="km/u"
+            />
+          </div>
           <WindCompass data={data} />
-          <Metric
-            label="Stoot"
-            value={gust.toFixed(1)}
-            unit="km/u"
-            accent="energy"
-            className="text-right"
-          />
+          <div className="text-right">
+            <Metric
+              label="Stoot"
+              value={gust.toFixed(1)}
+              unit="km/u"
+              accent="energy"
+              className="text-right"
+            />
+            <DailyMax
+              value={data.maxdailygust_kmh}
+              time={data.maxdailygust_time}
+              unit="km/u"
+              className="justify-end"
+            />
+          </div>
         </div>
         <p className="text-caption mt-4 text-center text-surface-muted">
           Sustained {sustainedSpeed.toFixed(1)} km/u · {getWindDirection(sustainedDir ?? 0)}
+        </p>
+        <p className="text-caption mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-surface-muted">
+          <span className="inline-flex items-center gap-1.5">
+            <span
+              className="inline-block h-0 w-0 border-x-[4px] border-b-[7px] border-x-transparent border-b-accent-weather"
+              aria-hidden
+            />
+            Real-time wind
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span
+              className="inline-block h-2 w-2 rotate-45 border border-accent-export bg-transparent"
+              aria-hidden
+            />
+            Sustained 10 min
+          </span>
         </p>
       </SurfaceBody>
     </Surface>

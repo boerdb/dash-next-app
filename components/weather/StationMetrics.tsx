@@ -32,12 +32,14 @@ function DailyRange({
   minTime,
   maxTime,
   unit,
+  decimals = 1,
 }: {
   min?: unknown;
   max?: unknown;
   minTime?: string | null;
   maxTime?: string | null;
   unit?: string;
+  decimals?: number;
 }) {
   const minN = finiteNumber(min);
   const maxN = finiteNumber(max);
@@ -47,14 +49,16 @@ function DailyRange({
       {maxN !== null ? (
         <span className="inline-flex items-center gap-0.5 text-accent-energy">
           <ArrowUp className="h-3 w-3" />
-          {formatValue(max)}{unit ? ` ${unit}` : ""}
+          {formatValue(max, decimals)}
+          {unit ? ` ${unit}` : ""}
           {maxTime ? ` ${maxTime}` : ""}
         </span>
       ) : null}
       {minN !== null ? (
         <span className="ml-2 inline-flex items-center gap-0.5 text-accent-weather">
           <ArrowDown className="h-3 w-3" />
-          {formatValue(min)}{unit ? ` ${unit}` : ""}
+          {formatValue(min, decimals)}
+          {unit ? ` ${unit}` : ""}
           {minTime ? ` ${minTime}` : ""}
         </span>
       ) : null}
@@ -147,14 +151,49 @@ export function StationMetrics({
         </MetricRow>
 
         <MetricRow>
-          <Metric
-            label="Zonstraling"
-            value={formatValue(data.solarradiation, 0)}
-            unit="W/m²"
-          />
-          <Metric label="UV-index" value={data.uv ?? "—"} />
-          <Metric label="Luchtdruk rel." value={formatValue(data.baromrel_hpa)} unit="hPa" />
-          <Metric label="Luchtdruk abs." value={formatValue(data.baromabs_hpa)} unit="hPa" />
+          <div>
+            <Metric
+              label="Zonstraling"
+              value={formatValue(data.solarradiation, 0)}
+              unit="W/m²"
+            />
+            <DailyRange
+              min={undefined}
+              max={data.solar_max}
+              maxTime={data.solar_max_time}
+              unit="W/m²"
+              decimals={0}
+            />
+          </div>
+          <div>
+            <Metric label="UV-index" value={data.uv ?? "—"} />
+            <DailyRange
+              min={undefined}
+              max={data.uv_max}
+              maxTime={data.uv_max_time}
+              decimals={0}
+            />
+          </div>
+          <div>
+            <Metric label="Luchtdruk rel." value={formatValue(data.baromrel_hpa)} unit="hPa" />
+            <DailyRange
+              min={data.baromrel_min_hpa}
+              max={data.baromrel_max_hpa}
+              minTime={data.baromrel_min_time}
+              maxTime={data.baromrel_max_time}
+              unit="hPa"
+            />
+          </div>
+          <div>
+            <Metric label="Luchtdruk abs." value={formatValue(data.baromabs_hpa)} unit="hPa" />
+            <DailyRange
+              min={data.baromabs_min_hpa}
+              max={data.baromabs_max_hpa}
+              minTime={data.baromabs_min_time}
+              maxTime={data.baromabs_max_time}
+              unit="hPa"
+            />
+          </div>
         </MetricRow>
 
         {baromDelta !== null ? (
