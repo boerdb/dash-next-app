@@ -218,8 +218,8 @@ export function SunMoonArc({ astro }: SunMoonArcProps) {
         <MoonPhaseDisc
           phase={astro.moon.phase}
           fraction={astro.moon.fraction}
-          moonDark={chartTheme.tooltipBg}
-          moonLight={chartTheme.tick}
+          moonDark="#1e293b"
+          moonLight="#f8fafc"
           size={26}
         />
         <div className="text-left text-sm leading-tight">
