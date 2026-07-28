@@ -89,10 +89,10 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
                 <CloudLightning
                   className={cn(
                     "h-4 w-4",
-                    recentStrike && "text-violet-300",
-                    lightningStatus === "risk" && "text-amber-300",
-                    lightningStatus === "airmass" && "text-amber-300/60",
-                    lightningStatus === "idle" && wh57Detected && "text-emerald-400/80",
+                    recentStrike && "text-violet-600 dark:text-violet-300",
+                    lightningStatus === "risk" && "text-amber-600 dark:text-amber-300",
+                    lightningStatus === "airmass" && "text-amber-500/80 dark:text-amber-300/60",
+                    lightningStatus === "idle" && wh57Detected && "text-emerald-600 dark:text-emerald-400/80",
                     lightningStatus === "idle" && !wh57Detected && "text-surface-muted"
                   )}
                 />
@@ -100,20 +100,20 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
             >
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 {wh57Detected ? (
-                  <span className="inline-flex rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[0.6rem] font-medium uppercase tracking-wide text-emerald-200">
+                  <span className="inline-flex rounded-full border border-emerald-300 bg-emerald-100 px-2 py-0.5 text-[0.6rem] font-medium uppercase tracking-wide text-emerald-800 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-200">
                     WH57 gedetecteerd
                   </span>
                 ) : null}
                 {recentStrike ? (
-                  <span className="inline-flex rounded-full bg-violet-500/15 px-2 py-0.5 text-[0.6rem] font-medium uppercase tracking-wide text-violet-200">
+                  <span className="inline-flex rounded-full bg-violet-100 px-2 py-0.5 text-[0.6rem] font-medium uppercase tracking-wide text-violet-800 dark:bg-violet-500/15 dark:text-violet-200">
                     Recent
                   </span>
                 ) : lightningStatus === "risk" ? (
-                  <span className="inline-flex rounded-full bg-amber-500/15 px-2 py-0.5 text-[0.6rem] font-medium uppercase tracking-wide text-amber-200">
+                  <span className="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[0.6rem] font-medium uppercase tracking-wide text-amber-800 dark:bg-amber-500/15 dark:text-amber-200">
                     Kans op onweer
                   </span>
                 ) : lightningStatus === "airmass" ? (
-                  <span className="inline-flex rounded-full bg-amber-500/10 px-2 py-0.5 text-[0.6rem] font-medium uppercase tracking-wide text-amber-200/70">
+                  <span className="inline-flex rounded-full bg-amber-50 px-2 py-0.5 text-[0.6rem] font-medium uppercase tracking-wide text-amber-700 dark:bg-amber-500/10 dark:text-amber-200/70">
                     Onweersgevoelig
                   </span>
                 ) : null}
@@ -141,9 +141,9 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
                 <p
                   className={cn(
                     "text-sm",
-                    lightningStatus === "risk" && "text-amber-200/90",
-                    lightningStatus === "airmass" && "text-amber-200/70",
-                    lightningStatus === "idle" && wh57Detected && "text-emerald-200/80",
+                    lightningStatus === "risk" && "text-amber-700 dark:text-amber-200/90",
+                    lightningStatus === "airmass" && "text-amber-600/80 dark:text-amber-200/70",
+                    lightningStatus === "idle" && wh57Detected && "text-emerald-700 dark:text-emerald-200/80",
                     lightningStatus === "idle" && !wh57Detected && "text-surface-muted"
                   )}
                 >
@@ -155,14 +155,14 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
                   className={cn(
                     "mt-3 flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs",
                     lightningBattery.state === "low"
-                      ? "border-amber-500/30 bg-amber-950/20 text-amber-200"
+                      ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-500/30 dark:bg-amber-950/20 dark:text-amber-200"
                       : "border-card-border bg-surface-inset text-surface-muted"
                   )}
                 >
                   {lightningBattery.state === "low" ? (
-                    <BatteryWarning className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+                    <BatteryWarning className="h-3.5 w-3.5 shrink-0 text-amber-500 dark:text-amber-400" />
                   ) : (
-                    <Battery className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                    <Battery className="h-3.5 w-3.5 shrink-0 text-emerald-500 dark:text-emerald-400" />
                   )}
                   <span>Batterij</span>
                   <strong className="tabular-nums text-foreground">
@@ -176,7 +176,7 @@ export function SensorExtrasCard({ data }: SensorExtrasCardProps) {
           {showWs90 ? (
             <SensorBlock
               title="WS90"
-              icon={<Gauge className="h-4 w-4 text-cyan-400" />}
+              icon={<Gauge className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />}
             >
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-1 lg:grid-cols-2">
                 {data.ws90_voltage_v != null ? (
