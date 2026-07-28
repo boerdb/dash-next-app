@@ -186,9 +186,9 @@ export function SunMoonArc({ astro }: SunMoonArcProps) {
           x={CX - R}
           y={BASE_Y + 14}
           textAnchor="start"
-          fill="rgba(255,255,255,0.9)"
+          fill="rgba(255,255,255,0.95)"
           fontSize="11"
-          fontWeight="500"
+          fontWeight="600"
         >
           ↑ {astro.sunriseLabel}
         </text>
@@ -196,9 +196,9 @@ export function SunMoonArc({ astro }: SunMoonArcProps) {
           x={CX + R}
           y={BASE_Y + 14}
           textAnchor="end"
-          fill="rgba(255,255,255,0.9)"
+          fill="rgba(255,255,255,0.95)"
           fontSize="11"
-          fontWeight="500"
+          fontWeight="600"
         >
           {astro.sunsetLabel} ↓
         </text>
@@ -214,7 +214,7 @@ export function SunMoonArc({ astro }: SunMoonArcProps) {
         </text>
       </svg>
 
-      <div className="mt-2 flex items-center justify-center gap-2.5 rounded-xl border border-white/10 bg-black/25 px-3 py-2 backdrop-blur-sm">
+      <div className="mt-2 flex items-center justify-center gap-2.5 rounded-xl border border-white/25 bg-gradient-to-br from-indigo-500/30 to-slate-900/60 px-3 py-2 shadow-[0_4px_16px_rgba(0,0,0,0.2)] ring-1 ring-white/10 backdrop-blur-md">
         <MoonPhaseDisc
           phase={astro.moon.phase}
           fraction={astro.moon.fraction}
@@ -224,7 +224,7 @@ export function SunMoonArc({ astro }: SunMoonArcProps) {
         />
         <div className="text-left text-sm leading-tight">
           <p className="font-medium text-white">{astro.moon.label}</p>
-          <p className="text-xs text-white/60">
+          <p className="text-xs text-white/75">
             {astro.moon.illuminationPct}% verlicht
           </p>
         </div>

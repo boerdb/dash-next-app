@@ -64,44 +64,44 @@ export function WeatherHero({
       className="relative -mx-4 overflow-hidden rounded-b-3xl px-4 pb-6 pt-5 sm:-mx-6 md:-mx-8"
       style={getWeatherBackgroundStyle(condition)}
     >
-      <div className="relative z-10 text-center [text-shadow:0_1px_8px_rgba(0,0,0,0.6)]">
-        <div className="mb-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-white/75">
+      <div className="relative z-10 text-center [text-shadow:0_1px_10px_rgba(0,0,0,0.65)]">
+        <div className="mb-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-white/85">
           {updateLabel ? <span>{updateLabel}</span> : null}
-          {updateLabel ? <span className="hidden text-white/40 sm:inline">·</span> : null}
-          <span className="text-label font-medium uppercase text-white/90">
+          {updateLabel ? <span className="hidden text-white/50 sm:inline">·</span> : null}
+          <span className="text-label font-semibold uppercase tracking-wide text-white">
             {periodLabel}
           </span>
           {showWeatherSub ? (
             <>
-              <span className="text-white/40">·</span>
-              <span className="text-label uppercase text-white/70">{weatherLabel}</span>
+              <span className="text-white/50">·</span>
+              <span className="text-label font-medium uppercase text-white/85">{weatherLabel}</span>
             </>
           ) : null}
         </div>
 
         <Icon
           className={cn(
-            "mx-auto h-9 w-9 text-white/90 drop-shadow-lg",
-            condition === "sunny" && "text-amber-200",
-            condition === "evening" && "text-orange-200",
-            (condition === "thunder" || condition === "storm") && "text-violet-200",
-            condition === "snow" && "text-sky-200",
-            condition === "wind" && "text-teal-200"
+            "mx-auto h-9 w-9 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]",
+            condition === "sunny" && "text-amber-300",
+            condition === "evening" && "text-orange-300",
+            (condition === "thunder" || condition === "storm") && "text-violet-300",
+            condition === "snow" && "text-sky-300",
+            condition === "wind" && "text-teal-300"
           )}
           strokeWidth={1.5}
         />
 
         <SunMoonArc astro={astro} />
 
-        <p className="text-caption mt-2 uppercase tracking-label text-white/60">
+        <p className="text-caption mt-2 uppercase tracking-label text-white/75">
           Buitentemperatuur
         </p>
-        <h1 className="text-6xl font-bold tabular-nums leading-none text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]">
+        <h1 className="text-6xl font-bold tabular-nums leading-none text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.9)]">
           {temp}
-          <sup className="ml-1 text-2xl font-normal text-white/75">°C</sup>
+          <sup className="ml-1 text-2xl font-normal text-white/85">°C</sup>
         </h1>
 
-        <div className="mx-auto mt-4 flex max-w-md flex-wrap items-center justify-center gap-x-4 gap-y-1 rounded-2xl border border-white/20 bg-black/40 px-4 py-2.5 text-sm text-white/95 backdrop-blur-sm">
+        <div className="mx-auto mt-4 flex max-w-md flex-wrap items-center justify-center gap-x-4 gap-y-1 rounded-2xl border border-white/30 bg-gradient-to-br from-sky-500/30 to-indigo-900/50 px-4 py-2.5 text-sm text-white shadow-[0_4px_20px_rgba(0,0,0,0.25)] ring-1 ring-white/10 backdrop-blur-md">
           {showWindChill ? (
             <span>
               Gevoel{" "}
@@ -113,7 +113,7 @@ export function WeatherHero({
           {showHitteIndex ? (
             <>
               {showWindChill ? (
-                <span className="hidden text-white/30 sm:inline">|</span>
+                <span className="hidden text-white/40 sm:inline">|</span>
               ) : null}
               <span>
                 Hitte-index{" "}
@@ -124,27 +124,27 @@ export function WeatherHero({
             </>
           ) : null}
           {(showWindChill || showHitteIndex) ? (
-            <span className="hidden text-white/30 sm:inline">|</span>
+            <span className="hidden text-white/40 sm:inline">|</span>
           ) : null}
           <span>
             {data.temp_min_time ? (
-              <span className="text-caption mr-1 tabular-nums text-white/55">
+              <span className="text-caption mr-1 tabular-nums text-white/70">
                 {data.temp_min_time}
               </span>
             ) : null}
             Min{" "}
-            <strong className="font-semibold tabular-nums text-sky-200">
+            <strong className="font-semibold tabular-nums text-cyan-200">
               {data.temp_min_c}°
             </strong>
           </span>
-          <span className="hidden text-white/30 sm:inline">|</span>
+          <span className="hidden text-white/40 sm:inline">|</span>
           <span>
             Max{" "}
-            <strong className="font-semibold tabular-nums text-orange-200">
+            <strong className="font-semibold tabular-nums text-amber-300">
               {data.temp_max_c}°
             </strong>
             {data.temp_max_time ? (
-              <span className="text-caption ml-1 tabular-nums text-white/55">
+              <span className="text-caption ml-1 tabular-nums text-white/70">
                 {data.temp_max_time}
               </span>
             ) : null}
