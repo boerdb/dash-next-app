@@ -33,6 +33,7 @@ const icons: Record<WeatherCondition, typeof Sun> = {
   wind: Wind,
   fog: CloudFog,
   night: Moon,
+  dusk: Sunset,
   evening: Sunset,
   dawn: Sun,
 };
@@ -87,7 +88,7 @@ export function WeatherHero({
             className={cn(
               "mx-auto h-9 w-9 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)] lg:mx-0",
               condition === "sunny" && "text-amber-300",
-              condition === "evening" && "text-orange-300",
+              (condition === "evening" || condition === "dusk") && "text-orange-300",
               condition === "night" && "text-amber-200"
             )}
             strokeWidth={1.5}

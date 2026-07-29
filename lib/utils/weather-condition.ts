@@ -111,7 +111,7 @@ export function getWeatherCondition(
   if ( period === "night" || ( period === "evening" && sunBelowHorizon ) ) {
     return "night";
   }
-  if ( period === "evening" ) return "evening";
+  if ( period === "evening" ) return "dusk";
   if ( period === "dawn" ) return "dawn";
 
   const stationSolar = Number(data.solarradiation);
@@ -140,6 +140,7 @@ export const conditionLabels: Record<WeatherCondition, string> = {
   wind: "Wind",
   fog: "Mist",
   night: "Nacht",
+  dusk: "Schemering",
   evening: "Avond",
   dawn: "Dageraad",
   sunny: "Zonnig",

@@ -13,6 +13,7 @@ export const weatherBackgrounds: Record<WeatherCondition, { image: string }> = {
   wind: { image: "/weather/cloudy.svg" },
   fog: { image: "/weather/fog.svg" },
   night: { image: "/weather/night.svg" },
+  dusk: { image: "/weather/dusk.svg" },
   evening: { image: "/weather/evening.svg" },
   dawn: { image: "/weather/dawn.svg" },
 };
