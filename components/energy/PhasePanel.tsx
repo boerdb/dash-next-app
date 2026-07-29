@@ -69,7 +69,13 @@ export function PhasePanel({ data }: PhasePanelProps) {
         <p className="text-label mb-4 text-surface-muted">
           {count === 1 ? "1-fase" : count === 3 ? "3-fasen" : `${count} fasen`} · live
         </p>
-        <MetricRow className={cn(active.length === 1 && "grid-cols-1", active.length === 2 && "grid-cols-2")}>
+        <MetricRow
+          className={cn(
+            active.length === 1 && "grid-cols-1 sm:grid-cols-1 lg:grid-cols-1",
+            active.length === 2 && "grid-cols-2 sm:grid-cols-2 lg:grid-cols-2",
+            active.length === 3 && "grid-cols-3 sm:grid-cols-3 lg:grid-cols-3"
+          )}
+        >
           {active.map(({ key, label }) => {
             const unit = fases[key];
             if (!unit) return null;
