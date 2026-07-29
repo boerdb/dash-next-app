@@ -44,8 +44,8 @@
   --chart-weather-light: #93c5fd;
   --chart-energy: #b45309;
   --chart-energy-light: #fcd34d;
-  --chart-battery: #6d28d9;
-  --chart-net: #4f46e5;
+  --chart-battery: #7c3aed;
+  --chart-net: #c2410c;
   --chart-export: #047857;
   --chart-solar: #ca8a04;
   --chart-temperature: #2563eb;
@@ -114,7 +114,7 @@
   --chart-energy: #fbbf24;
   --chart-energy-light: #fde68a;
   --chart-battery: #a78bfa;
-  --chart-net: #818cf8;
+  --chart-net: #fb923c;
   --chart-export: #34d399;
   --chart-solar: #facc15;
   --chart-temperature: #60a5fa;
