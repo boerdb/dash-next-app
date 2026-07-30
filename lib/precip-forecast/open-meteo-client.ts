@@ -21,7 +21,9 @@ interface OpenMeteoForecastResponse {
 
 function formatSlotLabel(isoLocal: string): string {
   const time = isoLocal.slice(11, 16);
-  if (isoLocal.slice(11, 13) === "00") {
+  // Middernacht + middag krijgen weekdag — voorkomt dubbele "12:00"-labels
+  // over twee dagen (Recharts koppelt tooltip anders aan het verkeerde uur).
+  if (isoLocal.slice(11, 13) === "00" || isoLocal.slice(11, 13) === "12") {
     const d = new Date(isoLocal);
     const day = d.toLocaleDateString("nl-NL", {
       weekday: "short",
@@ -54,19 +56,23 @@ export function mapOpenMeteoCurrentSky(
 }
 
 export function mapOpenMeteoPrecipForecast(
-  raw: OpenMeteoForecastResponse
+  raw: OpenMeteoForecastResponse,
+  now = new Date()
 ): PrecipForecastSlot[] {
   const times = raw.hourly?.time ?? [];
   const precip = raw.hourly?.precipitation ?? [];
   const pop = raw.hourly?.precipitation_probability ?? [];
-  const limit = Math.min(times.length, PRECIP_FORECAST_HOURS);
+  // Start vanaf het huidige uur — Open-Meteo levert vanaf middernacht.
+  const hourStart = new Date(now);
+  hourStart.setMinutes(0, 0, 0);
+  const fromMs = hourStart.getTime();
 
   const slots: PrecipForecastSlot[] = [];
-  for (let i = 0; i < limit; i++) {
+  for (let i = 0; i < times.length && slots.length < PRECIP_FORECAST_HOURS; i++) {
     const iso = times[i];
     if (!iso) continue;
     const at = new Date(iso).getTime();
-    if (Number.isNaN(at)) continue;
+    if (Number.isNaN(at) || at < fromMs) continue;
     slots.push({
       at,
       label: formatSlotLabel(iso),
@@ -87,7 +93,8 @@ export async function fetchHarlingenPrecipForecast(): Promise<PrecipForecastResp
     current: "cloud_cover,weather_code,precipitation,shortwave_radiation",
     hourly: "precipitation,precipitation_probability",
     timezone: TZ,
-    forecast_days: "2",
+    // 3 dagen zodat er na filteren vanaf nu altijd ~48 toekomstige uren overblijven
+    forecast_days: "3",
   });
 
   const res = await fetch(

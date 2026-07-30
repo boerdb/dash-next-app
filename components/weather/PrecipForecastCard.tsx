@@ -32,6 +32,11 @@ function formatPrecipTick(value: number): string {
   return `${formatted} mm`;
 }
 
+function formatTooltipMm(mm: number, pop: number | null | undefined): string {
+  const mmText = `${mm} mm`;
+  return pop != null ? `${mmText} · ${pop}% kans` : mmText;
+}
+
 interface PrecipForecastCardProps {
   data?: PrecipForecastResponse | null;
   error?: string;
@@ -59,12 +64,16 @@ export function PrecipForecastCard({ data, error, onRetry }: PrecipForecastCardP
 
   if (!data?.slots.length) return null;
 
+  // Unieke x-sleutel (at) — labels herhalen (do 12:00 én vr 12:00 = "12:00")
+  // waardoor Recharts de tooltip aan het verkeerde (droge) uur koppelde.
   const chartData = data.slots.map((s) => ({
+    at: s.at,
     label: s.label,
     mm: s.precipitationMm,
     pop: s.probabilityPct,
   }));
   const yMax = precipYMax(chartData);
+  const tipStyle = chartTooltipStyle(chartTheme);
 
   return (
     <Surface level="raised">
@@ -83,11 +92,14 @@ export function PrecipForecastCard({ data, error, onRetry }: PrecipForecastCardP
               </defs>
               <CartesianGrid stroke={chartTheme.grid} vertical={false} />
               <XAxis
-                dataKey="label"
+                dataKey="at"
                 tick={{ fill: chartTheme.tick, fontSize: 8 }}
                 tickLine={false}
                 axisLine={false}
                 interval="preserveStartEnd"
+                tickFormatter={(value) =>
+                  chartData.find((d) => d.at === value)?.label ?? ""
+                }
               />
               <YAxis
                 domain={[0, yMax]}
@@ -99,14 +111,29 @@ export function PrecipForecastCard({ data, error, onRetry }: PrecipForecastCardP
                 tickFormatter={formatPrecipTick}
               />
               <Tooltip
-                contentStyle={{
-                  ...chartTooltipStyle(chartTheme),
-                  fontSize: 12,
-                }}
-                formatter={(value, _name, item) => {
-                  const pop = item.payload?.pop as number | null | undefined;
-                  const mm = `${value} mm`;
-                  return pop != null ? [`${mm} · ${pop}% kans`, "Neerslag"] : [mm, "Neerslag"];
+                cursor={{ fill: chartTheme.cursor }}
+                content={({ active, payload }) => {
+                  if (!active || !payload?.[0]) return null;
+                  const point = payload[0].payload as {
+                    label: string;
+                    mm: number;
+                    pop: number | null;
+                  };
+                  return (
+                    <div
+                      style={{
+                        ...tipStyle,
+                        fontSize: 12,
+                        padding: "8px 10px",
+                        color: chartTheme.tooltipLabel,
+                      }}
+                    >
+                      <p style={{ margin: 0, fontWeight: 600 }}>{point.label}</p>
+                      <p style={{ margin: "4px 0 0" }}>
+                        Neerslag: {formatTooltipMm(point.mm, point.pop)}
+                      </p>
+                    </div>
+                  );
                 }}
               />
               <Bar

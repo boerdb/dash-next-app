@@ -254,6 +254,8 @@ export function MonthlyEnergyChart() {
                   ...chartTooltipStyle(chartTheme),
                   fontSize: 12,
                 }}
+                labelStyle={{ color: chartTheme.tooltipLabel }}
+                itemStyle={{ color: chartTheme.tooltipLabel }}
                 formatter={(value, name) => {
                   const v = Math.abs(Number(value));
                   const labels: Record<string, string> = {
