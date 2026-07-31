@@ -1,3 +1,5 @@
+import { parseAmsterdamDateTime } from "@/lib/db/nl-time";
+
 const NL_TZ = "Europe/Amsterdam";
 
 function formatAmsterdam(isoUtc: Date): string {
@@ -58,7 +60,8 @@ export function isRecentLightningStrike(
   now = Date.now()
 ): boolean {
   if (!lightningTimeAmsterdam) return false;
-  const strike = new Date(lightningTimeAmsterdam.replace(" ", "T"));
-  if (Number.isNaN(strike.getTime())) return false;
-  return now - strike.getTime() >= 0 && now - strike.getTime() < maxAgeMs;
+  const strikeMs = parseAmsterdamDateTime(lightningTimeAmsterdam);
+  if (strikeMs == null) return false;
+  const age = now - strikeMs;
+  return age >= 0 && age < maxAgeMs;
 }
