@@ -104,6 +104,50 @@ describe("lightning storm risk", () => {
     assert.equal(resolved.lightning_storm_risk, true);
   });
 
+  it("verlengt latch niet bij elke poll voor dezelfde inslag", () => {
+    const now = Date.now();
+    const strikeTime = new Date(now - 5 * 60_000)
+      .toLocaleString("sv-SE", { timeZone: "Europe/Amsterdam" })
+      .replace("T", " ")
+      .slice(0, 19);
+    const live = { wh57batt: "5", lightning_km: 8, lightning_time: strikeTime };
+
+    const first = resolveLightningStormRisk(live, null, now);
+    const untilFirst = first.lightning_storm_risk_until;
+    assert.ok(untilFirst);
+
+    const second = resolveLightningStormRisk(live, first, now + 25 * 60_000);
+    assert.equal(second.lightning_storm_risk_until, untilFirst);
+
+    const third = resolveLightningStormRisk(live, second, now + 35 * 60_000);
+    assert.equal(third.lightning_storm_risk_until, untilFirst);
+  });
+
+  it("verlengt latch wel bij nieuwe inslag", () => {
+    const now = Date.now();
+    const strike1 = new Date(now - 10 * 60_000)
+      .toLocaleString("sv-SE", { timeZone: "Europe/Amsterdam" })
+      .replace("T", " ")
+      .slice(0, 19);
+    const strike2 = new Date(now - 2 * 60_000)
+      .toLocaleString("sv-SE", { timeZone: "Europe/Amsterdam" })
+      .replace("T", " ")
+      .slice(0, 19);
+    const first = resolveLightningStormRisk(
+      { wh57batt: "5", lightning_km: 8, lightning_time: strike1 },
+      null,
+      now
+    );
+    const second = resolveLightningStormRisk(
+      { wh57batt: "5", lightning_km: 5, lightning_time: strike2 },
+      first,
+      now + 60_000
+    );
+    assert.ok(first.lightning_storm_risk_until);
+    assert.ok(second.lightning_storm_risk_until);
+    assert.notEqual(second.lightning_storm_risk_until, first.lightning_storm_risk_until);
+  });
+
   it("versnelt poll niet bij enkel onweersgevoelige lucht", () => {
     assert.equal(
       shouldAccelerateLightningPoll({

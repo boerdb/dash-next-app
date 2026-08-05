@@ -119,6 +119,46 @@ export function computeLightningStormRisk(data: WeerLive): boolean {
   return hasActualLightningActivity(data) || isThunderProneAirmass(data);
 }
 
+function strikeTimeMs(data: WeerLive): number | null {
+  if (!data.lightning_time) return null;
+  return parseAmsterdamDateTime(data.lightning_time);
+}
+
+/** Zet latch alleen bij een nieuwe inslag; elke poll verlengt niet opnieuw. */
+function applyStrikeLatch(
+  data: WeerLive,
+  previous: WeerLive | null,
+  now: number
+): WeerLive {
+  const curMs = strikeTimeMs(data);
+  const prevMs = previous?.lightning_time
+    ? parseAmsterdamDateTime(previous.lightning_time)
+    : null;
+  const prevUntilMs = parseUntilIso(previous?.lightning_storm_risk_until);
+
+  if (curMs != null && curMs !== prevMs) {
+    return {
+      ...data,
+      lightning_storm_risk: true,
+      lightning_storm_risk_until: latchUntilIso(now),
+    };
+  }
+
+  if (prevUntilMs != null && prevUntilMs > now) {
+    return {
+      ...data,
+      lightning_storm_risk: true,
+      lightning_storm_risk_until: previous!.lightning_storm_risk_until ?? null,
+    };
+  }
+
+  return {
+    ...data,
+    lightning_storm_risk: true,
+    lightning_storm_risk_until: latchUntilIso(now),
+  };
+}
+
 /** Berekent stormkans incl. latch (voor ingest én live). */
 export function resolveLightningStormRisk(
   data: WeerLive,
@@ -126,21 +166,19 @@ export function resolveLightningStormRisk(
   now = Date.now()
 ): WeerLive {
   if (shouldClearStormRiskLatch(data)) {
-    const immediate = hasActualLightningActivity(data);
-    return {
-      ...data,
-      lightning_storm_risk: immediate,
-      lightning_storm_risk_until: immediate ? latchUntilIso(now) : null,
-    };
+    if (!hasActualLightningActivity(data)) {
+      return {
+        ...data,
+        lightning_storm_risk: false,
+        lightning_storm_risk_until: null,
+      };
+    }
+    return applyStrikeLatch(data, previous, now);
   }
 
   const immediate = hasActualLightningActivity(data);
   if (immediate) {
-    return {
-      ...data,
-      lightning_storm_risk: true,
-      lightning_storm_risk_until: latchUntilIso(now),
-    };
+    return applyStrikeLatch(data, previous, now);
   }
 
   const untilMs = parseUntilIso(previous?.lightning_storm_risk_until);

@@ -140,3 +140,25 @@ describe("getWeatherCondition · regen", () => {
     assert.equal(condition, "partly-cloudy");
   });
 });
+
+describe("getWeatherCondition · dagperioden", () => {
+  it("toont dusk in avondperiode ook als zon onder horizon is", () => {
+    const condition = getWeatherCondition(
+      { temp_c: 22, solarradiation: 0 },
+      "evening",
+      true,
+      clearSky
+    );
+    assert.equal(condition, "dusk");
+  });
+
+  it("toont night in nachtperiode", () => {
+    const condition = getWeatherCondition(
+      { temp_c: 18, solarradiation: 0 },
+      "night",
+      true,
+      clearSky
+    );
+    assert.equal(condition, "night");
+  });
+});

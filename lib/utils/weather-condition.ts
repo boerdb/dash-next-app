@@ -108,11 +108,11 @@ export function getWeatherCondition(
   if (isStationFoggy(data)) return "fog";
   if (isStationWindy(data)) return "wind";
 
-  if ( period === "night" || ( period === "evening" && sunBelowHorizon ) ) {
+  if (period === "night") {
     return "night";
   }
-  if ( period === "evening" ) return "dusk";
-  if ( period === "dawn" ) return "dawn";
+  if (period === "evening") return "dusk";
+  if (period === "dawn") return "dawn";
 
   const stationSolar = Number(data.solarradiation);
   const stationDry = isStationDry(data);
