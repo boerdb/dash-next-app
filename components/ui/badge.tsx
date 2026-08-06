@@ -12,6 +12,7 @@ const badgeVariants = cva(
         export: "border-accent-export/30 text-accent-export",
         danger: "border-accent-danger/30 text-accent-danger",
         violet: "border-accent-violet/30 text-accent-violet",
+        amber: "border-accent-amber/30 text-accent-amber",
       },
     },
     defaultVariants: {
