@@ -1,6 +1,8 @@
 import "server-only";
 import type { WeerLive } from "@/lib/api/types";
 import { compare, metricValue } from "@/lib/tahoma/metrics";
+import { scheduleRuleReset } from "@/lib/hue/pending-reset";
+import { snapshotFromLight } from "@/lib/hue/snapshot";
 import { applyHueLightAction } from "@/lib/hue/apply-action";
 import { appendLog } from "@/lib/hue/action-log";
 import { getRules, markTriggered } from "@/lib/hue/rules-store";
@@ -48,6 +50,7 @@ export async function evaluateHueRules(
 
     let status: "ok" | "error" = "ok";
     let message: string | undefined;
+    const snapshot = light ? snapshotFromLight(light) : null;
     try {
       await applyHueLightAction(
         settings,
@@ -58,6 +61,19 @@ export async function evaluateHueRules(
         rule.color,
       );
       await markTriggered(rule.id, new Date(now).toISOString());
+
+      const resetMin = rule.resetAfterMin ?? 0;
+      if (resetMin > 0 && snapshot) {
+        await scheduleRuleReset({
+          ruleId: rule.id,
+          ruleName: rule.name,
+          lightId: rule.lightId,
+          lightName,
+          lightType: light!.type,
+          snapshot,
+          restoreAt: new Date(now + resetMin * 60_000).toISOString(),
+        });
+      }
     } catch (e) {
       status = "error";
       message = e instanceof Error ? e.message : "Actie mislukt";

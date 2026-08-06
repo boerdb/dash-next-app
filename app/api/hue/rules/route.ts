@@ -19,6 +19,7 @@ interface CreateBody {
   action: HueRule["action"];
   brightness?: number;
   color?: HueRule["color"];
+  resetAfterMin?: number;
   cooldownMin?: number;
   enabled?: boolean;
 }
@@ -47,6 +48,8 @@ export async function POST(req: Request) {
     action: body.action,
     brightness: body.brightness,
     color: body.color,
+    resetAfterMin:
+      body.resetAfterMin != null && body.resetAfterMin >= 0 ? body.resetAfterMin : 5,
     cooldownMin: body.cooldownMin && body.cooldownMin > 0 ? body.cooldownMin : 10,
     enabled: body.enabled ?? true,
   });

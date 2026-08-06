@@ -3,6 +3,7 @@ import { jsonNoStore } from "@/lib/api/no-store";
 import { isDirectDbEnabled } from "@/lib/db/pool";
 import { fetchWeerLiveFromDb } from "@/lib/db/live-weer";
 import { fetchLights } from "@/lib/hue/client";
+import { processPendingResets } from "@/lib/hue/pending-reset";
 import { evaluateHueRules } from "@/lib/hue/rules-engine";
 import { getSettings, isConfigured } from "@/lib/hue/settings";
 
@@ -24,9 +25,12 @@ export async function POST() {
   try {
     const weather = await fetchWeerLiveFromDb();
     const lights = await fetchLights(settings);
+    const restored = await processPendingResets(settings);
     const results = await evaluateHueRules(settings, weather, lights, { force: true });
     return jsonNoStore({
       evaluated: results.length,
+      restored: restored.length,
+      restoreResults: restored,
       results,
       weather: {
         illuminance_lux: weather.illuminance_lux ?? null,

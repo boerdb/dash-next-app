@@ -34,6 +34,8 @@ export interface HueRule {
   brightness?: number;
   /** Basiskleur (alleen als lamp kleur/temperatuur ondersteunt). */
   color?: HueColorPreset;
+  /** Minuten na trigger: terug naar staat vóór alarm; 0 = uit. */
+  resetAfterMin: number;
   cooldownMin: number;
   lastTriggeredAt: string | null;
 }
@@ -64,6 +66,8 @@ export interface HueLightState {
   on: boolean;
   /** Helderheid 1–254 (Hue-bereik). */
   bri: number | null;
+  xy?: [number, number] | null;
+  ct?: number | null;
   reachable: boolean;
 }
 

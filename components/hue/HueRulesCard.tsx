@@ -24,6 +24,7 @@ interface FormState {
   action: HueRuleAction;
   brightness: number;
   color: HueColorPreset | "";
+  resetAfterMin: number;
   cooldownMin: number;
   enabled: boolean;
 }
@@ -37,6 +38,7 @@ const emptyForm: FormState = {
   action: "on",
   brightness: 50,
   color: "",
+  resetAfterMin: 5,
   cooldownMin: 10,
   enabled: true,
 };
@@ -68,6 +70,7 @@ export function HueRulesCard() {
       action: rule.action,
       brightness: rule.brightness ?? 50,
       color: rule.color ?? "",
+      resetAfterMin: rule.resetAfterMin ?? 0,
       cooldownMin: rule.cooldownMin,
       enabled: rule.enabled,
     });
@@ -118,6 +121,7 @@ export function HueRulesCard() {
           : undefined,
         color:
           form.color && form.action !== "off" ? form.color : undefined,
+        resetAfterMin: form.resetAfterMin,
         cooldownMin: form.cooldownMin,
         enabled: form.enabled,
       };
@@ -378,6 +382,19 @@ function RuleEditor({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block space-y-1">
+          <span className="text-label text-surface-muted">Herstel na (min)</span>
+          <input
+            type="number"
+            min={0}
+            className="tahoma-input w-32"
+            value={form.resetAfterMin}
+            onChange={(e) => setForm((f) => ({ ...f, resetAfterMin: Number(e.target.value) }))}
+          />
+          <span className="block text-caption text-surface-muted">
+            0 = uit · anders terug naar staat vóór alarm
+          </span>
+        </label>
+        <label className="block space-y-1">
           <span className="text-label text-surface-muted">Cooldown (min)</span>
           <input
             type="number"
@@ -386,16 +403,17 @@ function RuleEditor({
             onChange={(e) => setForm((f) => ({ ...f, cooldownMin: Number(e.target.value) }))}
           />
         </label>
-        <label className="flex items-center gap-2 self-end pb-2">
-          <input
-            type="checkbox"
-            checked={form.enabled}
-            onChange={(e) => setForm((f) => ({ ...f, enabled: e.target.checked }))}
-            className="h-4 w-4 accent-[var(--primary)]"
-          />
-          <span className="text-sm text-foreground">Ingeschakeld</span>
-        </label>
       </div>
+
+      <label className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          checked={form.enabled}
+          onChange={(e) => setForm((f) => ({ ...f, enabled: e.target.checked }))}
+          className="h-4 w-4 accent-[var(--primary)]"
+        />
+        <span className="text-sm text-foreground">Ingeschakeld</span>
+      </label>
 
       {error ? <p className="text-caption text-accent-danger">{error}</p> : null}
 
@@ -441,7 +459,9 @@ function RuleRow({
             {rule.color && rule.action !== "off" ? ` · ${colorLabel(rule.color)}` : ""}
           </p>
           <p className="text-caption mt-0.5 text-surface-muted">
-            {lightName} · cooldown {rule.cooldownMin} min
+            {lightName}
+            {rule.resetAfterMin ? ` · herstel na ${rule.resetAfterMin} min` : ""}
+            {" · "}cooldown {rule.cooldownMin} min
             {rule.lastTriggeredAt
               ? ` · laatste ${new Date(rule.lastTriggeredAt).toLocaleString("nl-NL", {
                   hour: "2-digit",

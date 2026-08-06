@@ -6,6 +6,7 @@ import {
   type HueLightStateInput,
 } from "@/lib/hue/colors";
 import type { HueLight, HueSettings } from "@/lib/hue/types";
+import type { HueLightStateSnapshot } from "@/lib/hue/snapshot";
 
 /**
  * Philips Hue Bridge local REST API.
@@ -29,6 +30,8 @@ interface RawLight {
     on?: boolean;
     bri?: number;
     reachable?: boolean;
+    xy?: [number, number];
+    ct?: number;
   };
 }
 
@@ -162,6 +165,42 @@ export async function setLightState(
   if (err) throw new Error(err);
 }
 
+/** Zet lamp terug naar opgeslagen snapshot (exact xy/ct/on/bri). */
+export async function restoreLightSnapshot(
+  settings: HueSettings,
+  lightId: string,
+  snapshot: HueLightStateSnapshot,
+  lightType?: string,
+): Promise<void> {
+  const body: Record<string, unknown> = { on: snapshot.on };
+  if (!snapshot.on) {
+    await setLightStateRaw(settings, lightId, body);
+    return;
+  }
+  if (snapshot.bri != null) body.bri = snapshot.bri;
+  if (snapshot.xy) body.xy = snapshot.xy;
+  else if (snapshot.ct) body.ct = snapshot.ct;
+  await setLightStateRaw(settings, lightId, body);
+}
+
+async function setLightStateRaw(
+  settings: HueSettings,
+  lightId: string,
+  body: Record<string, unknown>,
+): Promise<void> {
+  const data = (await request(
+    `${apiBase(settings.bridgeIp, settings.username)}/lights/${lightId}/state`,
+    { method: "PUT", body },
+  )) as HueApiResult[];
+
+  if (!Array.isArray(data)) {
+    throw new Error("Onverwacht antwoord bij lampactie");
+  }
+
+  const err = firstError(data);
+  if (err) throw new Error(err);
+}
+
 export async function ping(settings: HueSettings): Promise<void> {
   await fetchLights(settings);
 }
@@ -178,6 +217,8 @@ function normalizeLight(id: string, raw: RawLight): HueLight {
     state: {
       on: raw.state?.on ?? false,
       bri: typeof raw.state?.bri === "number" ? raw.state.bri : null,
+      xy: Array.isArray(raw.state?.xy) && raw.state.xy.length === 2 ? raw.state.xy : null,
+      ct: typeof raw.state?.ct === "number" ? raw.state.ct : null,
       reachable: raw.state?.reachable ?? false,
     },
   };
