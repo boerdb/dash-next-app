@@ -23,6 +23,8 @@ export const METRICS: MetricMeta[] = [
   { key: "baromrel_hpa", label: "Luchtdruk (rel)", unit: "hPa", hint: "Bijv. 1013 hPa" },
   { key: "lightning_km", label: "Bliksem-afstand", unit: "km", hint: "Sluiten binnen 8 km" },
   { key: "lightning_num", label: "Bliksem-inslagen vandaag", unit: "", hint: "Bijv. 1" },
+  { key: "illuminance_lux", label: "Lichtsterkte (lux)", unit: "lux", hint: "Lamp aan bijv. < 30 lux" },
+  { key: "lightning_storm_risk", label: "Onweerrisico", unit: "", hint: "Drempel 1 = actief" },
 ];
 
 export const METRIC_BY_KEY: Record<RuleMetric, MetricMeta> = METRICS.reduce(
@@ -35,6 +37,9 @@ export const METRIC_BY_KEY: Record<RuleMetric, MetricMeta> = METRICS.reduce(
 
 /** Lees een numerieke waarde uit WeerLive voor de opgegeven metric. */
 export function metricValue(weather: WeerLive, metric: RuleMetric): number | null {
+  if (metric === "lightning_storm_risk") {
+    return weather.lightning_storm_risk ? 1 : 0;
+  }
   const raw = weather[metric];
   if (raw == null || raw === "") return null;
   const n = Number(raw);

@@ -4,12 +4,21 @@ import { useCallback } from "react";
 import useSWR, { mutate as swrMutate } from "swr";
 import { jsonFetcher, FetchError } from "@/lib/fetcher";
 import { useRevalidateOnVisible } from "@/lib/hooks/use-revalidate-on-visible";
-import type { HueLight, HueStatus } from "@/lib/hue/types";
+import type { HueActionLogEntry, HueLight, HueRule, HueStatus } from "@/lib/hue/types";
 
 interface SettingsSafe {
   bridgeIp: string;
+  enabled: boolean;
   hasUsername: boolean;
   configured: boolean;
+}
+
+interface RulesResponse {
+  rules: HueRule[];
+}
+
+interface LogResponse {
+  entries: HueActionLogEntry[];
 }
 
 interface LightsResponse {
@@ -41,6 +50,28 @@ export function useHueLights() {
   return { lights: data?.lights ?? [], updatedAt: data?.updatedAt, error, isLoading, mutate };
 }
 
+export function useHueRules() {
+  const { data, error, isLoading, mutate } = useSWR<RulesResponse, FetchError>(
+    "/api/hue/rules",
+    jsonFetcher,
+    { revalidateOnMount: true, keepPreviousData: true },
+  );
+  const revalidate = useCallback(() => void mutate(), [mutate]);
+  useRevalidateOnVisible(revalidate);
+  return { rules: data?.rules ?? [], error, isLoading, mutate };
+}
+
+export function useHueLog() {
+  const { data, error, isLoading, mutate } = useSWR<LogResponse, FetchError>(
+    "/api/hue/log",
+    jsonFetcher,
+    { revalidateOnMount: true, keepPreviousData: true },
+  );
+  const revalidate = useCallback(() => void mutate(), [mutate]);
+  useRevalidateOnVisible(revalidate);
+  return { entries: data?.entries ?? [], error, isLoading, mutate };
+}
+
 export function useHueSettings() {
   const { data, error, isLoading, mutate } = useSWR<SettingsSafe, FetchError>(
     "/api/hue/settings",
@@ -56,6 +87,8 @@ export async function refreshAllHue(): Promise<void> {
   await Promise.all([
     swrMutate("/api/hue/status"),
     swrMutate("/api/hue/lights"),
+    swrMutate("/api/hue/rules"),
+    swrMutate("/api/hue/log"),
   ]);
 }
 

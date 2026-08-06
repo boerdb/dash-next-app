@@ -32,7 +32,9 @@ export type RuleMetric =
   | "humidity"
   | "baromrel_hpa"
   | "lightning_km"
-  | "lightning_num";
+  | "lightning_num"
+  | "illuminance_lux"
+  | "lightning_storm_risk";
 
 export type RuleOperator = ">" | "<" | ">=" | "<=";
 

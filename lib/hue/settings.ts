@@ -10,6 +10,7 @@ function fromEnv(): Partial<HueSettings> {
   const out: Partial<HueSettings> = {};
   if (process.env.HUE_BRIDGE_IP) out.bridgeIp = process.env.HUE_BRIDGE_IP.trim();
   if (process.env.HUE_USERNAME) out.username = process.env.HUE_USERNAME.trim();
+  if (process.env.HUE_ENABLED === "1") out.enabled = true;
   return out;
 }
 

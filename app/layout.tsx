@@ -16,13 +16,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Weer & Energie",
-  description: "Live weerstation en energie-dashboard voor thuis",
-  applicationName: "Weer & Energie",
+  title: "ThuisDash",
+  description: "Weer, energie en slim huis — live thuisdashboard",
+  applicationName: "ThuisDash",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Weer & Energie",
+    title: "ThuisDash",
   },
   manifest: "/manifest.webmanifest",
   icons: {

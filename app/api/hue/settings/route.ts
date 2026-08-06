@@ -9,6 +9,7 @@ export async function GET() {
   const settings = await getSettings();
   return jsonNoStore({
     bridgeIp: settings.bridgeIp,
+    enabled: settings.enabled,
     hasUsername: settings.username.length > 0,
     configured: isConfigured(settings),
   });
@@ -37,6 +38,7 @@ export async function PUT(req: Request) {
   const saved = await saveSettings(next);
   return jsonNoStore({
     bridgeIp: saved.bridgeIp,
+    enabled: saved.enabled,
     hasUsername: saved.username.length > 0,
     configured: isConfigured(saved),
   });

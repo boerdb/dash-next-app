@@ -15,10 +15,6 @@ export default function TahomaPage() {
   return (
     <PullToRefresh onRefresh={refreshAllTahoma}>
       <div className="space-y-[var(--space-section)] pb-2">
-        <Section title="Verbinding" subtitle="Somfy Tahoma · lokaal" accent="violet">
-          <TahomaStatusCard />
-        </Section>
-
         <Section
           title="Apparaten"
           subtitle="Schermen, rolluiken, zonwering"
@@ -40,6 +36,16 @@ export default function TahomaPage() {
 
         <Section title="Geschiedenis" subtitle="Uitgevoerde acties" accent="violet">
           <TahomaLogCard />
+        </Section>
+
+        <Section
+          title="Verbinding"
+          subtitle="Tahoma-box en token · alleen bij setup"
+          accent="violet"
+          collapsible
+          defaultOpen={false}
+        >
+          <TahomaStatusCard />
         </Section>
       </div>
     </PullToRefresh>

@@ -125,7 +125,7 @@ export function PwaProvider() {
     return (
       <InstallBanner
         title="App installeren"
-        description="Voeg Weer & Energie toe aan je startscherm voor snelle toegang."
+        description="Voeg ThuisDash toe aan je startscherm voor snelle toegang."
         primaryLabel="Installeren"
         onPrimary={onInstallClick}
         onDismiss={dismissInstall}

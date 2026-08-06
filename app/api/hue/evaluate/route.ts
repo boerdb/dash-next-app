@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import { jsonNoStore } from "@/lib/api/no-store";
 import { isDirectDbEnabled } from "@/lib/db/pool";
 import { fetchWeerLiveFromDb } from "@/lib/db/live-weer";
-import { getSettings, isConfigured } from "@/lib/tahoma/settings";
-import { fetchDevices } from "@/lib/tahoma/client";
-import { evaluateRules } from "@/lib/tahoma/rules-engine";
+import { fetchLights } from "@/lib/hue/client";
+import { evaluateHueRules } from "@/lib/hue/rules-engine";
+import { getSettings, isConfigured } from "@/lib/hue/settings";
 
 export const dynamic = "force-dynamic";
 
-/** Handmatige evaluatie vanuit de UI ("Test nu"); negeert cooldown + master-switch. */
+/** Handmatige evaluatie vanuit de UI; negeert cooldown + master-switch. */
 export async function POST() {
   if (!isDirectDbEnabled()) {
     return NextResponse.json(
@@ -18,24 +18,21 @@ export async function POST() {
   }
   const settings = await getSettings();
   if (!isConfigured(settings)) {
-    return NextResponse.json({ error: "Tahoma-box niet geconfigureerd" }, { status: 503 });
+    return NextResponse.json({ error: "Hue Bridge niet geconfigureerd" }, { status: 503 });
   }
 
   try {
     const weather = await fetchWeerLiveFromDb();
-    const devices = await fetchDevices(settings);
-    const results = await evaluateRules(settings, weather, devices, { force: true });
+    const lights = await fetchLights(settings);
+    const results = await evaluateHueRules(settings, weather, lights, { force: true });
     return jsonNoStore({
       evaluated: results.length,
       results,
       weather: {
-        windgust_kmh: weather.windgust_kmh ?? null,
-        windspeed_kmh: weather.windspeed_kmh ?? null,
-        solarradiation: weather.solarradiation ?? null,
         illuminance_lux: weather.illuminance_lux ?? null,
-        rainrate_mm: weather.rainrate_mm ?? null,
         lightning_km: weather.lightning_km ?? null,
         lightning_storm_risk: weather.lightning_storm_risk ?? false,
+        windgust_kmh: weather.windgust_kmh ?? null,
       },
     });
   } catch (e) {

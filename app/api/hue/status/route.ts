@@ -12,6 +12,7 @@ export async function GET() {
   if (!configured) {
     const status: HueStatus = {
       configured: false,
+      enabled: settings.enabled,
       connected: false,
       bridgeIp: settings.bridgeIp,
       bridgeName: null,
@@ -29,6 +30,7 @@ export async function GET() {
     ]);
     const status: HueStatus = {
       configured: true,
+      enabled: settings.enabled,
       connected: true,
       bridgeIp: settings.bridgeIp,
       bridgeName,
@@ -40,6 +42,7 @@ export async function GET() {
   } catch (e) {
     const status: HueStatus = {
       configured: true,
+      enabled: settings.enabled,
       connected: false,
       bridgeIp: settings.bridgeIp,
       bridgeName: null,

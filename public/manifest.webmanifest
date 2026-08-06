@@ -1,7 +1,7 @@
 {
-  "name": "Weer & Energie",
-  "short_name": "WeerEnergie",
-  "description": "Live weerstation en energie-dashboard",
+  "name": "ThuisDash",
+  "short_name": "ThuisDash",
+  "description": "Weer, energie en slim huis — live thuisdashboard",
   "start_url": "/weer",
   "scope": "/",
   "display": "standalone",
