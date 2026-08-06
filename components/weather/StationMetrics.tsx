@@ -14,6 +14,7 @@ import { Surface, SurfaceBody } from "@/components/ui/surface";
 import { formatBaromTrendDelta } from "@/lib/weer/barom-trend";
 import { hasWs90Sensor } from "@/lib/weer/sensor-status";
 import { regenMmFromWeer } from "@/lib/weer/regen-dag";
+import { resolveIlluminanceLux } from "@/lib/weer/ws90-lux";
 import { resolveRainRateMm } from "@/lib/weer/ws90-rain";
 function finiteNumber(value: unknown): number | null {
   if (value === undefined || value === null || value === "") return null;
@@ -104,6 +105,7 @@ export function StationMetrics({
 }) {
   const rainToday = regenMmFromWeer(data);
   const rainRate = resolveRainRateMm(data);
+  const lux = resolveIlluminanceLux(data);
   const baromDir = data.barom_trend_direction ?? "steady";
   const baromDelta = finiteNumber(data.barom_trend_delta_hpa);
 
@@ -165,6 +167,18 @@ export function StationMetrics({
               decimals={0}
             />
           </div>
+          {hasWs90Sensor(data) && lux != null ? (
+            <div>
+              <Metric label="Licht (WS90)" value={formatValue(lux, 0)} unit="lux" />
+              <DailyRange
+                min={undefined}
+                max={data.illuminance_max}
+                maxTime={data.illuminance_max_time}
+                unit="lux"
+                decimals={0}
+              />
+            </div>
+          ) : null}
           <div>
             <Metric label="UV-index" value={data.uv ?? "—"} />
             <DailyRange

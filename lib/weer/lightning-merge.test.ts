@@ -361,6 +361,7 @@ describe("mapGatewayLive", () => {
     assert.equal(m.temp_c, 23.4);
     assert.equal(m.humidity, 66);
     assert.equal(m.solarradiation, 513.73);
+    assert.equal(m.illuminance_lux, 65090);
     assert.equal(m.uv, 4);
     assert.equal(m.vpd, 0.978);
   });

@@ -1,6 +1,7 @@
 import type { WeerLive } from "@/lib/api/types";
 import { nowAmsterdamHHmm } from "@/lib/db/nl-time";
 import { todayAmsterdamDate } from "@/lib/weer/regen-jaar-labels";
+import { resolveIlluminanceLux } from "@/lib/weer/ws90-lux";
 
 function num(value: unknown): number | null {
   if (value == null || value === "") return null;
@@ -147,6 +148,15 @@ export function applyDailyExtremes(
     previous,
     num(data.uv),
     { max: "uv_max", maxTime: "uv_max_time" },
+    now,
+    today,
+    true
+  );
+  out = applyRange(
+    out,
+    previous,
+    resolveIlluminanceLux(out) ?? null,
+    { max: "illuminance_max", maxTime: "illuminance_max_time" },
     now,
     today,
     true

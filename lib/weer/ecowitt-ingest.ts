@@ -116,6 +116,15 @@ export function parseEcowittPayload(
   }
   if (input.uv !== undefined) metric.uv = num(input.uv);
 
+  const luxRaw =
+    num(input.illuminance) ??
+    num(input.luminosity) ??
+    num(input.light) ??
+    num(input.lux);
+  if (luxRaw !== undefined) {
+    metric.illuminance_lux = Math.round(luxRaw);
+  }
+
   metric.lightning_km = optionalNum(input.lightning);
   metric.lightning_num = optionalNum(input.lightning_num);
   const lightningParsed = parseLightningTime(input.lightning_time, input.dateutc);

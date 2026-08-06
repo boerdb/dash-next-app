@@ -1,5 +1,6 @@
 import type { WeerLive } from "@/lib/api/types";
 import { parseLightningTime } from "@/lib/weer/lightning-time";
+import { parseGatewayLightReading } from "@/lib/weer/ws90-lux";
 
 interface GatewayItem {
   id?: string;
@@ -123,7 +124,9 @@ export function mapGatewayLive(raw: GatewayLiveResponse): Partial<WeerLive> {
   assignDefined(out, "windgust_kmh", toKmh(common.get("0x0c")?.val));
   assignDefined(out, "maxdailygust_kmh", toKmh(common.get("0x19")?.val));
 
-  assignDefined(out, "solarradiation", gwNum(common.get("0x15")?.val));
+  const light = parseGatewayLightReading(common.get("0x15")?.val);
+  assignDefined(out, "solarradiation", light.solarWm2);
+  assignDefined(out, "illuminance_lux", light.lux);
   assignDefined(out, "uv", gwNum(common.get("0x17")?.val));
   assignDefined(out, "vpd", gwNum(common.get("5")?.val));
 

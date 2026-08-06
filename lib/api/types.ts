@@ -108,6 +108,11 @@ export interface WeerLive {
   };
   freq?: string;
   uv?: number | string;
+  /** WS90 lichtsensor (lux); vaak afgeleid uit solarradiation × 126,7. */
+  illuminance_lux?: number | string;
+  /** Hoogste lux vandaag. */
+  illuminance_max?: number | string;
+  illuminance_max_time?: string | null;
   solarradiation?: number | string;
   tide_info?: string;
   server_timestamp?: string;
