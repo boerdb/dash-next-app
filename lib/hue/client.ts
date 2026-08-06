@@ -1,5 +1,10 @@
 import "server-only";
 import http from "node:http";
+import {
+  buildHueStateBody,
+  capabilitiesFromType,
+  type HueLightStateInput,
+} from "@/lib/hue/colors";
 import type { HueLight, HueSettings } from "@/lib/hue/types";
 
 /**
@@ -138,11 +143,11 @@ export async function fetchLights(settings: HueSettings): Promise<HueLight[]> {
 export async function setLightState(
   settings: HueSettings,
   lightId: string,
-  state: { on?: boolean; bri?: number },
+  state: HueLightStateInput,
+  lightType?: string,
 ): Promise<void> {
-  const body: Record<string, boolean | number> = {};
-  if (state.on !== undefined) body.on = state.on;
-  if (state.bri !== undefined) body.bri = Math.max(1, Math.min(254, Math.round(state.bri)));
+  const cap = capabilitiesFromType(lightType ?? "");
+  const body = buildHueStateBody(state, cap);
 
   const data = (await request(
     `${apiBase(settings.bridgeIp, settings.username)}/lights/${lightId}/state`,
@@ -162,12 +167,14 @@ export async function ping(settings: HueSettings): Promise<void> {
 }
 
 function normalizeLight(id: string, raw: RawLight): HueLight {
+  const type = raw.type ?? "Onbekend";
   return {
     id,
     name: raw.name ?? `Lamp ${id}`,
-    type: raw.type ?? "Onbekend",
+    type,
     modelid: raw.modelid ?? "",
     manufacturername: raw.manufacturername ?? "",
+    capabilities: capabilitiesFromType(type),
     state: {
       on: raw.state?.on ?? false,
       bri: typeof raw.state?.bri === "number" ? raw.state.bri : null,

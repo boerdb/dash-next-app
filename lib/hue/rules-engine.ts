@@ -1,7 +1,7 @@
 import "server-only";
 import type { WeerLive } from "@/lib/api/types";
 import { compare, metricValue } from "@/lib/tahoma/metrics";
-import { setLightState } from "@/lib/hue/client";
+import { applyHueLightAction } from "@/lib/hue/apply-action";
 import { appendLog } from "@/lib/hue/action-log";
 import { getRules, markTriggered } from "@/lib/hue/rules-store";
 import type { HueLight, HueRule, HueRuleAction, HueSettings } from "@/lib/hue/types";
@@ -21,34 +21,6 @@ function cooldownPassed(rule: HueRule, now: number): boolean {
   const last = Date.parse(rule.lastTriggeredAt);
   if (!Number.isFinite(last)) return true;
   return now - last >= rule.cooldownMin * 60_000;
-}
-
-function briFromPercent(percent: number): number {
-  return Math.max(1, Math.min(254, Math.round((percent / 100) * 254)));
-}
-
-async function executeRuleAction(
-  settings: HueSettings,
-  rule: HueRule,
-): Promise<void> {
-  const brightness = rule.brightness ?? 100;
-  switch (rule.action) {
-    case "on":
-      await setLightState(settings, rule.lightId, {
-        on: true,
-        bri: briFromPercent(brightness),
-      });
-      break;
-    case "off":
-      await setLightState(settings, rule.lightId, { on: false });
-      break;
-    case "dim":
-      await setLightState(settings, rule.lightId, {
-        on: true,
-        bri: briFromPercent(brightness),
-      });
-      break;
-  }
 }
 
 export async function evaluateHueRules(
@@ -77,7 +49,14 @@ export async function evaluateHueRules(
     let status: "ok" | "error" = "ok";
     let message: string | undefined;
     try {
-      await executeRuleAction(settings, rule);
+      await applyHueLightAction(
+        settings,
+        light,
+        rule.lightId,
+        rule.action,
+        rule.brightness,
+        rule.color,
+      );
       await markTriggered(rule.id, new Date(now).toISOString());
     } catch (e) {
       status = "error";
@@ -102,6 +81,7 @@ export async function evaluateHueRules(
       lightName,
       action: rule.action,
       brightness: rule.brightness,
+      color: rule.color,
       trigger: {
         metric: rule.metric,
         operator: rule.operator,

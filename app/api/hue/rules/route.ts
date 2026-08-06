@@ -18,6 +18,7 @@ interface CreateBody {
   threshold: number;
   action: HueRule["action"];
   brightness?: number;
+  color?: HueRule["color"];
   cooldownMin?: number;
   enabled?: boolean;
 }
@@ -45,6 +46,7 @@ export async function POST(req: Request) {
     threshold: body.threshold,
     action: body.action,
     brightness: body.brightness,
+    color: body.color,
     cooldownMin: body.cooldownMin && body.cooldownMin > 0 ? body.cooldownMin : 10,
     enabled: body.enabled ?? true,
   });

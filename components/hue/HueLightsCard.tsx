@@ -10,6 +10,8 @@ import {
   percentToBri,
   useHueLights,
 } from "@/lib/hooks/use-hue";
+import { HueColorSwatches } from "@/components/hue/HueColorSelect";
+import type { HueColorPreset } from "@/lib/hue/colors";
 import type { HueLight } from "@/lib/hue/types";
 
 export function HueLightsCard() {
@@ -17,7 +19,10 @@ export function HueLightsCard() {
   const [busy, setBusy] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const run = async (light: HueLight, patch: { on?: boolean; bri?: number }) => {
+  const run = async (
+    light: HueLight,
+    patch: { on?: boolean; bri?: number; color?: HueColorPreset },
+  ) => {
     setBusy(`${light.id}:${patch.on ?? ""}:${patch.bri ?? ""}`);
     setActionError(null);
     try {
@@ -45,7 +50,7 @@ export function HueLightsCard() {
           <div>
             <h3 className="text-base font-semibold text-foreground">Lampen</h3>
             <p className="text-caption mt-0.5 text-surface-muted">
-              {lights.length} lampen · aan/uit en dimmen
+              {lights.length} lampen · aan/uit, dimmen en kleur
             </p>
           </div>
           <IconButton onClick={() => mutate()} aria-label="Vernieuwen">
@@ -84,11 +89,24 @@ function LightRow({
 }: {
   light: HueLight;
   busy: string | null;
-  onAction: (light: HueLight, patch: { on?: boolean; bri?: number }) => void;
+  onAction: (
+    light: HueLight,
+    patch: { on?: boolean; bri?: number; color?: HueColorPreset },
+  ) => void;
 }) {
   const [brightness, setBrightness] = useState(briToPercent(light.state.bri));
+  const [color, setColor] = useState<HueColorPreset | "">("");
   const isBusy = busy?.startsWith(`${light.id}:`) ?? false;
   const isOn = light.state.on;
+  const hasColor =
+    light.capabilities.color || light.capabilities.ct;
+
+  const apply = (patch: { on?: boolean; bri?: number; color?: HueColorPreset }) => {
+    onAction(light, {
+      ...patch,
+      color: patch.color ?? (color || undefined),
+    });
+  };
 
   const stateLabel = !light.state.reachable
     ? "Niet bereikbaar"
@@ -115,7 +133,12 @@ function LightRow({
           variant="outline"
           size="sm"
           disabled={isBusy || !light.state.reachable}
-          onClick={() => onAction(light, { on: !isOn, bri: isOn ? undefined : percentToBri(brightness || 100) })}
+          onClick={() =>
+            apply({
+              on: !isOn,
+              bri: isOn ? undefined : percentToBri(brightness || 100),
+            })
+          }
         >
           {isOn ? (
             <>
@@ -148,12 +171,23 @@ function LightRow({
             size="sm"
             disabled={isBusy || !light.state.reachable}
             onClick={() =>
-              onAction(light, { on: true, bri: percentToBri(brightness) })
+              apply({ on: true, bri: percentToBri(brightness) })
             }
           >
             Dim
           </Button>
         </span>
+        {hasColor ? (
+          <HueColorSwatches
+            value={color}
+            onChange={(c) => {
+              setColor(c);
+              apply({ on: true, bri: percentToBri(brightness || 100), color: c });
+            }}
+            capabilities={light.capabilities}
+            disabled={isBusy || !light.state.reachable}
+          />
+        ) : null}
         {isBusy ? <Loader2 className="h-4 w-4 animate-spin text-surface-muted" /> : null}
       </div>
     </li>

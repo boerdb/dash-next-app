@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { jsonNoStore } from "@/lib/api/no-store";
-import { setLightState } from "@/lib/hue/client";
+import type { HueColorPreset } from "@/lib/hue/colors";
+import { fetchLights, setLightState } from "@/lib/hue/client";
 import { getSettings, isConfigured } from "@/lib/hue/settings";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +10,7 @@ interface ActionBody {
   lightId: string;
   on?: boolean;
   bri?: number;
+  color?: HueColorPreset;
 }
 
 export async function POST(req: Request) {
@@ -33,7 +35,19 @@ export async function POST(req: Request) {
   }
 
   try {
-    await setLightState(settings, body.lightId, { on: body.on, bri: body.bri });
+    let lightType = "";
+    try {
+      const lights = await fetchLights(settings);
+      lightType = lights.find((l) => l.id === body.lightId)?.type ?? "";
+    } catch {
+      /* type is optioneel */
+    }
+    await setLightState(
+      settings,
+      body.lightId,
+      { on: body.on, bri: body.bri, color: body.color },
+      lightType,
+    );
     return jsonNoStore({ ok: true });
   } catch (e) {
     return NextResponse.json(

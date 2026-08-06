@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { useHueLights, useHueRules, useHueSettings } from "@/lib/hooks/use-hue";
 import { METRICS, operatorLabel } from "@/lib/tahoma/metrics";
 import { HUE_ACTIONS } from "@/components/hue/HueRulesCard.helpers";
+import { HueColorSelect } from "@/components/hue/HueColorSelect";
+import { colorLabel, type HueColorPreset } from "@/lib/hue/colors";
 import type { HueLight, HueRule, HueRuleAction } from "@/lib/hue/types";
 import type { RuleMetric, RuleOperator } from "@/lib/tahoma/types";
 
@@ -21,6 +23,7 @@ interface FormState {
   threshold: number;
   action: HueRuleAction;
   brightness: number;
+  color: HueColorPreset | "";
   cooldownMin: number;
   enabled: boolean;
 }
@@ -33,6 +36,7 @@ const emptyForm: FormState = {
   threshold: 30,
   action: "on",
   brightness: 50,
+  color: "",
   cooldownMin: 10,
   enabled: true,
 };
@@ -63,6 +67,7 @@ export function HueRulesCard() {
       threshold: rule.threshold,
       action: rule.action,
       brightness: rule.brightness ?? 50,
+      color: rule.color ?? "",
       cooldownMin: rule.cooldownMin,
       enabled: rule.enabled,
     });
@@ -111,6 +116,8 @@ export function HueRulesCard() {
         brightness: HUE_ACTIONS.find((a) => a.value === form.action)?.needsBrightness
           ? form.brightness
           : undefined,
+        color:
+          form.color && form.action !== "off" ? form.color : undefined,
         cooldownMin: form.cooldownMin,
         enabled: form.enabled,
       };
@@ -244,6 +251,7 @@ function RuleEditor({
   const needsBrightness =
     HUE_ACTIONS.find((a) => a.value === form.action)?.needsBrightness ?? false;
   const metricMeta = METRICS.find((m) => m.key === form.metric);
+  const selectedLight = lights.find((l) => l.id === form.lightId);
 
   return (
     <div className="space-y-3 rounded-[var(--radius-sm)] border border-border-subtle bg-surface p-3">
@@ -343,17 +351,29 @@ function RuleEditor({
       </div>
 
       {needsBrightness ? (
-        <label className="block space-y-1">
-          <span className="text-label text-surface-muted">Helderheid (%)</span>
-          <input
-            type="number"
-            min={1}
-            max={100}
-            className="tahoma-input w-32"
-            value={form.brightness}
-            onChange={(e) => setForm((f) => ({ ...f, brightness: Number(e.target.value) }))}
-          />
-        </label>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="block space-y-1">
+            <span className="text-label text-surface-muted">Helderheid (%)</span>
+            <input
+              type="number"
+              min={1}
+              max={100}
+              className="tahoma-input w-32"
+              value={form.brightness}
+              onChange={(e) => setForm((f) => ({ ...f, brightness: Number(e.target.value) }))}
+            />
+          </label>
+          {selectedLight ? (
+            <label className="block space-y-1">
+              <span className="text-label text-surface-muted">Kleur</span>
+              <HueColorSelect
+                value={form.color}
+                onChange={(color) => setForm((f) => ({ ...f, color }))}
+                capabilities={selectedLight.capabilities}
+              />
+            </label>
+          ) : null}
+        </div>
       ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -418,6 +438,7 @@ function RuleRow({
             {metricMeta?.label ?? rule.metric} {rule.operator} {rule.threshold}
             {metricMeta?.unit ? ` ${metricMeta.unit}` : ""} → {actionLabel}
             {rule.brightness != null && rule.action !== "off" ? ` (${rule.brightness}%)` : ""}
+            {rule.color && rule.action !== "off" ? ` · ${colorLabel(rule.color)}` : ""}
           </p>
           <p className="text-caption mt-0.5 text-surface-muted">
             {lightName} · cooldown {rule.cooldownMin} min

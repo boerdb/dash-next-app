@@ -1,6 +1,7 @@
 /** Philips Hue Bridge local API types. */
 
 import type { RuleMetric, RuleOperator } from "@/lib/tahoma/types";
+import type { HueColorPreset, HueLightCapabilities } from "@/lib/hue/colors";
 
 export interface HueSettings {
   /** LAN-IP van de Hue Bridge, bijv. 192.168.1.76 */
@@ -31,6 +32,8 @@ export interface HueRule {
   action: HueRuleAction;
   /** Helderheid 1–100 voor aan/dim. */
   brightness?: number;
+  /** Basiskleur (alleen als lamp kleur/temperatuur ondersteunt). */
+  color?: HueColorPreset;
   cooldownMin: number;
   lastTriggeredAt: string | null;
 }
@@ -51,6 +54,7 @@ export interface HueActionLogEntry {
   lightName: string;
   action: HueRuleAction;
   brightness?: number;
+  color?: HueColorPreset;
   trigger: HueActionLogTrigger | null;
   status: "ok" | "error";
   message?: string;
@@ -69,6 +73,7 @@ export interface HueLight {
   type: string;
   modelid: string;
   manufacturername: string;
+  capabilities: HueLightCapabilities;
   state: HueLightState;
 }
 

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useHueLog } from "@/lib/hooks/use-hue";
 import { METRIC_BY_KEY, operatorLabel } from "@/lib/tahoma/metrics";
 import { HUE_ACTIONS } from "@/components/hue/HueRulesCard.helpers";
+import { colorLabel } from "@/lib/hue/colors";
 
 export function HueLogCard() {
   const { entries, mutate } = useHueLog();
@@ -46,6 +47,9 @@ export function HueLogCard() {
                         <span className="text-surface-muted">→ {actionLabel}</span>
                         {e.brightness != null && e.action !== "off"
                           ? ` (${e.brightness}%)`
+                          : ""}
+                        {e.color && e.action !== "off"
+                          ? ` · ${colorLabel(e.color)}`
                           : ""}
                       </p>
                       <p className="text-caption mt-0.5 text-surface-muted">
