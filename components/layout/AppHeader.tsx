@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 const titles: Record<string, string> = {
   "/weer": "Weer",
   "/energie": "Energie",
+  "/tahoma": "Tahoma",
 };
 
 export function AppHeader() {

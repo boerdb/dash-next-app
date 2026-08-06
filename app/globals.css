@@ -214,6 +214,30 @@ body {
   font-size: var(--text-caption);
 }
 
+/* ── Tahoma formulier-inputs ── */
+.tahoma-input {
+  width: 100%;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--foreground);
+  padding: 0.5rem 0.625rem;
+  font-size: var(--text-sm);
+  line-height: 1.25;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.tahoma-input::placeholder {
+  color: var(--nav-inactive);
+}
+.tahoma-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 25%, transparent);
+}
+.tahoma-input:disabled {
+  opacity: 0.5;
+}
+
 .text-metric {
   font-size: var(--text-2xl);
   font-weight: 700;

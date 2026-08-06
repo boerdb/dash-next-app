@@ -39,6 +39,9 @@ scripts/db-migration/.enphase-token.txt
 scripts/db-migration/weerdata_migrate.sql
 scripts/db-migration/*_migrate.sql
 
+# Tahoma-instellingen/-regels/-log (bevat Somfy-inlog; via UI beheerd)
+/data/
+
 # vercel
 .vercel
 

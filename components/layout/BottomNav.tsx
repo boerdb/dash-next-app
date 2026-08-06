@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CloudSun, Zap } from "lucide-react";
+import { CloudSun, Zap, Blinds } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -19,6 +19,13 @@ const links = [
     icon: Zap,
     accent: "text-accent-energy",
     activeBg: "bg-accent-energy-soft",
+  },
+  {
+    href: "/tahoma",
+    label: "Tahoma",
+    icon: Blinds,
+    accent: "text-accent-violet",
+    activeBg: "bg-accent-violet-soft",
   },
 ] as const;
 
