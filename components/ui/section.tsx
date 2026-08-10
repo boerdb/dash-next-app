@@ -22,6 +22,14 @@ const accentBar: Record<NonNullable<SectionProps["accent"]>, string> = {
   amber: "bg-accent-amber",
 };
 
+const accentText: Record<NonNullable<SectionProps["accent"]>, string> = {
+  weather: "text-accent-weather",
+  energy: "text-accent-energy",
+  export: "text-accent-export",
+  violet: "text-accent-violet",
+  amber: "text-accent-amber",
+};
+
 export function Section({
   title,
   subtitle,
@@ -73,7 +81,14 @@ function SectionHeader({
         <span className={cn("mt-1 h-4 w-1 shrink-0 rounded-full", accentBar[accent])} aria-hidden />
       ) : null}
       <div>
-        <h2 className="text-label font-semibold text-foreground">{title}</h2>
+        <h2
+          className={cn(
+            "text-label font-semibold",
+            accent ? accentText[accent] : "text-foreground"
+          )}
+        >
+          {title}
+        </h2>
         {subtitle ? (
           <p className="text-caption mt-0.5 text-surface-muted">{subtitle}</p>
         ) : null}

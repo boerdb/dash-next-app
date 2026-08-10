@@ -92,7 +92,7 @@ export default function WeerPage() {
               <PrecipForecastCard data={openMeteoForecast} />
             </Section>
 
-            <Section title="Neerslagradar" subtitle="Nederland · RainViewer">
+            <Section title="Neerslagradar" subtitle="Nederland · RainViewer" accent="weather">
               <PrecipitationRadar />
             </Section>
           </div>
@@ -100,6 +100,7 @@ export default function WeerPage() {
           <Section
             title="Historie"
             subtitle="Eigen weerstation"
+            accent="weather"
             collapsible
             defaultOpen={false}
           >
@@ -115,6 +116,7 @@ export default function WeerPage() {
           <Section
             title="Getij"
             subtitle="Harlingen · Waddenzee"
+            accent="weather"
             collapsible
             defaultOpen={false}
           >

@@ -1,60 +1,61 @@
 @import "tailwindcss";
 
-/* ── Day palette (default, no pure white) ── */
-:root,
-[data-theme="day"] {
-  --background: #cdd5e3;
-  --foreground: #152032;
-  --surface: #e4eaf3;
-  --surface-raised: #f2f5fa;
-  --surface-muted: #4a5568;
-  --surface-subtle: #d8e0ec;
-  --border: #b8c4d4;
-  --border-subtle: #c8d2e0;
-  --primary: #1d4ed8;
-  --accent-weather: #1d4ed8;
-  --accent-energy: #c2410c;
-  --accent-export: #047857;
-  --accent-danger: #be123c;
-  --accent-violet: #6d28d9;
-  --accent-amber: #b45309;
-  --accent-weather-soft: rgba(29, 78, 216, 0.12);
-  --accent-energy-soft: rgba(194, 65, 12, 0.12);
-  --accent-export-soft: rgba(4, 120, 87, 0.12);
-  --accent-violet-soft: rgba(109, 40, 217, 0.12);
-  --accent-amber-soft: rgba(180, 83, 9, 0.12);
-  --nav-bg: rgba(242, 245, 250, 0.92);
-  --nav-inactive: #7a8699;
-  --nav-hover: #2d3748;
-  --hero-foreground: #152032;
-  --hero-muted: #4a5568;
-  --gradient-from: #b8c9e2;
-  --gradient-via: #cdd5e3;
-  --gradient-to: #d5dce8;
-  --elevation-shadow: 0 1px 3px rgba(21, 32, 50, 0.1),
-    0 6px 16px rgba(21, 32, 50, 0.06);
-  --moon-dark: #1b2432;
-  --moon-light: #eef1f6;
-  --chart-grid: rgba(27, 36, 50, 0.08);
-  --chart-tick: #5a6577;
-  --chart-tooltip-bg: #f5f7fa;
-  --chart-tooltip-border: #c8d0dc;
-  --chart-tooltip-label: #5a6577;
-  --chart-cursor: rgba(27, 36, 50, 0.06);
-  --chart-ref-line: rgba(27, 36, 50, 0.12);
-  --chart-weather: #2563eb;
-  --chart-weather-light: #93c5fd;
-  --chart-energy: #b45309;
-  --chart-energy-light: #fcd34d;
-  --chart-battery: #7c3aed;
-  --chart-net: #c2410c;
-  --chart-export: #047857;
-  --chart-solar: #ca8a04;
-  --chart-temperature: #2563eb;
-  --chart-rain: #2563eb;
-  --chart-rain-light: #93c5fd;
-  --chart-lightning: #b45309;
-  --chart-lightning-light: #fcd34d;
+/* ── Vaste Weer&Radar-achtige palette (geen dag/nacht) ── */
+:root {
+  --background: #0077b6;
+  --foreground: #062033;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-muted: #2a4f66;
+  --surface-subtle: #e8f6fc;
+  --border: #7ebfe0;
+  --border-subtle: #c5e6f5;
+  --primary: #0077b6;
+  --accent-weather: #0088cc;
+  --accent-energy: #ff5500;
+  --accent-export: #00b84f;
+  --accent-danger: #e31c23;
+  --accent-violet: #5b21e8;
+  --accent-amber: #ff9500;
+  --accent-weather-soft: rgba(0, 136, 204, 0.18);
+  --accent-energy-soft: rgba(255, 85, 0, 0.18);
+  --accent-export-soft: rgba(0, 184, 79, 0.18);
+  --accent-violet-soft: rgba(91, 33, 232, 0.18);
+  --accent-amber-soft: rgba(255, 149, 0, 0.2);
+  --nav-bg: rgba(255, 255, 255, 0.97);
+  --nav-inactive: #4a6a80;
+  --nav-hover: #062033;
+  --header-bg: #0066a1;
+  --header-fg: #ffffff;
+  --hero-foreground: #062033;
+  --hero-muted: #2a4f66;
+  --gradient-from: #005f94;
+  --gradient-via: #0077b6;
+  --gradient-to: #0090d0;
+  --elevation-shadow: 0 2px 4px rgba(0, 40, 80, 0.12),
+    0 10px 24px rgba(0, 50, 100, 0.18);
+  --moon-dark: #062033;
+  --moon-light: #f4faff;
+  --chart-grid: rgba(6, 32, 51, 0.1);
+  --chart-tick: #2a4f66;
+  --chart-tooltip-bg: #ffffff;
+  --chart-tooltip-border: #7ebfe0;
+  --chart-tooltip-label: #2a4f66;
+  --chart-cursor: rgba(0, 136, 204, 0.1);
+  --chart-ref-line: rgba(6, 32, 51, 0.16);
+  --chart-weather: #0088cc;
+  --chart-weather-light: #33a8e0;
+  --chart-energy: #ff5500;
+  --chart-energy-light: #ff8533;
+  --chart-battery: #5b21e8;
+  --chart-net: #ff5500;
+  --chart-export: #00b84f;
+  --chart-solar: #ff9500;
+  --chart-temperature: #0088cc;
+  --chart-rain: #006aa3;
+  --chart-rain-light: #33a8e0;
+  --chart-lightning: #ff9500;
+  --chart-lightning-light: #ffb84d;
   --radius-sm: 0.625rem;
   --radius-lg: 1rem;
   --text-xs: 0.6875rem;
@@ -70,64 +71,6 @@
   --tracking-label: 0.06em;
   --space-section: 2rem;
   --space-stack: 1rem;
-}
-
-/* ── Night palette (deep marine, no pure black/white) ── */
-[data-theme="night"] {
-  --background: #0b1220;
-  --foreground: #dfe6f0;
-  --surface: #131c2e;
-  --surface-raised: #1a2439;
-  --surface-muted: #8b9ab1;
-  --surface-subtle: #1a2439;
-  --border: #2a3548;
-  --border-subtle: #222d3f;
-  --primary: #60a5fa;
-  --accent-weather: #60a5fa;
-  --accent-energy: #fbbf24;
-  --accent-export: #34d399;
-  --accent-danger: #fb7185;
-  --accent-violet: #a78bfa;
-  --accent-amber: #fbbf24;
-  --accent-weather-soft: rgba(96, 165, 250, 0.14);
-  --accent-energy-soft: rgba(251, 191, 36, 0.14);
-  --accent-export-soft: rgba(52, 211, 153, 0.14);
-  --accent-violet-soft: rgba(167, 139, 250, 0.14);
-  --accent-amber-soft: rgba(251, 191, 36, 0.14);
-  --nav-bg: rgba(19, 28, 46, 0.92);
-  --nav-inactive: #6b7a90;
-  --nav-hover: #c5d0e0;
-  --hero-foreground: #dfe6f0;
-  --hero-muted: #8b9ab1;
-  --gradient-from: #0b1220;
-  --gradient-via: #101a2e;
-  --gradient-to: #0b1220;
-  --elevation-shadow: 0 1px 2px rgba(0, 0, 0, 0.2),
-    0 4px 12px rgba(0, 0, 0, 0.15);
-  --moon-dark: #0b1220;
-  --moon-light: #dfe6f0;
-  --chart-grid: rgba(255, 255, 255, 0.06);
-  --chart-tick: #8b9ab1;
-  --chart-tooltip-bg: #1a2439;
-  --chart-tooltip-border: #2a3548;
-  --chart-tooltip-label: #8b9ab1;
-  --chart-cursor: rgba(255, 255, 255, 0.06);
-  --chart-ref-line: rgba(255, 255, 255, 0.12);
-  --chart-weather: #60a5fa;
-  --chart-weather-light: #93c5fd;
-  --chart-energy: #fbbf24;
-  --chart-energy-light: #fde68a;
-  --chart-battery: #a78bfa;
-  --chart-net: #fb923c;
-  --chart-export: #34d399;
-  --chart-solar: #facc15;
-  --chart-temperature: #60a5fa;
-  --chart-rain: #60a5fa;
-  --chart-rain-light: #93c5fd;
-  --chart-lightning: #fbbf24;
-  --chart-lightning-light: #fde68a;
-  --elevation-shadow: 0 1px 2px rgba(0, 0, 0, 0.25),
-    0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 @theme inline {
@@ -154,6 +97,8 @@
   --color-nav-bg: var(--nav-bg);
   --color-nav-inactive: var(--nav-inactive);
   --color-nav-hover: var(--nav-hover);
+  --color-header-bg: var(--header-bg);
+  --color-header-fg: var(--header-fg);
   --color-hero-foreground: var(--hero-foreground);
   --color-hero-muted: var(--hero-muted);
   --color-chart-weather: var(--chart-weather);
@@ -175,11 +120,6 @@
 
 html {
   color-scheme: light;
-  transition: background-color 0.4s ease, color 0.4s ease;
-}
-
-[data-theme="night"] {
-  color-scheme: dark;
 }
 
 body {
@@ -194,7 +134,6 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
   font-size: var(--text-base);
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 .app-shell {
