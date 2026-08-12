@@ -503,10 +503,28 @@ export function HueEvaluateButton() {
       const res = await fetch("/api/hue/evaluate", { method: "POST" });
       const b = (await res.json().catch(() => ({}))) as {
         evaluated?: number;
+        triggered?: number;
+        results?: { triggered: boolean; message?: string; ruleName?: string }[];
         error?: string;
       };
       if (!res.ok) throw new Error(b.error ?? `Fout ${res.status}`);
-      setResult(b.evaluated != null ? `${b.evaluated} regel(s) geëvalueerd` : "Klaar");
+
+      const checked = b.evaluated ?? 0;
+      const triggered = b.triggered ?? 0;
+      if (checked === 0) {
+        setResult("Geen actieve regels");
+        return;
+      }
+      if (triggered === 0) {
+        const detail = b.results?.find((r) => !r.triggered && r.message)?.message;
+        setResult(
+          detail
+            ? `${checked} gecontroleerd · geen trigger (${detail})`
+            : `${checked} gecontroleerd · geen trigger`,
+        );
+        return;
+      }
+      setResult(`${checked} gecontroleerd · ${triggered} geactiveerd`);
     } catch (e) {
       setResult(e instanceof Error ? e.message : "Mislukt");
     } finally {

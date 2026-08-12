@@ -44,8 +44,9 @@ export async function GET(req: NextRequest) {
       ok: true,
       restored: restored.length,
       evaluated: results.length,
-      triggered: results.filter((r) => r.status === "ok").length,
+      triggered: results.filter((r) => r.triggered).length,
       failed: results.filter((r) => r.status === "error").length,
+      skipped: results.filter((r) => r.status === "skipped").length,
       restoreResults: restored,
       results,
     });

@@ -1,6 +1,6 @@
 import "server-only";
 import type { WeerLive } from "@/lib/api/types";
-import { compare, metricValue } from "@/lib/tahoma/metrics";
+import { compare, metricValue, METRIC_BY_KEY } from "@/lib/tahoma/metrics";
 import { scheduleRuleReset } from "@/lib/hue/pending-reset";
 import { snapshotFromLight } from "@/lib/hue/snapshot";
 import { applyHueLightAction } from "@/lib/hue/apply-action";
@@ -13,9 +13,10 @@ export interface HueEvaluationResult {
   ruleName: string;
   lightId: string;
   action: HueRuleAction;
-  status: "ok" | "error";
+  status: "ok" | "error" | "skipped";
   message?: string;
   triggered: boolean;
+  value?: number | null;
 }
 
 function cooldownPassed(rule: HueRule, now: number): boolean {
@@ -23,6 +24,12 @@ function cooldownPassed(rule: HueRule, now: number): boolean {
   const last = Date.parse(rule.lastTriggeredAt);
   if (!Number.isFinite(last)) return true;
   return now - last >= rule.cooldownMin * 60_000;
+}
+
+function formatValue(metric: HueRule["metric"], value: number): string {
+  const meta = METRIC_BY_KEY[metric];
+  const unit = meta?.unit ? ` ${meta.unit}` : "";
+  return `${value}${unit}`;
 }
 
 export async function evaluateHueRules(
@@ -41,12 +48,50 @@ export async function evaluateHueRules(
     if (!settings.enabled && !options.force) continue;
 
     const value = metricValue(weather, rule.metric);
-    if (value == null) continue;
-    if (!options.force && !cooldownPassed(rule, now)) continue;
-    if (!compare(value, rule.operator, rule.threshold)) continue;
-
     const light = byId.get(rule.lightId);
     const lightName = light?.name ?? `Lamp ${rule.lightId}`;
+
+    if (value == null) {
+      results.push({
+        ruleId: rule.id,
+        ruleName: rule.name,
+        lightId: rule.lightId,
+        action: rule.action,
+        status: "skipped",
+        message: "Geen meetwaarde (bijv. geen recente bliksem)",
+        triggered: false,
+        value: null,
+      });
+      continue;
+    }
+
+    if (!options.force && !cooldownPassed(rule, now)) {
+      results.push({
+        ruleId: rule.id,
+        ruleName: rule.name,
+        lightId: rule.lightId,
+        action: rule.action,
+        status: "skipped",
+        message: "Cooldown actief",
+        triggered: false,
+        value,
+      });
+      continue;
+    }
+
+    if (!compare(value, rule.operator, rule.threshold)) {
+      results.push({
+        ruleId: rule.id,
+        ruleName: rule.name,
+        lightId: rule.lightId,
+        action: rule.action,
+        status: "skipped",
+        message: `Voorwaarde niet waar (${formatValue(rule.metric, value)})`,
+        triggered: false,
+        value,
+      });
+      continue;
+    }
 
     let status: "ok" | "error" = "ok";
     let message: string | undefined;
@@ -87,6 +132,7 @@ export async function evaluateHueRules(
       status,
       message,
       triggered: true,
+      value,
     });
 
     await appendLog({

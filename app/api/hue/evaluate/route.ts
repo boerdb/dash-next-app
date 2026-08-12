@@ -27,8 +27,10 @@ export async function POST() {
     const lights = await fetchLights(settings);
     const restored = await processPendingResets(settings);
     const results = await evaluateHueRules(settings, weather, lights, { force: true });
+    const triggered = results.filter((r) => r.triggered).length;
     return jsonNoStore({
       evaluated: results.length,
+      triggered,
       restored: restored.length,
       restoreResults: restored,
       results,
