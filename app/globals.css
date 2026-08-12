@@ -1,61 +1,61 @@
 @import "tailwindcss";
 
-/* ── Vaste Weer&Radar-achtige palette (geen dag/nacht) ── */
+/* ── Weer&Radar-stijl: vaste donkere navy/teal (geen dag/nacht) ── */
 :root {
-  --background: #0077b6;
-  --foreground: #062033;
-  --surface: #ffffff;
-  --surface-raised: #ffffff;
-  --surface-muted: #2a4f66;
-  --surface-subtle: #e8f6fc;
-  --border: #7ebfe0;
-  --border-subtle: #c5e6f5;
-  --primary: #0077b6;
-  --accent-weather: #0088cc;
-  --accent-energy: #ff5500;
-  --accent-export: #00b84f;
-  --accent-danger: #e31c23;
-  --accent-violet: #5b21e8;
-  --accent-amber: #ff9500;
-  --accent-weather-soft: rgba(0, 136, 204, 0.18);
-  --accent-energy-soft: rgba(255, 85, 0, 0.18);
-  --accent-export-soft: rgba(0, 184, 79, 0.18);
-  --accent-violet-soft: rgba(91, 33, 232, 0.18);
-  --accent-amber-soft: rgba(255, 149, 0, 0.2);
-  --nav-bg: rgba(255, 255, 255, 0.97);
-  --nav-inactive: #4a6a80;
-  --nav-hover: #062033;
-  --header-bg: #0066a1;
+  --background: #061a2e;
+  --foreground: #f2f7fb;
+  --surface: #0b2a45;
+  --surface-raised: #0e3556;
+  --surface-muted: #8eabc2;
+  --surface-subtle: #123a5c;
+  --border: #1a4d73;
+  --border-subtle: #153d5c;
+  --primary: #00a8e8;
+  --accent-weather: #00b4f0;
+  --accent-energy: #ff6a00;
+  --accent-export: #22c55e;
+  --accent-danger: #ff3b4a;
+  --accent-violet: #a78bfa;
+  --accent-amber: #ffcc00;
+  --accent-weather-soft: rgba(0, 180, 240, 0.2);
+  --accent-energy-soft: rgba(255, 106, 0, 0.2);
+  --accent-export-soft: rgba(34, 197, 94, 0.2);
+  --accent-violet-soft: rgba(167, 139, 250, 0.2);
+  --accent-amber-soft: rgba(255, 204, 0, 0.22);
+  --nav-bg: rgba(8, 30, 52, 0.96);
+  --nav-inactive: #7a97ae;
+  --nav-hover: #f2f7fb;
+  --header-bg: #083052;
   --header-fg: #ffffff;
-  --hero-foreground: #062033;
-  --hero-muted: #2a4f66;
-  --gradient-from: #005f94;
-  --gradient-via: #0077b6;
-  --gradient-to: #0090d0;
-  --elevation-shadow: 0 2px 4px rgba(0, 40, 80, 0.12),
-    0 10px 24px rgba(0, 50, 100, 0.18);
-  --moon-dark: #062033;
-  --moon-light: #f4faff;
-  --chart-grid: rgba(6, 32, 51, 0.1);
-  --chart-tick: #2a4f66;
-  --chart-tooltip-bg: #ffffff;
-  --chart-tooltip-border: #7ebfe0;
-  --chart-tooltip-label: #2a4f66;
-  --chart-cursor: rgba(0, 136, 204, 0.1);
-  --chart-ref-line: rgba(6, 32, 51, 0.16);
-  --chart-weather: #0088cc;
-  --chart-weather-light: #33a8e0;
-  --chart-energy: #ff5500;
-  --chart-energy-light: #ff8533;
-  --chart-battery: #5b21e8;
-  --chart-net: #ff5500;
-  --chart-export: #00b84f;
-  --chart-solar: #ff9500;
-  --chart-temperature: #0088cc;
-  --chart-rain: #006aa3;
-  --chart-rain-light: #33a8e0;
-  --chart-lightning: #ff9500;
-  --chart-lightning-light: #ffb84d;
+  --hero-foreground: #f2f7fb;
+  --hero-muted: #a8c2d6;
+  --gradient-from: #041525;
+  --gradient-via: #061a2e;
+  --gradient-to: #0a2744;
+  --elevation-shadow: 0 2px 6px rgba(0, 0, 0, 0.35),
+    0 12px 28px rgba(0, 0, 0, 0.28);
+  --moon-dark: #061a2e;
+  --moon-light: #e8f4fc;
+  --chart-grid: rgba(255, 255, 255, 0.08);
+  --chart-tick: #8eabc2;
+  --chart-tooltip-bg: #0e3556;
+  --chart-tooltip-border: #1a4d73;
+  --chart-tooltip-label: #8eabc2;
+  --chart-cursor: rgba(0, 180, 240, 0.12);
+  --chart-ref-line: rgba(255, 255, 255, 0.16);
+  --chart-weather: #00b4f0;
+  --chart-weather-light: #5ad0ff;
+  --chart-energy: #ff6a00;
+  --chart-energy-light: #ff9a4d;
+  --chart-battery: #a78bfa;
+  --chart-net: #ff6a00;
+  --chart-export: #22c55e;
+  --chart-solar: #ffcc00;
+  --chart-temperature: #00b4f0;
+  --chart-rain: #00a0e0;
+  --chart-rain-light: #5ad0ff;
+  --chart-lightning: #ffcc00;
+  --chart-lightning-light: #ffe066;
   --radius-sm: 0.625rem;
   --radius-lg: 1rem;
   --text-xs: 0.6875rem;
@@ -119,7 +119,7 @@
 }
 
 html {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 body {

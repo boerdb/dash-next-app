@@ -64,11 +64,11 @@ export function WeatherHero({
   return (
     <div className="lg:grid lg:grid-cols-[1fr_auto] lg:items-end lg:gap-8">
       <section
-        className="relative -mx-4 overflow-hidden rounded-b-[var(--radius-lg)] px-4 pb-6 pt-5 sm:-mx-6 lg:mx-0 lg:rounded-[var(--radius-lg)] lg:px-6"
+        className="relative -mx-4 min-h-[22rem] overflow-hidden rounded-b-[var(--radius-lg)] px-4 pb-8 pt-6 sm:-mx-6 sm:min-h-[24rem] lg:mx-0 lg:min-h-[26rem] lg:rounded-[var(--radius-lg)] lg:px-6 lg:pb-10 lg:pt-8"
         style={getWeatherBackgroundStyle(condition)}
       >
-        <div className="relative z-10 text-center [text-shadow:0_1px_10px_rgba(0,0,0,0.65)] lg:text-left">
-          <div className="mb-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-white/85 lg:justify-start">
+        <div className="relative z-10 flex h-full min-h-[20rem] flex-col justify-end text-center [text-shadow:0_1px_12px_rgba(0,0,0,0.7)] sm:min-h-[22rem] lg:min-h-[24rem] lg:text-left">
+          <div className="mb-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-white/90 lg:justify-start">
             {updateLabel ? <span>{updateLabel}</span> : null}
             {updateLabel ? <span className="hidden text-white/50 sm:inline">·</span> : null}
             <span className="text-label font-semibold uppercase tracking-wide text-white">
@@ -77,7 +77,7 @@ export function WeatherHero({
             {showWeatherSub ? (
               <>
                 <span className="text-white/50">·</span>
-                <span className="text-label font-medium uppercase text-white/85">
+                <span className="text-label font-medium uppercase text-white/90">
                   {weatherLabel}
                 </span>
               </>
@@ -86,22 +86,22 @@ export function WeatherHero({
 
           <Icon
             className={cn(
-              "mx-auto h-9 w-9 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)] lg:mx-0",
-              condition === "sunny" && "text-amber-300",
+              "mx-auto h-10 w-10 text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)] lg:mx-0",
+              condition === "sunny" && "text-accent-amber",
               (condition === "evening" || condition === "dusk") && "text-orange-300",
-              condition === "night" && "text-amber-200"
+              condition === "night" && "text-accent-amber"
             )}
             strokeWidth={1.5}
           />
 
           <SunMoonArc astro={astro} />
 
-          <p className="text-caption mt-2 uppercase tracking-label text-white/75">
+          <p className="text-caption mt-3 uppercase tracking-label text-white/80">
             Buitentemperatuur
           </p>
-          <h1 className="text-metric-lg text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.9)]">
+          <h1 className="text-metric-lg text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.85)]">
             {temp}
-            <sup className="ml-1 text-2xl font-normal text-white/85">°C</sup>
+            <sup className="ml-1 text-2xl font-normal text-white/90">°C</sup>
           </h1>
         </div>
       </section>
