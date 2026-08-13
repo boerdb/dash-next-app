@@ -3,8 +3,8 @@
 import { useCallback, useMemo } from "react";
 import useSWR, { mutate as swrMutate } from "swr";
 import { jsonFetcher, FetchError } from "@/lib/fetcher";
+import { useLiveAstronomy } from "@/lib/hooks/use-live-astronomy";
 import { useRevalidateOnVisible } from "@/lib/hooks/use-revalidate-on-visible";
-import { getAstronomyInfo, toAstronomieApi } from "@/lib/astronomy/sun-moon";
 import { hasActiveKnmiThunderWarning } from "@/lib/knmi/thunder";
 import { getWeatherCondition } from "@/lib/utils/weather-condition";
 import { formatWeerUpdateLabel } from "@/lib/weer/update-label";
@@ -14,7 +14,6 @@ import {
   shouldAccelerateLightningPoll,
 } from "@/lib/weer/lightning-storm";
 import type {
-  AstronomieApi,
   GetijdenResponse,
   KnmiWaarschuwingenApi,
   PrecipForecastResponse,
@@ -28,24 +27,6 @@ const swrFreshOnOpen = {
   revalidateIfStale: true,
   keepPreviousData: true,
 } as const;
-
-const defaultAstro: AstronomieApi = {
-  period: "day",
-  sunriseLabel: "—",
-  sunsetLabel: "—",
-  daylightHoursLabel: "—",
-  sunProgress: 0.5,
-  sunBelowHorizon: false,
-  sunAltitudeDeg: 0,
-  moon: {
-    phase: 0.5,
-    fraction: 0.5,
-    label: "Maan",
-    illuminationPct: 50,
-    riseLabel: null,
-    setLabel: null,
-  },
-};
 
 async function knmiFetcher(url: string): Promise<KnmiWaarschuwingenApi | null> {
   const res = await fetch(url, { cache: "no-store" });
@@ -86,11 +67,7 @@ export function useWeerData() {
     { refreshInterval: 900_000, ...swrFreshOnOpen }
   );
 
-  const { data: astro, mutate: mutateAstro } = useSWR<AstronomieApi>(
-    "/api/weer/astronomie",
-    jsonFetcher,
-    { refreshInterval: 300_000, ...swrFreshOnOpen }
-  );
+  const astroData = useLiveAstronomy();
 
   const { data: knmiWaarschuwingen, mutate: mutateKnmi } = useSWR<
     KnmiWaarschuwingenApi | null,
@@ -111,27 +88,16 @@ export function useWeerData() {
     ...swrFreshOnOpen,
   });
 
-  const astroFallback = useMemo(() => {
-    try {
-      return toAstronomieApi(getAstronomyInfo());
-    } catch {
-      return defaultAstro;
-    }
-  }, []);
-
-  const astroData = astro ?? astroFallback;
-
   const refreshAll = useCallback(async () => {
     await Promise.all([
       mutateWeer(),
       mutateHistorie(),
       mutateGetijden(),
-      mutateAstro(),
       mutateKnmi(),
       mutateForecast(),
       swrMutate("/api/weer/radar"),
     ]);
-  }, [mutateWeer, mutateHistorie, mutateGetijden, mutateAstro, mutateKnmi, mutateForecast]);
+  }, [mutateWeer, mutateHistorie, mutateGetijden, mutateKnmi, mutateForecast]);
 
   useRevalidateOnVisible(refreshAll);
 

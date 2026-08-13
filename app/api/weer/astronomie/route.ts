@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+import { jsonNoStore } from "@/lib/api/no-store";
 import { getAstronomyInfo, toAstronomieApi } from "@/lib/astronomy/sun-moon";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return NextResponse.json(toAstronomieApi(getAstronomyInfo()));
+  return jsonNoStore(toAstronomieApi(getAstronomyInfo()));
 }
