@@ -58,7 +58,7 @@ export interface WeerLive {
   humidityin_min_time?: string | null;
   humidityin_max_time?: string | null;
   dailyrain_mm?: number;
-  /** WS90 piezo-regen (mm); gekopieerd naar dailyrain_mm bij ingest. */
+  /** WS90 piezo-regen (mm); zonder WH40 gekopieerd naar dailyrain_mm. */
   dailyrain_piezo_mm?: number;
   rainrate_piezo_mm?: number;
   weeklyrain_piezo_mm?: number;
@@ -98,6 +98,8 @@ export interface WeerLive {
   wh25batt?: number | string;
   wh57batt?: number | string;
   wh90batt?: number | string;
+  /** WH40 kiepbakje-batterij (volt of 0–5-schaal). */
+  wh40batt?: number | string;
   batt2?: number | string;
   stationtype?: string;
   model?: string;

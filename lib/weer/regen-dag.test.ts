@@ -13,7 +13,7 @@ describe("regenMmFromWeer", () => {
     assert.equal(regenMmFromWeer({ dailyrain_mm: 12.34 }), 12.3);
   });
 
-  it("prefereert WS90 piezo boven legacy WH65-velden", () => {
+  it("leest dailyrain_mm (WH40 of piezo-primair)", () => {
     assert.equal(
       regenMmFromWeer({
         dailyrain_mm: 0.6,

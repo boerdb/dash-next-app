@@ -12,7 +12,7 @@ import type { WeerHistorie, WeerLive } from "@/lib/api/types";
 import { Metric, MetricRow, MetricTrend } from "@/components/ui/metric";
 import { Surface, SurfaceBody } from "@/components/ui/surface";
 import { formatBaromTrendDelta } from "@/lib/weer/barom-trend";
-import { hasWs90Sensor } from "@/lib/weer/sensor-status";
+import { hasWh40Sensor, hasWs90Sensor } from "@/lib/weer/sensor-status";
 import { regenMmFromWeer } from "@/lib/weer/regen-dag";
 import { resolveIlluminanceLux } from "@/lib/weer/ws90-lux";
 import { resolveRainRateMm } from "@/lib/weer/ws90-rain";
@@ -108,6 +108,8 @@ export function StationMetrics({
   const lux = resolveIlluminanceLux(data);
   const baromDir = data.barom_trend_direction ?? "steady";
   const baromDelta = finiteNumber(data.barom_trend_delta_hpa);
+  const wh40 = hasWh40Sensor(data);
+  const piezoToday = finiteNumber(data.dailyrain_piezo_mm);
 
   return (
     <Surface level="raised">
@@ -229,7 +231,15 @@ export function StationMetrics({
 
         <div className="border-t border-border-subtle pt-4">
           <MetricRow>
-            <Metric label="Regen vandaag" value={rainToday.toFixed(1)} unit="mm" accent="weather" />
+            <Metric
+              label={wh40 ? "Regen WH40" : "Regen vandaag"}
+              value={rainToday.toFixed(1)}
+              unit="mm"
+              accent="weather"
+            />
+            {wh40 && piezoToday !== null ? (
+              <Metric label="Piezo WS90" value={piezoToday.toFixed(1)} unit="mm" />
+            ) : null}
             <Metric
               label="Regen nu"
               value={rainRate !== undefined ? rainRate.toFixed(1) : "—"}
@@ -252,17 +262,37 @@ export function StationMetrics({
           </MetricRow>
         )}
 
-        {hasWs90Sensor(data) ? (
+        {hasWs90Sensor(data) || wh40 ? (
           <div className="border-t border-border-subtle pt-4">
-            <p className="text-label mb-3 text-surface-muted">WS90</p>
-            <MetricRow>
-              {data.ws90_voltage_v != null ? (
-                <Metric label="Batterij" value={`${data.ws90_voltage_v}`} unit="V" size="sm" />
-              ) : null}
-              {data.ws90_cap_voltage_v != null ? (
-                <Metric label="Supercap" value={`${data.ws90_cap_voltage_v}`} unit="V" size="sm" />
-              ) : null}
-            </MetricRow>
+            {hasWs90Sensor(data) ? (
+              <>
+                <p className="text-label mb-3 text-surface-muted">WS90</p>
+                <MetricRow>
+                  {data.ws90_voltage_v != null ? (
+                    <Metric label="Batterij" value={`${data.ws90_voltage_v}`} unit="V" size="sm" />
+                  ) : null}
+                  {data.ws90_cap_voltage_v != null ? (
+                    <Metric label="Supercap" value={`${data.ws90_cap_voltage_v}`} unit="V" size="sm" />
+                  ) : null}
+                </MetricRow>
+              </>
+            ) : null}
+            {wh40 ? (
+              <>
+                <p
+                  className={
+                    hasWs90Sensor(data)
+                      ? "text-label mb-3 mt-4 text-surface-muted"
+                      : "text-label mb-3 text-surface-muted"
+                  }
+                >
+                  WH40
+                </p>
+                <MetricRow>
+                  <Metric label="Batterij" value={`${data.wh40batt}`} unit="V" size="sm" />
+                </MetricRow>
+              </>
+            ) : null}
           </div>
         ) : null}
       </SurfaceBody>

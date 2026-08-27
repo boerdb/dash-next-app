@@ -22,6 +22,11 @@ export function hasLightningSensor(data: WeerLive): boolean {
   );
 }
 
+/** WH40 kiepbakje gekoppeld (wh40batt in upload). */
+export function hasWh40Sensor(data: WeerLive): boolean {
+  return data.wh40batt !== undefined && data.wh40batt !== "";
+}
+
 export function hasWs90Sensor(data: WeerLive): boolean {
   return (
     fieldPresent(data, "wh90batt") ||

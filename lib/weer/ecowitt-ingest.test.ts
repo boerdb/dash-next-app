@@ -24,6 +24,20 @@ describe("parseEcowittPayload", () => {
     assert.ok(r.server_timestamp);
   });
 
+  it("houdt WH40-dagregen aan als kiepbakje gekoppeld is", () => {
+    const r = parseEcowittPayload({
+      dailyrainin: "0.016",
+      drain_piezo: "0.000",
+      rainratein: "0.08",
+      rrain_piezo: "0.000",
+      wh40batt: "1.5",
+      wh90batt: "3.18",
+    });
+    assert.equal(r.dailyrain_mm, 0.4);
+    assert.equal(r.dailyrain_piezo_mm, 0);
+    assert.equal(r.rainrate_mm, 2);
+  });
+
   it("mapt bliksem en WS90 piezo", () => {
     const r = parseEcowittPayload({
       dateutc: "2020-10-01 11:31:16",

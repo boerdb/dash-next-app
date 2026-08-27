@@ -23,6 +23,21 @@ describe("applyWs90RainPrimary", () => {
     assert.equal(r.yearlyrain_mm, 180);
   });
 
+  it("laat WH40-kiepbakje staan naast piezo", () => {
+    const r = applyWs90RainPrimary({
+      wh40batt: "1.5",
+      dailyrain_mm: 0.4,
+      rainrate_mm: 1.2,
+      last24hrain_mm: 0.4,
+      dailyrain_piezo_mm: 0,
+      rainrate_piezo_mm: 0,
+    });
+    assert.equal(r.dailyrain_mm, 0.4);
+    assert.equal(r.rainrate_mm, 1.2);
+    assert.equal(r.last24hrain_mm, 0.4);
+    assert.equal(r.dailyrain_piezo_mm, 0);
+  });
+
   it("laat data ongewijzigd zonder piezo", () => {
     const r = applyWs90RainPrimary({ dailyrain_mm: 3, rainrate_mm: 0.2 });
     assert.equal(r.dailyrain_mm, 3);
@@ -84,6 +99,18 @@ describe("resolveRainRateMm", () => {
         rrain_piezo: 0.024,
       }),
       0
+    );
+  });
+
+  it("prefereert WH40-intensiteit boven vast piezo-minimum", () => {
+    assert.equal(
+      resolveRainRateMm({
+        wh40batt: "1.5",
+        rainrate_mm: 2.1,
+        rainrate_piezo_mm: 0.6,
+        rrain_piezo: 0.024,
+      }),
+      2.1
     );
   });
 

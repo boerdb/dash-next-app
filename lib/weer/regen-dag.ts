@@ -1,7 +1,7 @@
 import type { WeerLive } from "@/lib/api/types";
 import { round1 } from "@/lib/weer/regen-jaar-labels";
 
-/** Dagregen (mm) uit standaard veld (WS90 piezo via applyWs90RainPrimary). */
+/** Dagregen (mm): WH40 kiepbakje, anders piezo via applyWs90RainPrimary. */
 export function resolveDailyRainMm(data: WeerLive): number | undefined {
   if (data.dailyrain_mm != null) {
     const mm = Number(data.dailyrain_mm);

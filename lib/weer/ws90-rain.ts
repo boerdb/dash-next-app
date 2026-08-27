@@ -1,4 +1,5 @@
 import type { WeerLive } from "@/lib/api/types";
+import { hasWh40Sensor } from "@/lib/weer/sensor-status";
 
 /** WS90 piezo: 0,024 in/u ≈ 0,6 mm/u — minimum bij “regen ja”, geen echte intensiteit. */
 export const PIEZO_RAINRATE_FLOOR_MM = 0.6;
@@ -43,12 +44,25 @@ export function hasPiezoRain(data: WeerLive): boolean {
   );
 }
 
+function normalizePiezoRate(data: WeerLive): WeerLive {
+  const out = { ...data };
+  const piezoRate = finiteMm(out.rainrate_piezo_mm);
+  if (piezoRate !== undefined) {
+    out.rainrate_piezo_mm = resolveStuckPiezoRainRate(out, piezoRate);
+  }
+  return out;
+}
+
 /**
- * Kopieert WS90 piezo naar de standaard regenvelden (dailyrain_mm, rainrate_mm, …).
- * Oude WH65-velden (dailyrainin e.d.) worden daarmee genegeerd in de UI.
+ * Zonder WH40: kopieert WS90 piezo naar de standaard regenvelden.
+ * Met WH40: kiepbakje blijft dailyrain_mm / rainrate_mm; piezo blijft ernaast.
  */
 export function applyWs90RainPrimary(data: WeerLive): WeerLive {
   if (!hasPiezoRain(data)) return data;
+
+  if (hasWh40Sensor(data)) {
+    return normalizePiezoRate(data);
+  }
 
   const out = { ...data };
 
@@ -85,6 +99,9 @@ export function applyWs90RainPrimary(data: WeerLive): WeerLive {
 
 /** Actuele neerslagintensiteit (mm/u); piezo-minimum wordt gecorrigeerd via uurtotaal. */
 export function resolveRainRateMm(data: WeerLive): number | undefined {
+  if (hasWh40Sensor(data)) {
+    return finiteMm(data.rainrate_mm) ?? finiteMm(data.rainrate_piezo_mm);
+  }
   const fromStandard = finiteMm(data.rainrate_mm);
   if (fromStandard !== undefined) {
     return resolveStuckPiezoRainRate(data, fromStandard);
