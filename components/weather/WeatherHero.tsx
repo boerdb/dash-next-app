@@ -19,6 +19,7 @@ import { getWeatherBackgroundStyle } from "@/lib/utils/weather-backgrounds";
 import { shouldShowHeatIndex } from "@/lib/weer/heat-index";
 import { shouldShowWindChill } from "@/lib/weer/wind-chill-display";
 import { SunMoonArc } from "@/components/weather/SunMoonArc";
+import { DegreeMark } from "@/components/ui/degree-mark";
 import { Surface, SurfaceBody } from "@/components/ui/surface";
 import { cn } from "@/lib/utils";
 
@@ -101,7 +102,9 @@ export function WeatherHero({
           </p>
           <h1 className="text-metric-lg text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.85)]">
             {temp}
-            <sup className="ml-1 text-2xl font-normal text-white/90">°C</sup>
+            <DegreeMark mode="sup" className="text-white/90">
+              °C
+            </DegreeMark>
           </h1>
         </div>
       </section>
@@ -111,26 +114,40 @@ export function WeatherHero({
           {showWindChill ? (
             <div className="flex items-baseline justify-between gap-2">
               <span className="text-label text-surface-muted">Gevoel</span>
-              <span className="text-metric text-accent-weather">{data.gevoelstemperatuur}°</span>
+              <span className="text-metric text-accent-weather">
+                {data.gevoelstemperatuur}
+                <DegreeMark />
+              </span>
             </div>
           ) : null}
           {showHitteIndex ? (
             <div className="flex items-baseline justify-between gap-2">
               <span className="text-label text-surface-muted">Hitte-index</span>
-              <span className="text-metric text-accent-energy">{data.hitte_index_c}°</span>
+              <span className="text-metric text-accent-energy">
+                {data.hitte_index_c}
+                <DegreeMark />
+              </span>
             </div>
           ) : null}
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="text-label text-surface-muted">
-              {data.temp_min_time ? `${data.temp_min_time} min` : "Min"}
-            </span>
-            <span className="text-metric text-accent-weather">{data.temp_min_c}°</span>
-          </div>
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="text-label text-surface-muted">
-              {data.temp_max_time ? `${data.temp_max_time} max` : "Max"}
-            </span>
-            <span className="text-metric text-accent-energy">{data.temp_max_c}°</span>
+          <div className="space-y-3">
+            <div className="flex items-baseline justify-between gap-6">
+              <p className="text-label text-surface-muted tabular-nums">
+                {data.temp_min_time ?? "—"} MIN
+              </p>
+              <p className="text-metric text-accent-weather">
+                {data.temp_min_c ?? "—"}
+                <DegreeMark />
+              </p>
+            </div>
+            <div className="flex items-baseline justify-between gap-6">
+              <p className="text-label text-surface-muted tabular-nums">
+                {data.temp_max_time ?? "—"} MAX
+              </p>
+              <p className="text-metric text-accent-energy">
+                {data.temp_max_c ?? "—"}
+                <DegreeMark />
+              </p>
+            </div>
           </div>
         </SurfaceBody>
       </Surface>

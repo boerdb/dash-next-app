@@ -1,14 +1,9 @@
 "use client";
 
 import { useMemo } from "react";
-import {
-  ArrowDown,
-  ArrowDownRight,
-  ArrowUp,
-  ArrowUpRight,
-  Minus,
-} from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 import type { WeerHistorie, WeerLive } from "@/lib/api/types";
+import { DailyRange } from "@/components/ui/daily-range";
 import { Metric, MetricRow, MetricTrend } from "@/components/ui/metric";
 import { Surface, SurfaceBody } from "@/components/ui/surface";
 import { formatBaromTrendDelta } from "@/lib/weer/barom-trend";
@@ -25,46 +20,6 @@ function finiteNumber(value: unknown): number | null {
 function formatValue(value: unknown, decimals = 1, fallback = "—"): string {
   const n = finiteNumber(value);
   return n === null ? fallback : n.toFixed(decimals);
-}
-
-function DailyRange({
-  min,
-  max,
-  minTime,
-  maxTime,
-  unit,
-  decimals = 1,
-}: {
-  min?: unknown;
-  max?: unknown;
-  minTime?: string | null;
-  maxTime?: string | null;
-  unit?: string;
-  decimals?: number;
-}) {
-  const minN = finiteNumber(min);
-  const maxN = finiteNumber(max);
-  if (minN === null && maxN === null) return null;
-  return (
-    <p className="text-caption mt-1 text-surface-muted">
-      {maxN !== null ? (
-        <span className="inline-flex items-center gap-0.5 text-accent-energy">
-          <ArrowUp className="h-3 w-3" />
-          {formatValue(max, decimals)}
-          {unit ? ` ${unit}` : ""}
-          {maxTime ? ` ${maxTime}` : ""}
-        </span>
-      ) : null}
-      {minN !== null ? (
-        <span className="ml-2 inline-flex items-center gap-0.5 text-accent-weather">
-          <ArrowDown className="h-3 w-3" />
-          {formatValue(min, decimals)}
-          {unit ? ` ${unit}` : ""}
-          {minTime ? ` ${minTime}` : ""}
-        </span>
-      ) : null}
-    </p>
-  );
 }
 
 function TempTrend({ historie }: { historie?: WeerHistorie }) {
@@ -91,7 +46,7 @@ function TempTrend({ historie }: { historie?: WeerHistorie }) {
         <Minus className="h-3.5 w-3.5" />
       )}
       {trend.delta > 0 ? "+" : ""}
-      {trend.delta.toFixed(1)} °C/u · 24 uur
+      {trend.delta.toFixed(1)}° · 24u
     </MetricTrend>
   );
 }

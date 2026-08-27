@@ -1,7 +1,7 @@
 "use client";
 
-import { ArrowUp } from "lucide-react";
 import type { WeerLive } from "@/lib/api/types";
+import { DailyRange } from "@/components/ui/daily-range";
 import {
   getWindDirection,
   resolveWindDegrees,
@@ -19,38 +19,6 @@ function finiteNumber(value: unknown): number | null {
   if (value === undefined || value === null || value === "") return null;
   const n = Number(value);
   return Number.isFinite(n) ? n : null;
-}
-
-function DailyMax({
-  value,
-  time,
-  unit,
-  decimals = 1,
-  className,
-}: {
-  value: unknown;
-  time?: string | null;
-  unit?: string;
-  decimals?: number;
-  className?: string;
-}) {
-  const n = finiteNumber(value);
-  if (n === null) return null;
-  return (
-    <p
-      className={cn(
-        "text-caption mt-2 inline-flex flex-wrap items-center gap-x-1 font-semibold tabular-nums text-accent-energy",
-        className
-      )}
-    >
-      <ArrowUp className="h-3 w-3 shrink-0" aria-hidden />
-      <span>
-        {n.toFixed(decimals)}
-        {unit ? ` ${unit}` : ""}
-      </span>
-      {time ? <span className="font-normal text-surface-muted">{time}</span> : null}
-    </p>
-  );
 }
 
 function CompassTicks() {
@@ -172,9 +140,9 @@ export function WindRosette({ data }: { data: WeerLive }) {
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
           <div>
             <Metric label="Wind" value={windSpeed.toFixed(1)} unit="km/u" accent="weather" />
-            <DailyMax
-              value={data.maxdailywind_kmh}
-              time={data.maxdailywind_time}
+            <DailyRange
+              max={data.maxdailywind_kmh}
+              maxTime={data.maxdailywind_time}
               unit="km/u"
             />
           </div>
@@ -187,11 +155,11 @@ export function WindRosette({ data }: { data: WeerLive }) {
               accent="energy"
               className="text-right"
             />
-            <DailyMax
-              value={data.maxdailygust_kmh}
-              time={data.maxdailygust_time}
+            <DailyRange
+              max={data.maxdailygust_kmh}
+              maxTime={data.maxdailygust_time}
               unit="km/u"
-              className="justify-end"
+              align="right"
             />
           </div>
         </div>
