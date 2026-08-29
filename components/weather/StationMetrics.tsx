@@ -180,31 +180,39 @@ function SolarCard({ data }: { data: WeerLive }) {
             value={formatValue(data.solarradiation, 0)}
             unit="W/m²"
           />
-          {hasWs90Sensor(data) && lux != null ? (
-            <DerivedMetric
-              label="Licht"
-              value={formatValue(lux, 0)}
-              unit="lux"
-              tone="muted"
-            />
-          ) : null}
+        </StationCol>
+        <StationCol>
+          <Metric label="UV-index" value={data.uv ?? "—"} />
+        </StationCol>
+        <StationCol>
           <DailyRange
             min={undefined}
             max={data.solar_max}
             maxTime={data.solar_max_time}
             unit="W/m²"
             decimals={0}
+            className="mt-2"
           />
         </StationCol>
         <StationCol>
-          <Metric label="UV-index" value={data.uv ?? "—"} />
           <DailyRange
             min={undefined}
             max={data.uv_max}
             maxTime={data.uv_max_time}
             decimals={0}
+            className="mt-2"
           />
         </StationCol>
+        {hasWs90Sensor(data) && lux != null ? (
+          <StationCol className="pt-3">
+            <DerivedMetric
+              label="Licht"
+              value={formatValue(lux, 0)}
+              unit="lux"
+              tone="muted"
+            />
+          </StationCol>
+        ) : null}
       </StationSplit>
     </StationCard>
   );

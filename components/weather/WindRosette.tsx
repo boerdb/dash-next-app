@@ -160,7 +160,7 @@ function WindCompass({ data }: { data: WeerLive }) {
 
   return (
     <div
-      className="relative mx-auto aspect-square w-[9rem] sm:w-[11.5rem]"
+      className="relative mx-auto aspect-square w-[10.5rem] sm:w-[12.5rem]"
       role="img"
       aria-label={`Windrichting ${Math.round(realtimeDeg)} graden ${dirLabel}`}
     >
