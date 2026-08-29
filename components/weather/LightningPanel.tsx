@@ -1,19 +1,15 @@
 "use client";
 
-import { Battery, BatteryWarning, CloudLightning } from "lucide-react";
+import { CloudLightning } from "lucide-react";
 import type { WeerLive } from "@/lib/api/types";
 import { Badge } from "@/components/ui/badge";
 import { Metric, MetricRow } from "@/components/ui/metric";
 import { StationCard } from "@/components/weather/station-card";
-import { getLightningBattery } from "@/lib/weer/sensor-battery";
 import {
   getLightningStatus,
   getLightningStatusLabel,
 } from "@/lib/weer/lightning-storm";
-import {
-  hasLightningSensor,
-  isWh57Detected,
-} from "@/lib/weer/sensor-status";
+import { hasLightningSensor } from "@/lib/weer/sensor-status";
 import { cn } from "@/lib/utils";
 
 function formatStrikeTime(iso: string): string {
@@ -26,48 +22,35 @@ export function LightningPanel({ data }: { data: WeerLive }) {
   if (!hasLightningSensor(data)) return null;
 
   const lightningStatus = getLightningStatus(data);
-  const wh57Detected = isWh57Detected(data);
-  const lightningBattery = getLightningBattery(data);
   const recentStrike = lightningStatus === "strike";
   const lightningKm = data.lightning_km;
   const statusLabel = getLightningStatusLabel(data);
 
   return (
     <StationCard title="Bliksem">
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <CloudLightning
-            className={cn(
-              "h-5 w-5",
-              recentStrike && "text-accent-violet",
-              lightningStatus === "risk" && "text-accent-energy",
-              lightningStatus === "idle" && "text-accent-export"
-            )}
-          />
-          <span className="text-sm font-medium text-foreground">{statusLabel}</span>
-        </div>
-        {lightningBattery ? (
-          <Badge variant={lightningBattery.state === "low" ? "energy" : "default"}>
-            {lightningBattery.state === "low" ? (
-              <BatteryWarning className="h-3 w-3" />
-            ) : (
-              <Battery className="h-3 w-3" />
-            )}
-            {lightningBattery.detail}
-          </Badge>
-        ) : null}
+      <div className="mb-3 flex items-center gap-2">
+        <CloudLightning
+          className={cn(
+            "h-5 w-5 shrink-0",
+            recentStrike && "text-accent-violet",
+            lightningStatus === "risk" && "text-accent-energy",
+            lightningStatus === "idle" && "text-accent-export"
+          )}
+        />
+        <span className="text-sm font-medium text-foreground">{statusLabel}</span>
       </div>
 
-      <div className="mb-3 flex flex-wrap gap-2">
-        {wh57Detected ? <Badge variant="export">WH57</Badge> : null}
-        {recentStrike ? (
-          <Badge variant="violet">Recent</Badge>
-        ) : lightningStatus === "risk" ? (
-          <Badge variant="energy">Kans op onweer</Badge>
-        ) : lightningStatus === "airmass" ? (
-          <Badge variant="energy">Onweersgevoelig</Badge>
-        ) : null}
-      </div>
+      {recentStrike || lightningStatus === "risk" || lightningStatus === "airmass" ? (
+        <div className="mb-3 flex flex-wrap gap-2">
+          {recentStrike ? (
+            <Badge variant="violet">Recent</Badge>
+          ) : lightningStatus === "risk" ? (
+            <Badge variant="energy">Kans op onweer</Badge>
+          ) : (
+            <Badge variant="energy">Onweersgevoelig</Badge>
+          )}
+        </div>
+      ) : null}
 
       {lightningKm != null && lightningKm > 0 ? (
         <MetricRow>

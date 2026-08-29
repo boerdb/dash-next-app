@@ -16,6 +16,7 @@ import {
 import { WindRosette } from "@/components/weather/WindRosette";
 import { formatBaromTrendDelta } from "@/lib/weer/barom-trend";
 import { shouldShowHeatIndex } from "@/lib/weer/heat-index";
+import { getLightningBattery } from "@/lib/weer/sensor-battery";
 import { hasWh40Sensor, hasWs90Sensor } from "@/lib/weer/sensor-status";
 import { regenMmFromWeer } from "@/lib/weer/regen-dag";
 import { shouldShowWindChill } from "@/lib/weer/wind-chill-display";
@@ -344,7 +345,8 @@ function Channel2Card({ data }: { data: WeerLive }) {
 function SensorsCard({ data }: { data: WeerLive }) {
   const ws90 = hasWs90Sensor(data);
   const wh40 = hasWh40Sensor(data);
-  if (!ws90 && !wh40) return null;
+  const lightningBattery = getLightningBattery(data);
+  if (!ws90 && !wh40 && !lightningBattery) return null;
 
   return (
     <StationCard title="Sensoren">
@@ -357,6 +359,14 @@ function SensorsCard({ data }: { data: WeerLive }) {
         ) : null}
         {wh40 ? (
           <Metric label="WH40 batterij" value={`${data.wh40batt}`} unit="V" size="sm" />
+        ) : null}
+        {lightningBattery ? (
+          <Metric
+            label="WH57 batterij"
+            value={lightningBattery.detail}
+            size="sm"
+            accent={lightningBattery.state === "low" ? "energy" : "default"}
+          />
         ) : null}
       </div>
     </StationCard>
