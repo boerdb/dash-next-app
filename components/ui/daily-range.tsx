@@ -1,3 +1,4 @@
+import { ArrowDown, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 function finiteNumber(value: unknown): number | null {
@@ -7,43 +8,58 @@ function finiteNumber(value: unknown): number | null {
 }
 
 function Extreme({
-  label,
   value,
   time,
   unit,
   decimals,
   tone,
+  layout,
+  align,
 }: {
-  label: string;
   value: number;
   time?: string | null;
   unit?: string;
   decimals: number;
   tone: "high" | "low";
+  layout: "row" | "stack";
+  align: "left" | "right";
 }) {
+  const Icon = tone === "high" ? ArrowUp : ArrowDown;
+  const valueEl = (
+    <p
+      className={cn(
+        "inline-flex items-center gap-0.5 tabular-nums text-base font-bold leading-none",
+        tone === "high" ? "text-accent-energy" : "text-accent-weather"
+      )}
+    >
+      <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
+      {value.toFixed(decimals)}
+      {unit?.startsWith("°") ? (
+        "°"
+      ) : unit ? (
+        <span className="ml-0.5 text-[0.7em] font-normal text-surface-muted">{unit}</span>
+      ) : null}
+    </p>
+  );
+
+  if (layout === "stack") {
+    return (
+      <div className={cn("space-y-0.5", align === "right" && "flex flex-col items-end")}>
+        {valueEl}
+        <p className="text-caption tabular-nums text-surface-muted">{time || "—"}</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex items-baseline justify-between gap-3">
-      <p className="text-[0.7rem] font-medium uppercase tracking-wide text-surface-muted tabular-nums">
-        {time || "—"} {label}
-      </p>
-      <p
-        className={cn(
-          "tabular-nums text-base font-bold leading-none",
-          tone === "high" ? "text-accent-energy" : "text-accent-weather"
-        )}
-      >
-        {value.toFixed(decimals)}
-        {unit?.startsWith("°") ? (
-          "°"
-        ) : unit ? (
-          <span className="ml-0.5 text-[0.7em] font-normal text-surface-muted">{unit}</span>
-        ) : null}
-      </p>
+    <div className="flex items-center justify-between gap-3">
+      <p className="text-caption tabular-nums text-surface-muted">{time || "—"}</p>
+      {valueEl}
     </div>
   );
 }
 
-/** Min/max van vandaag: tijd + label links, waarde rechts. */
+/** Dagrecord: max (oranje) boven min (blauw), met pijl en tijdstip. */
 export function DailyRange({
   min,
   max,
@@ -52,6 +68,7 @@ export function DailyRange({
   unit,
   decimals = 1,
   align = "left",
+  layout = "row",
   className,
 }: {
   min?: unknown;
@@ -61,37 +78,38 @@ export function DailyRange({
   unit?: string;
   decimals?: number;
   align?: "left" | "right";
+  layout?: "row" | "stack";
   className?: string;
 }) {
   const minN = finiteNumber(min);
   const maxN = finiteNumber(max);
   if (minN === null && maxN === null) return null;
 
-  const maxOnly = maxN !== null && minN === null;
-
   return (
     <div
       className={cn("mt-2.5 space-y-1.5", align === "right" && "text-right", className)}
       aria-label="Dagrecord"
     >
-      {minN !== null ? (
-        <Extreme
-          label="MIN"
-          value={minN}
-          time={minTime}
-          unit={unit}
-          decimals={decimals}
-          tone="low"
-        />
-      ) : null}
       {maxN !== null ? (
         <Extreme
-          label={maxOnly ? "PIEK" : "MAX"}
           value={maxN}
           time={maxTime}
           unit={unit}
           decimals={decimals}
           tone="high"
+          layout={layout}
+          align={align}
+        />
+      ) : null}
+      {minN !== null ? (
+        <Extreme
+          value={minN}
+          time={minTime}
+          unit={unit}
+          decimals={decimals}
+          tone="low"
+          layout={layout}
+          align={align}
         />
       ) : null}
     </div>

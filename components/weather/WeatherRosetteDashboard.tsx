@@ -23,11 +23,5 @@ export function WeatherMetricsDashboard({ data, historie }: WeatherRosetteDashbo
 }
 
 export function WeatherRosetteDashboard({ data, historie }: WeatherRosetteDashboardProps) {
-  return (
-    <div className="space-y-4">
-      <WindRosette data={data} />
-      <LightningPanel data={data} />
-      <StationMetrics data={data} historie={historie} />
-    </div>
-  );
+  return <StationMetrics data={data} historie={historie} />;
 }

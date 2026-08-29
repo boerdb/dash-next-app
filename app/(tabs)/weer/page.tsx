@@ -3,8 +3,6 @@
 import dynamic from "next/dynamic";
 import { WeatherHero } from "@/components/weather/WeatherHero";
 import { Section } from "@/components/ui/section";
-import { WindRosette } from "@/components/weather/WindRosette";
-import { LightningPanel } from "@/components/weather/LightningPanel";
 import { StationMetrics } from "@/components/weather/StationMetrics";
 import { TideCard } from "@/components/weather/TideCard";
 import { KnmiWarningsCard } from "@/components/weather/KnmiWarningsCard";
@@ -78,14 +76,7 @@ export default function WeerPage() {
             updateLabel={updateLabel}
           />
 
-          <div className="grid gap-4 lg:grid-cols-2">
-            <WindRosette data={weer} />
-            <LightningPanel data={weer} />
-          </div>
-
-          <Section title="Weerstation" subtitle="Ecowitt · live elke minuut" accent="weather">
-            <StationMetrics data={weer} historie={historie} />
-          </Section>
+          <StationMetrics data={weer} historie={historie} />
 
           <div className="grid gap-[var(--space-section)] lg:grid-cols-2">
             <Section title="Regenvoorspelling" subtitle="Open-Meteo · komende 48 uur" accent="weather">
@@ -134,11 +125,12 @@ function WeerSkeleton() {
   return (
     <div className="space-y-[var(--space-section)]">
       <Skeleton className="-mx-4 h-72 rounded-b-[var(--radius-lg)] sm:-mx-6 lg:mx-0" />
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Skeleton className="h-52 w-full" />
+      <div className="grid gap-3 lg:grid-cols-2">
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-40 w-full" />
         <Skeleton className="h-52 w-full" />
       </div>
-      <Skeleton className="h-64 w-full" />
       <Skeleton className="h-[300px] w-full" />
     </div>
   );

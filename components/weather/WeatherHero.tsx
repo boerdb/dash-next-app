@@ -16,11 +16,8 @@ import type { AstronomieApi, WeerLive, WeatherCondition } from "@/lib/api/types"
 import { periodLabels } from "@/lib/astronomy/sun-moon";
 import { conditionLabels } from "@/lib/utils/weather-condition";
 import { getWeatherBackgroundStyle } from "@/lib/utils/weather-backgrounds";
-import { shouldShowHeatIndex } from "@/lib/weer/heat-index";
-import { shouldShowWindChill } from "@/lib/weer/wind-chill-display";
 import { SunMoonArc } from "@/components/weather/SunMoonArc";
 import { DegreeMark } from "@/components/ui/degree-mark";
-import { Surface, SurfaceBody } from "@/components/ui/surface";
 import { cn } from "@/lib/utils";
 
 const icons: Record<WeatherCondition, typeof Sun> = {
@@ -56,19 +53,16 @@ export function WeatherHero({
   const temp = data.temp_c != null ? Number(data.temp_c).toFixed(1) : "—";
   const periodLabel = periodLabels[astro.period];
   const weatherLabel = conditionLabels[condition];
-  const showHitteIndex = shouldShowHeatIndex(data);
-  const showWindChill = shouldShowWindChill(data);
   const showWeatherSub =
     weatherLabel !== periodLabel &&
     !(astro.period === "day" && ["Bewolkt", "Deels bewolkt", "Zonnig"].includes(weatherLabel));
 
   return (
-    <div className="lg:grid lg:grid-cols-[1fr_auto] lg:items-end lg:gap-8">
-      <section
-        className="relative -mx-4 min-h-[22rem] overflow-hidden rounded-b-[var(--radius-lg)] px-4 pb-8 pt-6 sm:-mx-6 sm:min-h-[24rem] lg:mx-0 lg:min-h-[26rem] lg:rounded-[var(--radius-lg)] lg:px-6 lg:pb-10 lg:pt-8"
-        style={getWeatherBackgroundStyle(condition)}
-      >
-        <div className="relative z-10 flex h-full min-h-[20rem] flex-col justify-end text-center [text-shadow:0_1px_12px_rgba(0,0,0,0.7)] sm:min-h-[22rem] lg:min-h-[24rem] lg:text-left">
+    <section
+      className="relative -mx-4 min-h-[22rem] overflow-hidden rounded-b-[var(--radius-lg)] px-4 pb-8 pt-6 sm:-mx-6 sm:min-h-[24rem] lg:mx-0 lg:min-h-[26rem] lg:rounded-[var(--radius-lg)] lg:px-6 lg:pb-10 lg:pt-8"
+      style={getWeatherBackgroundStyle(condition)}
+    >
+      <div className="relative z-10 flex h-full min-h-[20rem] flex-col justify-end text-center [text-shadow:0_1px_12px_rgba(0,0,0,0.7)] sm:min-h-[22rem] lg:min-h-[24rem] lg:text-left">
           <div className="mb-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-white/90 lg:justify-start">
             {updateLabel ? <span>{updateLabel}</span> : null}
             {updateLabel ? <span className="hidden text-white/50 sm:inline">·</span> : null}
@@ -106,51 +100,7 @@ export function WeatherHero({
               °C
             </DegreeMark>
           </h1>
-        </div>
-      </section>
-
-      <Surface level="raised" className="mt-4 lg:mt-0">
-        <SurfaceBody className="space-y-3">
-          {showWindChill ? (
-            <div className="flex items-baseline justify-between gap-2">
-              <span className="text-label text-surface-muted">Gevoel</span>
-              <span className="text-metric text-accent-weather">
-                {data.gevoelstemperatuur}
-                <DegreeMark />
-              </span>
-            </div>
-          ) : null}
-          {showHitteIndex ? (
-            <div className="flex items-baseline justify-between gap-2">
-              <span className="text-label text-surface-muted">Hitte-index</span>
-              <span className="text-metric text-accent-energy">
-                {data.hitte_index_c}
-                <DegreeMark />
-              </span>
-            </div>
-          ) : null}
-          <div className="space-y-3">
-            <div className="flex items-baseline justify-between gap-6">
-              <p className="text-label text-surface-muted tabular-nums">
-                {data.temp_min_time ?? "—"} MIN
-              </p>
-              <p className="text-metric text-accent-weather">
-                {data.temp_min_c ?? "—"}
-                <DegreeMark />
-              </p>
-            </div>
-            <div className="flex items-baseline justify-between gap-6">
-              <p className="text-label text-surface-muted tabular-nums">
-                {data.temp_max_time ?? "—"} MAX
-              </p>
-              <p className="text-metric text-accent-energy">
-                {data.temp_max_c ?? "—"}
-                <DegreeMark />
-              </p>
-            </div>
-          </div>
-        </SurfaceBody>
-      </Surface>
-    </div>
+      </div>
+    </section>
   );
 }
