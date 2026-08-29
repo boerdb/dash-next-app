@@ -82,11 +82,13 @@ export function DerivedMetric({
 
 export function RainList({
   rows,
+  className,
 }: {
   rows: { label: string; value: string }[];
+  className?: string;
 }) {
   return (
-    <dl className="space-y-1.5">
+    <dl className={cn("space-y-1.5", className)}>
       {rows.map((row) => (
         <div key={row.label} className="flex items-baseline justify-between gap-3">
           <dt className="text-caption text-surface-muted">{row.label}</dt>

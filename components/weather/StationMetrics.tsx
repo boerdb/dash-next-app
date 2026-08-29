@@ -220,9 +220,9 @@ function SolarCard({ data }: { data: WeerLive }) {
 }
 
 function RainCard({ data }: { data: WeerLive }) {
+  const wh40 = hasWh40Sensor(data);
   const rainToday = regenMmFromWeer(data);
   const rainRate = resolveRainRateMm(data);
-  const wh40 = hasWh40Sensor(data);
   const piezoToday = finiteNumber(data.dailyrain_piezo_mm);
 
   const rows = [
@@ -233,27 +233,25 @@ function RainCard({ data }: { data: WeerLive }) {
     { label: "Jaar", value: formatMm(data.yearlyrain_mm) },
   ];
   if (wh40 && piezoToday !== null) {
-    rows.unshift({ label: "Piezo", value: piezoToday.toFixed(1) });
+    rows.push({ label: "Piezo WS90", value: piezoToday.toFixed(1) });
   }
 
   return (
     <StationCard title="Regen">
-      <div className="grid grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] gap-4">
-        <div className="space-y-4">
-          <Metric
-            label="Intensiteit"
-            value={rainRate !== undefined ? rainRate.toFixed(1) : "—"}
-            unit="mm/u"
-            accent="weather"
-          />
-          <Metric
-            label={wh40 ? "WH40 vandaag" : "Vandaag"}
-            value={rainToday.toFixed(1)}
-            unit="mm"
-            accent="weather"
-          />
-        </div>
-        <RainList rows={rows} />
+      <div className="grid grid-cols-2 gap-x-4 gap-y-5">
+        <Metric
+          label="Intensiteit"
+          value={rainRate !== undefined ? rainRate.toFixed(1) : "—"}
+          unit="mm/u"
+          accent="weather"
+        />
+        <RainList rows={rows} className="row-span-2 self-center" />
+        <Metric
+          label="Vandaag"
+          value={rainToday.toFixed(1)}
+          unit="mm"
+          accent="weather"
+        />
       </div>
     </StationCard>
   );
