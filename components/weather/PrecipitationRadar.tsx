@@ -239,10 +239,6 @@ export function PrecipitationRadar() {
   return (
     <Card variant="weather">
       <CardContent>
-        <p className="text-caption mb-3 text-surface-muted">
-          Kustlijnen door neerslag · gele stip = Harlingen
-        </p>
-
         <div
           ref={setMapContainerRef}
           className="radar-map z-0 w-full overflow-hidden rounded-xl border border-border-subtle"
