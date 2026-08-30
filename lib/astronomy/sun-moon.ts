@@ -27,12 +27,28 @@ export interface AstronomyInfo {
   };
 }
 
+const AMS_TZ = "Europe/Amsterdam";
+
 const AMS_TIME = new Intl.DateTimeFormat("nl-NL", {
-  timeZone: "Europe/Amsterdam",
+  timeZone: AMS_TZ,
   hour: "2-digit",
   minute: "2-digit",
   hourCycle: "h23",
 });
+
+/**
+ * 12:00 op de Amsterdamse kalenderdag van `date`.
+ * SunCalc.getTimes volgt anders middernacht UTC (in de zomer tot 02:00 nog "gisteren").
+ */
+export function amsterdamCivilNoon(date: Date): Date {
+  const ymd = date.toLocaleDateString("sv-SE", { timeZone: AMS_TZ });
+  const asUtc = new Date(`${ymd}T12:00:00Z`);
+  const inAms = asUtc
+    .toLocaleString("sv-SE", { timeZone: AMS_TZ, hour12: false })
+    .replace(" ", "T");
+  const offsetMs = asUtc.getTime() - new Date(`${inAms}Z`).getTime();
+  return new Date(asUtc.getTime() + offsetMs);
+}
 
 function amsterdamClockMinutes(date: Date): number {
   const parts = AMS_TIME.formatToParts(date);
@@ -101,8 +117,9 @@ export function getAstronomyInfo(
   lat = HARLINGEN.latitude,
   lng = HARLINGEN.longitude
 ): AstronomyInfo {
-  const times = SunCalc.getTimes(date, lat, lng);
-  const moonTimes = SunCalc.getMoonTimes(date, lat, lng);
+  const civilNoon = amsterdamCivilNoon(date);
+  const times = SunCalc.getTimes(civilNoon, lat, lng);
+  const moonTimes = SunCalc.getMoonTimes(civilNoon, lat, lng);
   const sunPos = SunCalc.getPosition(date, lat, lng);
   const moon = SunCalc.getMoonIllumination(date);
 
