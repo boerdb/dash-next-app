@@ -5,8 +5,8 @@ import { hasLightningSensor } from "@/lib/weer/sensor-status";
 
 const WH57_MAX_KM = 40;
 const NL_TZ = "Europe/Amsterdam";
-/** Console houdt onweersicoon kort actief na trigger; 2 uur is voldoende voor de hero. */
-export const STORM_RISK_LATCH_MS = 2 * 60 * 60 * 1000;
+/** Hero onweer blijft actief tot 1 uur na laatste bliksemdetectie. */
+export const STORM_RISK_LATCH_MS = 60 * 60 * 1000;
 /**
  * Druk-herstel (3-uurstrend) dat de latch vervroegd opheft. Bewust ruim boven
  * de na-storm ruis (~0.5-0.9 hPa): met de snelle GW1100-sampling jittert de
