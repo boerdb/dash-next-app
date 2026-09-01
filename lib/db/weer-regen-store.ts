@@ -2,7 +2,10 @@ import type { RowDataPacket } from "mysql2";
 import type { WeerLive, WeerRegenJaarMaand, WeerRegenJaarResponse } from "@/lib/api/types";
 import { amsterdamSqlOffset } from "@/lib/energie/amsterdam-sql-offset";
 import { getPool } from "@/lib/db/pool";
-import { regenMmFromWeer } from "@/lib/weer/regen-dag";
+import {
+  correctStaleTodayRainFromYesterday,
+  previousAmsterdamDate,
+} from "@/lib/weer/regen-dag";
 import {
   currentJaarAmsterdam,
   jaarNavigatie,
@@ -36,12 +39,20 @@ interface CachePayloadRow extends RowDataPacket {
 let lastBackfillAt = 0;
 const backfillJaarAt = new Map<number, number>();
 
-export async function upsertRegenDag(dag: string, regenMm: number): Promise<void> {
+export async function upsertRegenDag(
+  dag: string,
+  regenMm: number,
+  mode: "max" | "exact" = "max"
+): Promise<void> {
   if (!dag) return;
   const pool = getPool();
+  const update =
+    mode === "exact"
+      ? "regen_mm = VALUES(regen_mm)"
+      : "regen_mm = GREATEST(regen_mm, VALUES(regen_mm))";
   await pool.query(
     `INSERT INTO weer_regen_dag (dag, regen_mm) VALUES (?, ?)
-     ON DUPLICATE KEY UPDATE regen_mm = GREATEST(regen_mm, VALUES(regen_mm))`,
+     ON DUPLICATE KEY UPDATE ${update}`,
     [dag, round1(regenMm)]
   );
 }
@@ -56,7 +67,7 @@ export async function syncRegenFromIngest(
     await upsertRegenDag(archiveDag, archiveMm);
   }
   if (vandaagDag) {
-    await upsertRegenDag(vandaagDag, vandaagMm);
+    await upsertRegenDag(vandaagDag, vandaagMm, "exact");
   }
 }
 
@@ -116,6 +127,16 @@ export async function maybeBackfillRegenDag(): Promise<void> {
   await backfillRegenDagForJaar(currentJaarAmsterdam());
 }
 
+async function fetchRegenDagMm(dag: string): Promise<number> {
+  const pool = getPool();
+  const [rows] = await pool.query<DagRow[]>(
+    "SELECT regen_mm FROM weer_regen_dag WHERE dag = ? LIMIT 1",
+    [dag]
+  );
+  const mm = Number(rows[0]?.regen_mm);
+  return Number.isFinite(mm) ? mm : 0;
+}
+
 /** Sync vandaag uit weer_live-cache (piezo-dagregen) vóór maand/jaar-totalen. */
 export async function syncTodayRegenFromLiveCache(): Promise<void> {
   const pool = getPool();
@@ -133,7 +154,9 @@ export async function syncTodayRegenFromLiveCache(): Promise<void> {
   const dag = live.date_tracked ?? todayAmsterdamDate();
   if (!dag) return;
 
-  await upsertRegenDag(dag, regenMmFromWeer(live));
+  const yesterdayMm = await fetchRegenDagMm(previousAmsterdamDate(dag));
+  const mm = correctStaleTodayRainFromYesterday(live, yesterdayMm);
+  await upsertRegenDag(dag, mm, "exact");
 }
 
 export async function fetchRegenMaandTotaal(

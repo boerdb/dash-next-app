@@ -15,6 +15,40 @@ export function regenMmFromWeer(data: WeerLive): number {
   return Number.isFinite(mm) && mm >= 0 ? round1(mm) : 0;
 }
 
+/** Kalenderdag vóór een Amsterdam YYYY-MM-DD. */
+export function previousAmsterdamDate(isoDate: string): string {
+  const [y, m, d] = isoDate.split("-").map(Number);
+  const utc = new Date(Date.UTC(y, m - 1, d));
+  utc.setUTCDate(utc.getUTCDate() - 1);
+  return utc.toISOString().slice(0, 10);
+}
+
+/**
+ * Na middernacht staat de sensor-teller soms nog op gisterens totaal.
+ * Trek dan het vorige dagsaldo af, of 0 als de teller nog niet gereset is.
+ */
+export function todayRainMmAfterDayChange(
+  fresh: WeerLive,
+  previous: WeerLive
+): number {
+  const freshMm = regenMmFromWeer(fresh);
+  const prevMm = regenMmFromWeer(previous);
+  if (freshMm < prevMm) return freshMm;
+  return round1(Math.max(0, freshMm - prevMm));
+}
+
+/** Live-cache sync: teller staat soms nog exact op gisterens totaal. */
+export function correctStaleTodayRainFromYesterday(
+  fresh: WeerLive,
+  yesterdayMm: number
+): number {
+  const freshMm = regenMmFromWeer(fresh);
+  if (yesterdayMm > 0 && freshMm === yesterdayMm) {
+    return 0;
+  }
+  return freshMm;
+}
+
 /** Bij dagwissel: vorige dag definitief uit cache, daarna vandaag syncen. */
 export function regenDagSyncFromIngest(
   fresh: WeerLive,
@@ -32,7 +66,7 @@ export function regenDagSyncFromIngest(
       archiveDag: previous.date_tracked,
       archiveMm: regenMmFromWeer(previous),
       vandaagDag,
-      vandaagMm,
+      vandaagMm: todayRainMmAfterDayChange(fresh, previous),
     };
   }
 
