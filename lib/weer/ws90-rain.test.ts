@@ -23,7 +23,26 @@ describe("applyWs90RainPrimary", () => {
     assert.equal(r.yearlyrain_mm, 180);
   });
 
-  it("laat WH40-kiepbakje staan naast piezo", () => {
+  it("middel WH40 en piezo wanneer beide aanwezig zijn", () => {
+    const r = applyWs90RainPrimary({
+      wh40batt: "1.5",
+      dailyrain_mm: 0.4,
+      rainrate_mm: 1.2,
+      last24hrain_mm: 0.4,
+      hourlyrain_mm: 0.2,
+      dailyrain_piezo_mm: 0.8,
+      rainrate_piezo_mm: 2.0,
+      last24hrain_piezo_mm: 0.8,
+      hourlyrain_piezo_mm: 0.6,
+    });
+    assert.equal(r.dailyrain_mm, 0.6);
+    assert.equal(r.rainrate_mm, 1.6);
+    assert.equal(r.last24hrain_mm, 0.6);
+    assert.equal(r.hourlyrain_mm, 0.4);
+    assert.equal(r.dailyrain_piezo_mm, 0.8);
+  });
+
+  it("middel met 0 piezo (WH40 alleen) blijft bruikbaar", () => {
     const r = applyWs90RainPrimary({
       wh40batt: "1.5",
       dailyrain_mm: 0.4,
@@ -31,10 +50,11 @@ describe("applyWs90RainPrimary", () => {
       last24hrain_mm: 0.4,
       dailyrain_piezo_mm: 0,
       rainrate_piezo_mm: 0,
+      last24hrain_piezo_mm: 0,
     });
-    assert.equal(r.dailyrain_mm, 0.4);
-    assert.equal(r.rainrate_mm, 1.2);
-    assert.equal(r.last24hrain_mm, 0.4);
+    assert.equal(r.dailyrain_mm, 0.2);
+    assert.equal(r.rainrate_mm, 0.6);
+    assert.equal(r.last24hrain_mm, 0.2);
     assert.equal(r.dailyrain_piezo_mm, 0);
   });
 

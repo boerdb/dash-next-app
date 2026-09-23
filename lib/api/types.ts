@@ -58,7 +58,7 @@ export interface WeerLive {
   humidityin_min_time?: string | null;
   humidityin_max_time?: string | null;
   dailyrain_mm?: number;
-  /** WS90 piezo-regen (mm); zonder WH40 gekopieerd naar dailyrain_mm. */
+  /** WS90 piezo-regen (mm); met WH40 wordt dailyrain_mm het gemiddelde. */
   dailyrain_piezo_mm?: number;
   rainrate_piezo_mm?: number;
   weeklyrain_piezo_mm?: number;

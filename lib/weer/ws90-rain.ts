@@ -1,5 +1,6 @@
 import type { WeerLive } from "@/lib/api/types";
 import { hasWh40Sensor } from "@/lib/weer/sensor-status";
+import { round1 } from "@/lib/weer/regen-jaar-labels";
 
 /** WS90 piezo: 0,024 in/u ≈ 0,6 mm/u — minimum bij “regen ja”, geen echte intensiteit. */
 export const PIEZO_RAINRATE_FLOOR_MM = 0.6;
@@ -8,6 +9,15 @@ function finiteMm(v: unknown): number | undefined {
   if (v === undefined || v === "") return undefined;
   const n = Number(v);
   return Number.isFinite(n) && n >= 0 ? n : undefined;
+}
+
+/** WH40 onderschat, piezo overschat — gemiddelde als beide metingen er zijn. */
+export function averageRainMm(
+  a: number | undefined,
+  b: number | undefined
+): number | undefined {
+  if (a !== undefined && b !== undefined) return round1((a + b) / 2);
+  return a ?? b;
 }
 
 function hourlyRainRateEstimate(data: WeerLive): number | undefined {
@@ -55,13 +65,57 @@ function normalizePiezoRate(data: WeerLive): WeerLive {
 
 /**
  * Zonder WH40: kopieert WS90 piezo naar de standaard regenvelden.
- * Met WH40: kiepbakje blijft dailyrain_mm / rainrate_mm; piezo blijft ernaast.
+ * Met WH40 + piezo: middelen (kiepbakje te laag, piezo te hoog); piezo blijft ernaast.
  */
 export function applyWs90RainPrimary(data: WeerLive): WeerLive {
   if (!hasPiezoRain(data)) return data;
 
   if (hasWh40Sensor(data)) {
-    return normalizePiezoRate(data);
+    const out = normalizePiezoRate(data);
+
+    const daily = averageRainMm(
+      finiteMm(data.dailyrain_mm),
+      finiteMm(data.dailyrain_piezo_mm)
+    );
+    if (daily !== undefined) out.dailyrain_mm = daily;
+
+    const rate = averageRainMm(
+      finiteMm(data.rainrate_mm),
+      finiteMm(out.rainrate_piezo_mm)
+    );
+    if (rate !== undefined) out.rainrate_mm = rate;
+
+    const weekly = averageRainMm(
+      finiteMm(data.weeklyrain_mm),
+      finiteMm(data.weeklyrain_piezo_mm)
+    );
+    if (weekly !== undefined) out.weeklyrain_mm = weekly;
+
+    const hourly = averageRainMm(
+      finiteMm(data.hourlyrain_mm),
+      finiteMm(data.hourlyrain_piezo_mm)
+    );
+    if (hourly !== undefined) out.hourlyrain_mm = hourly;
+
+    const last24 = averageRainMm(
+      finiteMm(data.last24hrain_mm),
+      finiteMm(data.last24hrain_piezo_mm)
+    );
+    if (last24 !== undefined) out.last24hrain_mm = last24;
+
+    const monthly = averageRainMm(
+      finiteMm(data.monthlyrain_mm),
+      finiteMm(data.monthlyrain_piezo_mm)
+    );
+    if (monthly !== undefined) out.monthlyrain_mm = monthly;
+
+    const yearly = averageRainMm(
+      finiteMm(data.yearlyrain_mm),
+      finiteMm(data.yearlyrain_piezo_mm)
+    );
+    if (yearly !== undefined) out.yearlyrain_mm = yearly;
+
+    return out;
   }
 
   const out = { ...data };

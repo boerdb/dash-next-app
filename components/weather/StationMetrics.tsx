@@ -233,7 +233,7 @@ function RainCard({ data }: { data: WeerLive }) {
     { label: "Jaar", value: formatMm(data.yearlyrain_mm) },
   ];
   if (wh40 && piezoToday !== null) {
-    rows.push({ label: "Piezo WS90", value: piezoToday.toFixed(1) });
+    rows.push({ label: "Piezo (ruw)", value: piezoToday.toFixed(1) });
   }
 
   return (

@@ -24,18 +24,18 @@ describe("parseEcowittPayload", () => {
     assert.ok(r.server_timestamp);
   });
 
-  it("houdt WH40-dagregen aan als kiepbakje gekoppeld is", () => {
+  it("middel WH40 en piezo bij ingest", () => {
     const r = parseEcowittPayload({
       dailyrainin: "0.016",
-      drain_piezo: "0.000",
+      drain_piezo: "0.032",
       rainratein: "0.08",
-      rrain_piezo: "0.000",
+      rrain_piezo: "0.16",
       wh40batt: "1.5",
       wh90batt: "3.18",
     });
-    assert.equal(r.dailyrain_mm, 0.4);
-    assert.equal(r.dailyrain_piezo_mm, 0);
-    assert.equal(r.rainrate_mm, 2);
+    assert.equal(r.dailyrain_mm, 0.6);
+    assert.equal(r.dailyrain_piezo_mm, 0.8);
+    assert.equal(r.rainrate_mm, 3.1);
   });
 
   it("mapt bliksem en WS90 piezo", () => {
