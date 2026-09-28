@@ -6,6 +6,7 @@ Weer-achtergrondfoto's via Pexels (pexels.com/license)
 - rainy.jpg — Pexels #2397810
 - fog.jpg — Pexels #1166974
 - night.jpg — Pexels #1624438
+- night-partly-cloudy.jpg, night-cloudy.jpg — gegenereerd voor deze app (geen stocklicentie)
 - evening.jpg — Pexels #1036723 (ook gebruikt voor dusk)
 - dawn.jpg — Pexels #189349
 - snow.jpg, storm.jpg, thunder.jpg, wind.jpg — Pexels stock skies

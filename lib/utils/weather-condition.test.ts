@@ -152,13 +152,68 @@ describe("getWeatherCondition · dagperioden", () => {
     assert.equal(condition, "dusk");
   });
 
-  it("toont night in nachtperiode", () => {
+  it("toont night bij heldere nacht", () => {
     const condition = getWeatherCondition(
       { temp_c: 18, solarradiation: 0 },
       "night",
       true,
-      clearSky
+      {
+        cloudCoverPct: 5,
+        weatherCode: 0,
+        precipitationMm: 0,
+        shortwaveRadiationWm2: 0,
+      }
     );
     assert.equal(condition, "night");
+  });
+
+  it("toont deels bewolkte nacht en negeert instraling van 0", () => {
+    const condition = getWeatherCondition(
+      { temp_c: 18, solarradiation: 0 },
+      "night",
+      true,
+      { ...clearSky, shortwaveRadiationWm2: 0 }
+    );
+    assert.equal(condition, "night-partly-cloudy");
+  });
+
+  it("toont bewolkte nacht", () => {
+    const condition = getWeatherCondition(
+      { temp_c: 18, solarradiation: 0 },
+      "night",
+      true,
+      {
+        cloudCoverPct: 95,
+        weatherCode: 3,
+        precipitationMm: 0,
+        shortwaveRadiationWm2: 0,
+      }
+    );
+    assert.equal(condition, "night-cloudy");
+  });
+
+  it("valt terug op heldere nacht zonder luchtdata", () => {
+    const condition = getWeatherCondition(
+      { temp_c: 18, solarradiation: 0 },
+      "night",
+      true,
+      null
+    );
+    assert.equal(condition, "night");
+  });
+
+  it("laat regen voorgaan op een bewolkte nacht", () => {
+    const condition = getWeatherCondition(
+      { temp_c: 12, rainrate_mm: 1.2 },
+      "night",
+      true,
+      {
+        cloudCoverPct: 100,
+        weatherCode: 61,
+        precipitationMm: 1,
+        shortwaveRadiationWm2: 0,
+      }
+    );
+    assert.equal(condition, "rain");
   });
 });

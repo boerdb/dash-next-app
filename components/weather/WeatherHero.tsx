@@ -3,6 +3,7 @@
 import {
   Cloud,
   CloudFog,
+  CloudMoon,
   CloudLightning,
   CloudRain,
   CloudSnow,
@@ -31,6 +32,8 @@ const icons: Record<WeatherCondition, typeof Sun> = {
   wind: Wind,
   fog: CloudFog,
   night: Moon,
+  "night-partly-cloudy": CloudMoon,
+  "night-cloudy": Cloud,
   dusk: Sunset,
   evening: Sunset,
   dawn: Sun,
@@ -84,7 +87,8 @@ export function WeatherHero({
             "mb-1 h-10 w-10 text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)]",
             condition === "sunny" && "text-accent-amber",
             (condition === "evening" || condition === "dusk") && "text-orange-300",
-            condition === "night" && "text-accent-amber"
+            (condition === "night" || condition === "night-partly-cloudy") &&
+              "text-accent-amber"
           )}
           strokeWidth={1.5}
         />

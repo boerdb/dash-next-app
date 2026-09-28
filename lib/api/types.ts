@@ -289,6 +289,8 @@ export type WeatherCondition =
   | "wind"
   | "fog"
   | "night"
+  | "night-partly-cloudy"
+  | "night-cloudy"
   | "dusk"
   | "evening"
   | "dawn"

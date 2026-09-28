@@ -71,6 +71,26 @@ function isStationDry(data: WeerLive): boolean {
   return rate <= 0;
 }
 
+/**
+ * 's Nachts zegt instraling niets (0 W/m²). Alleen weercode en bewolking
+ * bepalen of de hero helder, deels bewolkt of dicht bewolkt is.
+ */
+function nightConditionFromSky(
+  sky: OpenMeteoSky | null | undefined
+): WeatherCondition {
+  if (!sky) return "night";
+  const skyCondition = conditionFromOpenMeteo(
+    sky.weatherCode,
+    sky.cloudCoverPct,
+    null,
+    true
+  );
+  if (skyCondition === "partly-cloudy") return "night-partly-cloudy";
+  if (skyCondition === "cloudy") return "night-cloudy";
+  if (skyCondition === "fog") return "fog";
+  return "night";
+}
+
 function skyFromOpenMeteo(sky: OpenMeteoSky, ignorePrecipitation = false): WeatherCondition {
   const code = sky.weatherCode;
   if (openMeteoImpliesThunder(code)) {
@@ -99,7 +119,7 @@ export function getWeatherCondition(
   const external = externalThunderCondition(openMeteoSky, knmiThunder);
   if (!data) {
     if (external) return external;
-    return period === "night" ? "night" : "cloudy";
+    return period === "night" ? nightConditionFromSky(openMeteoSky) : "cloudy";
   }
 
   if (isStationThunder(data)) return external ?? "thunder";
@@ -109,7 +129,7 @@ export function getWeatherCondition(
   if (isStationWindy(data)) return "wind";
 
   if (period === "night") {
-    return "night";
+    return nightConditionFromSky(openMeteoSky);
   }
   if (period === "evening") return "dusk";
   if (period === "dawn") return "dawn";
@@ -140,6 +160,8 @@ export const conditionLabels: Record<WeatherCondition, string> = {
   wind: "Wind",
   fog: "Mist",
   night: "Nacht",
+  "night-partly-cloudy": "Deels bewolkt",
+  "night-cloudy": "Bewolkt",
   dusk: "Schemering",
   evening: "Avond",
   dawn: "Dageraad",
