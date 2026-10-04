@@ -4,6 +4,7 @@ import {
   conditionFromOpenMeteo,
   conditionFromShortwaveRadiation,
   isClearSkyCondition,
+  openMeteoImpliesFog,
   openMeteoImpliesRain,
   openMeteoImpliesSnow,
   openMeteoImpliesThunder,
@@ -22,10 +23,19 @@ function blendWithLocalSolar(
   return pickSunnierSkyCondition(meteoCondition, local);
 }
 
-function isStationFoggy(data: WeerLive): boolean {
+/**
+ * Lokale mist-hero: vochtig én windstil is niet genoeg. Open-Meteo moet mist
+ * bevestigen (WMO 45/48). Zonder luchtdata blijft de stationheuristiek.
+ */
+function isStationFoggy(
+  data: WeerLive,
+  openMeteoSky?: OpenMeteoSky | null
+): boolean {
   const humidity = Number(data.humidity) || 0;
   const wind = Number(data.windspd_avg10m_kmh) || 0;
-  return humidity >= 95 && wind < 5;
+  if (humidity < 95 || wind >= 5) return false;
+  if (!openMeteoSky) return true;
+  return openMeteoImpliesFog(openMeteoSky.weatherCode);
 }
 
 function isStationWindy(data: WeerLive): boolean {
@@ -100,7 +110,7 @@ function skyFromOpenMeteo(sky: OpenMeteoSky, ignorePrecipitation = false): Weath
     if (openMeteoImpliesSnow(code)) return "snow";
     if (openMeteoImpliesRain(code) || sky.precipitationMm > 0) return "rain";
   }
-  if (code === 45 || code === 48) return "fog";
+  if (openMeteoImpliesFog(code)) return "fog";
   return conditionFromOpenMeteo(
     code,
     sky.cloudCoverPct,
@@ -125,7 +135,7 @@ export function getWeatherCondition(
   if (isStationThunder(data)) return external ?? "thunder";
   if (external) return external;
   if (isStationRainy(data)) return "rain";
-  if (isStationFoggy(data)) return "fog";
+  if (isStationFoggy(data, openMeteoSky)) return "fog";
   if (isStationWindy(data)) return "wind";
 
   if (period === "night") {

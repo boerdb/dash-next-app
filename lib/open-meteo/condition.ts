@@ -48,7 +48,7 @@ export function conditionFromOpenMeteo(
   shortwaveRadiationWm2?: number | null,
   ignorePrecipitation = false
 ): WeatherCondition {
-  if (weatherCode === 45 || weatherCode === 48) return "fog";
+  if (openMeteoImpliesFog(weatherCode)) return "fog";
   if (!ignorePrecipitation) {
     if (weatherCode >= 71 && weatherCode <= 77) return "snow";
     if (weatherCode >= 95 && weatherCode <= 99) {
@@ -95,4 +95,9 @@ export function openMeteoImpliesSnow(weatherCode: number): boolean {
 
 export function openMeteoImpliesThunder(weatherCode: number): boolean {
   return weatherCode >= 95 && weatherCode <= 99;
+}
+
+/** WMO 45 = mist, 48 = rijpende mist. */
+export function openMeteoImpliesFog(weatherCode: number): boolean {
+  return weatherCode === 45 || weatherCode === 48;
 }

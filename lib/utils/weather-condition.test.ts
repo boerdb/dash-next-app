@@ -111,6 +111,55 @@ describe("getWeatherCondition · lokale zon", () => {
   });
 });
 
+describe("getWeatherCondition · mist", () => {
+  const humidCalm = {
+    temp_c: 12,
+    humidity: 97,
+    windspd_avg10m_kmh: 1.2,
+    solarradiation: 0,
+  };
+
+  it("zet geen mist-hero bij hoge vochtigheid zonder Open-Meteo-code 45/48", () => {
+    const condition = getWeatherCondition(humidCalm, "night", true, {
+      cloudCoverPct: 80,
+      weatherCode: 3,
+      precipitationMm: 0,
+      shortwaveRadiationWm2: 0,
+    });
+    assert.equal(condition, "night-cloudy");
+  });
+
+  it("zet mist als het station vochtig is én Open-Meteo code 45 geeft", () => {
+    const condition = getWeatherCondition(humidCalm, "night", true, {
+      cloudCoverPct: 100,
+      weatherCode: 45,
+      precipitationMm: 0,
+      shortwaveRadiationWm2: 0,
+    });
+    assert.equal(condition, "fog");
+  });
+
+  it("houdt de stationheuristiek als Open-Meteo ontbreekt", () => {
+    const condition = getWeatherCondition(humidCalm, "night", true, null);
+    assert.equal(condition, "fog");
+  });
+
+  it("laat Open-Meteo-mist 's nachts door ook zonder hoge stationvochtigheid", () => {
+    const condition = getWeatherCondition(
+      { temp_c: 12, humidity: 80, windspd_avg10m_kmh: 8, solarradiation: 0 },
+      "night",
+      true,
+      {
+        cloudCoverPct: 100,
+        weatherCode: 48,
+        precipitationMm: 0,
+        shortwaveRadiationWm2: 0,
+      }
+    );
+    assert.equal(condition, "fog");
+  });
+});
+
 describe("getWeatherCondition · regen", () => {
   const rainyMeteo: OpenMeteoSky = {
     cloudCoverPct: 90,
