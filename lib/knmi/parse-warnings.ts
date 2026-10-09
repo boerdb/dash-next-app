@@ -1,5 +1,6 @@
 import {
   KNMI_PHENOMENON_LABELS,
+  KNMI_PROVINCE_LABELS,
   KNMI_WARNING_LEVEL_LABELS,
 } from "./constants";
 
@@ -15,6 +16,8 @@ export interface KnmiWarningItem {
   /** Geldt de waarschuwing nu (±tolerantie rond het tijdvak)? */
   active: boolean;
   texts: string[];
+  areaLabel: string;
+  warningType: "warning" | "potentially-dangerous-weather";
 }
 
 /** Tolerantie rond het waarschuwingstijdvak om "nu actief" te bepalen. */
@@ -125,6 +128,8 @@ export function parseKnmiWarningsXml(
             validFrom: slotLabel,
             validTo: slotLabel,
             texts: uniqueTexts,
+            areaLabel: KNMI_PROVINCE_LABELS[provinceCode] ?? provinceCode,
+            warningType: "warning",
             fromMs: ms,
             toMs: ms,
           });

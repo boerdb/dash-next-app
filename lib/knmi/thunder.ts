@@ -1,6 +1,6 @@
 import type { KnmiWaarschuwingenApi } from "@/lib/api/types";
 
-/** Is er nu een actieve KNMI-onweerwaarschuwing voor de provincie? */
+/** Is er nu een actieve KNMI-onweerwaarschuwing voor de dashboardlocatie? */
 export function hasActiveKnmiThunderWarning(
   data: KnmiWaarschuwingenApi | null | undefined
 ): boolean {

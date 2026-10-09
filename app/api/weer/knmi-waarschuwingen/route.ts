@@ -14,6 +14,7 @@ export async function GET() {
     );
   }
 
+  /** Alleen nog voor legacy provincie-fallback tot cutover. */
   const province = env.KNMI_PROVINCE?.toUpperCase() ?? KNMI_DEFAULT_PROVINCE;
 
   try {

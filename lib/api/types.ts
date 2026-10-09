@@ -323,7 +323,7 @@ export interface PrecipForecastResponse {
   updatedAt: string;
 }
 
-/** Officiële KNMI-provinciewaarschuwingen (waarschuwingen_nederland_48h). */
+/** Officiële KNMI-waarschuwingen (lokaal/polygon; legacy provincie-fallback). */
 export interface KnmiWarningItem {
   level: 1 | 2 | 3;
   levelLabel: string;
@@ -334,14 +334,21 @@ export interface KnmiWarningItem {
   /** Geldt de waarschuwing nu (±tolerantie rond het tijdvak)? */
   active: boolean;
   texts: string[];
+  /** Getroffen gebied (polygon-beschrijving of provincie bij legacy). */
+  areaLabel: string;
+  warningType: "warning" | "potentially-dangerous-weather";
 }
 
 export interface KnmiWaarschuwingenApi {
+  /** Weergavelabel voor de dashboardlocatie (Harlingen). */
+  locationLabel: string;
+  /** @deprecated Legacy provinciecode; blijft gevuld voor compat. */
   province: string;
   maxLevel: 0 | 1 | 2 | 3;
   maxLevelLabel: string;
   warnings: KnmiWarningItem[];
   sourceFile: string | null;
+  source: "public-local" | "legacy-province";
   updatedAt: string;
 }
 

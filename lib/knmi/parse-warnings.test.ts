@@ -18,6 +18,8 @@ describe("parseKnmiWarningsXml", () => {
     assert.equal(result.warnings.length, 1);
     assert.equal(result.warnings[0].phenomenonLabel, "Onweersbuien");
     assert.equal(result.warnings[0].level, 1);
+    assert.equal(result.warnings[0].areaLabel, "Friesland");
+    assert.equal(result.warnings[0].warningType, "warning");
     assert.ok(result.warnings[0].texts[0]?.includes("Onweersbuien"));
     assert.ok(result.warnings[0].validFrom.includes("29"));
     assert.ok(result.warnings[0].validTo.includes("13"));

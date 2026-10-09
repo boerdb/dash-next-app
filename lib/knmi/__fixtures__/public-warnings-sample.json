@@ -1,0 +1,260 @@
+{
+  "metadata": {
+    "schema_version": "0.5",
+    "generated_at": "2026-09-03T150216857105Z",
+    "producer": {
+      "producer_id": "2.49.0.0.528.0",
+      "name": "KNMI",
+      "contact": null
+    },
+    "domain": "public",
+    "publication_type": "test",
+    "snapshot_uuid": "d45b3bfd-ada2-4e2f-bb29-8496decbbc79"
+  },
+  "num_warning_sets": 2,
+  "num_warnings": 3,
+  "warnings": [
+    {
+      "domain": "public",
+      "phenomenon": "wind",
+      "onset": "2026-09-03T14:00:00Z",
+      "expires": "2026-09-03T22:00:00Z",
+      "texts": {
+        "nl": {
+          "headline": "Code oranje: zware storm",
+          "description": "Op 1 september trekt storm Wouter over Nederland. In het noorden worden windstoten verwacht tot 100 km/u.",
+          "detailed_description": "Storm Wouter nadert vanuit het westen. In Groningen, Friesland en Drenthe worden windstoten van 80-100 km/u verwacht, lokaal meer."
+        },
+        "en": {
+          "headline": "Code orange: severe storm",
+          "description": "On September 1st storm Wouter will cross the Netherlands. In the northern parts wind gusts are expected up to 100 km/h.",
+          "detailed_description": "Storm Wouter is approaching from the west. In Groningen, Friesland and Drenthe wind gusts of 80-100 km/h are expected, locally more."
+        }
+      },
+      "warning_type": "warning",
+      "status": "active",
+      "operational_status": "Test",
+      "incident": {
+        "incident_uuid": "014e478d-e68a-429c-adf9-5867aab20125",
+        "name": "Storm Wouter"
+      },
+      "parts": [
+        {
+          "part_uuid": "74554601-6f7d-4bfa-b986-32fb1dc402d3",
+          "version_id": 2,
+          "version_dt": "2026-09-03T15:01:13Z",
+          "severity": "Severe",
+          "color": "orange",
+          "area": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  5.7394837,
+                  53.3395859
+                ],
+                [
+                  5.4511446,
+                  53.197935
+                ],
+                [
+                  5.403088,
+                  52.9876776
+                ],
+                [
+                  5.3824924,
+                  52.8718049
+                ],
+                [
+                  5.825299,
+                  52.8282727
+                ],
+                [
+                  5.7394837,
+                  53.3395859
+                ]
+              ]
+            ]
+          },
+          "area_description": {
+            "nl": "Delen van Friesland",
+            "en": "Parts of Friesland"
+          },
+          "guidance": {
+            "nl": {
+              "impact": "Zeer zware windstoten zijn gevaarlijk voor al het verkeer, zeker voor fietsers, vrachtwagens en auto's met aanhanger of caravan. Er is grote kans op ongelukken door het afbreken van boomtakken, omwaaien van bomen en rondvliegende voorwerpen zoals dakpannen. Bel de brandweer alleen bij acuut gevaar.",
+              "instruction": "Ga alleen de weg of het water op als dat echt nodig is. Doe geen buitenactiviteiten, vooral niet in het bos. Zorg dat ramen en deuren dicht zijn en zet losse spullen vast zoals tuinmeubels en afvalcontainers."
+            },
+            "en": {
+              "impact": "Very strong wind gusts are dangerous for all traffic. In particular to cyclists, lorries and cars towing a trailer or caravan. High risk of accidents due to falling branches, uprooted trees and flying debris such as roof tiles or garden furniture. Only call the fire brigade in case of immediate danger.",
+              "instruction": "Only travel by road or water when absolutely necessary. Avoid outdoor activities, especially in wooded areas. Make sure windows and doors are closed and secure loose items, such as garden furniture and bins."
+            }
+          },
+          "onset": "2026-09-03T14:00:00Z",
+          "expires": "2026-09-03T15:00:00Z",
+          "probability_percentage_range": "60-90",
+          "certainty": "Likely",
+          "status": "expired",
+          "response_type": "Prepare"
+        },
+        {
+          "part_uuid": "ac1a044e-b548-4fcd-9fbc-d5d83c1ec684",
+          "version_id": 1,
+          "version_dt": "2026-09-03T13:02:13Z",
+          "severity": "Moderate",
+          "color": "yellow",
+          "area": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  4.8092467,
+                  53.2041035
+                ],
+                [
+                  4.5964249,
+                  52.9111536
+                ],
+                [
+                  4.5929923,
+                  52.5494666
+                ],
+                [
+                  6.0861772,
+                  52.6599535
+                ],
+                [
+                  6.8825425,
+                  53.4664664
+                ],
+                [
+                  6.5083882,
+                  53.5990802
+                ],
+                [
+                  5.149075,
+                  53.4255785
+                ],
+                [
+                  4.8092467,
+                  53.2041035
+                ]
+              ]
+            ]
+          },
+          "area_description": {
+            "nl": "Friesland, Waddeneilanden en Waddenzeegebied en delen van Groningen, Noord-Holland, Flevoland en IJsselmeergebied",
+            "en": "Friesland, Wadden Islands and Wadden Sea area and parts of Groningen, North Holland, Flevoland and IJsselmeer area"
+          },
+          "guidance": {
+            "nl": {
+              "impact": "Er is kans op ongelukken door het afbreken van boomtakken en rondvliegende voorwerpen zoals dakpannen of tuinmeubels. Bel de brandweer alleen bij acuut gevaar.",
+              "instruction": "Blijf uit de buurt van open water en bruggen. Hier waait het extra hard. Doe geen buitenactiviteiten, vooral niet in het bos. Ga niet de weg op met een auto met aanhanger of caravan of met een vrachtwagen. Zet je auto op een veilige plek: zoveel mogelijk uit de wind en uit de buurt van bomen en schuttingen."
+            },
+            "en": {
+              "impact": "Risk of accidents due to falling branches and flying debris such as roof tiles or garden furniture. Only call the fire brigade in case of immediate danger.",
+              "instruction": "Avoid open water and bridges. These are vulnerable to strong winds. Avoid outdoor activities, especially in wooded areas. Do not go on the roads in a car towing a trailer or caravan, or in a lorry. Park your car in a safe place, as sheltered from the wind as possible and away from trees and fences."
+            }
+          },
+          "onset": "2026-09-03T16:00:00Z",
+          "expires": "2026-09-03T18:00:00Z",
+          "probability_percentage_range": "60-90",
+          "certainty": "Likely",
+          "status": "active",
+          "response_type": "Monitor"
+        }
+      ],
+      "warning_set_uuid": "c2b2faac-b285-47f9-9306-213c210b9eff",
+      "version_id": 2,
+      "version_dt": "2026-09-03T15:01:13Z"
+    },
+    {
+      "domain": "public",
+      "phenomenon": "rain",
+      "onset": "2026-09-04T14:00:00Z",
+      "expires": "2026-09-05T22:00:00Z",
+      "texts": {
+        "nl": {
+          "headline": "Code geel: regen",
+          "description": "Op 4 en 5 september wordt ernstige regen verwacht rondom Den Haag",
+          "detailed_description": "een gedetailleerde beschrijving van ernstige regen"
+        },
+        "en": {
+          "headline": "Code yellow: rain",
+          "description": "On September 4 en 5, heavy rain is expected around The Hague",
+          "detailed_description": "a detailed description of heavy rain"
+        }
+      },
+      "warning_type": "potentially-dangerous-weather",
+      "status": "active",
+      "operational_status": "Test",
+      "incident": {
+        "incident_uuid": "1a3869c2-a80b-4cd3-aee6-2ec685cd66e7",
+        "name": null
+      },
+      "parts": [
+        {
+          "part_uuid": "3db59f70-ad63-40ce-979b-f0c50c5a6797",
+          "version_id": 1,
+          "version_dt": "2026-09-03T15:01:13Z",
+          "severity": "Moderate",
+          "color": "yellow",
+          "area": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  4.2078817,
+                  52.0687354
+                ],
+                [
+                  4.3191236,
+                  52.0176827
+                ],
+                [
+                  4.519359,
+                  52.1023878
+                ],
+                [
+                  4.4363555,
+                  52.1885062
+                ],
+                [
+                  4.3507848,
+                  52.179587
+                ],
+                [
+                  4.2078817,
+                  52.0687354
+                ]
+              ]
+            ]
+          },
+          "area_description": {
+            "nl": "Delen van Zuid-Holland",
+            "en": "Parts of South Holland"
+          },
+          "guidance": {
+            "nl": {
+              "impact": "Kans op slippen met de auto en slecht zicht door opspattend water. Houd rekening met een langere reistijd en vertragingen op de weg en in het openbaar vervoer. Bekijk voor vertrek de actuele situatie op rwsverkeersinfo.nl of in een reisplanner. Er is kans op overlast en schade rond en in het huis, zoals ondergelopen kelders en tuinen. Bel de brandweer alleen bij acuut gevaar.",
+              "instruction": "Rijd langzamer, houd grotere afstand tot andere weggebruikers."
+            },
+            "en": {
+              "impact": "Risk of aquaplaning and poor visibility due to spray from other vehicles. Expect longer travel times and delays on the roads and in public transport. Before you travel, check the current situation on rwsverkeersinfo.nl. Or use one of the available public travel planners for trains, trams and buses. Risk of disruption and damage in and around your home, such as flooding in basements and gardens. Only call the fire brigade in case of immediate danger.",
+              "instruction": "Drive more slowly and maintain a greater distance from other road users."
+            }
+          },
+          "onset": "2026-09-04T14:00:00Z",
+          "expires": "2026-09-05T22:00:00Z",
+          "probability_percentage_range": "60-90",
+          "certainty": "Likely",
+          "status": "expired",
+          "response_type": "Monitor"
+        }
+      ],
+      "warning_set_uuid": "5a2d32da-8cf9-40d5-8473-74b140459c7e",
+      "version_id": 1,
+      "version_dt": "2026-09-03T15:01:13Z"
+    }
+  ]
+}

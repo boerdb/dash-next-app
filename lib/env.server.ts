@@ -34,7 +34,7 @@ const envSchema = z.object({
     .default("dynamic_hourly"),
   /** Optioneel — officiële KNMI waarschuwingen op het weer-tabblad */
   KNMI_API_KEY: z.string().min(1).optional(),
-  /** Provinciecode voor KNMI-waarschuwingen (standaard FR = Friesland / Harlingen) */
+  /** Legacy provinciecode-fallback tot KNMI cutover (standaard FR) */
   KNMI_PROVINCE: z.string().min(2).max(4).optional(),
   /**
    * Fysieke watermeterstand bij sensor-nul (= laatste opgave vóór/ bij plaatsing).

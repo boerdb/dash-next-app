@@ -2,7 +2,6 @@
 
 import { AlertTriangle } from "lucide-react";
 import type { KnmiWaarschuwingenApi, KnmiWarningItem } from "@/lib/api/types";
-import { KNMI_PROVINCE_LABELS } from "@/lib/knmi/constants";
 import { Surface, SurfaceBody } from "@/components/ui/surface";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -49,8 +48,12 @@ export function KnmiWarningsCard({ data }: KnmiWarningsCardProps) {
     return null;
   }
 
-  const provinceLabel = KNMI_PROVINCE_LABELS[data.province] ?? data.province;
+  const locationLabel = data.locationLabel || data.province;
   const headerStyle = LEVEL_STYLES[data.maxLevel as 1 | 2 | 3] ?? LEVEL_STYLES[1];
+  const hasOfficial = data.warnings.some((w) => w.warningType === "warning");
+  const kindLabel = hasOfficial
+    ? "Officiële waarschuwing"
+    : "Mogelijk gevaarlijk weer";
 
   return (
     <Surface level="raised" className={cn("border-2", headerStyle.border)}>
@@ -66,7 +69,7 @@ export function KnmiWarningsCard({ data }: KnmiWarningsCardProps) {
                 KNMI · {data.maxLevelLabel}
               </p>
               <p className={cn("text-caption mt-0.5", headerStyle.muted)}>
-                Officiële waarschuwing · {provinceLabel}
+                {kindLabel} · {locationLabel}
               </p>
             </div>
           </div>
@@ -88,17 +91,23 @@ export function KnmiWarningsCard({ data }: KnmiWarningsCardProps) {
 }
 
 function warningKey(w: KnmiWarningItem): string {
-  return `${w.level}-${w.phenomenonId}-${w.validFrom}-${w.texts[0] ?? ""}`;
+  return `${w.level}-${w.phenomenonId}-${w.validFrom}-${w.areaLabel}-${w.texts[0] ?? ""}`;
 }
 
 function KnmiWarningRow({ warning }: { warning: KnmiWarningItem }) {
   const style = LEVEL_STYLES[warning.level];
+  const typeHint =
+    warning.warningType === "potentially-dangerous-weather"
+      ? "Mogelijk gevaarlijk weer · "
+      : "";
 
   return (
     <li className="rounded-[var(--radius-sm)] border border-border-subtle bg-surface-subtle px-3 py-2.5">
       <p className={cn("text-sm font-medium", style.title)}>{warning.phenomenonLabel}</p>
       <p className={cn("text-caption mt-0.5", style.muted)}>
+        {typeHint}
         {warning.levelLabel}
+        {warning.areaLabel ? ` · ${warning.areaLabel}` : ""}
         {warning.validFrom !== warning.validTo
           ? ` · ${warning.validFrom} – ${warning.validTo}`
           : ` · ${warning.validFrom}`}

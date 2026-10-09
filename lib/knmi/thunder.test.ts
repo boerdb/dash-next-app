@@ -13,17 +13,21 @@ function warning(overrides: Partial<KnmiWarningItem>): KnmiWarningItem {
     validTo: "29 mei 13:00",
     active: true,
     texts: [],
+    areaLabel: "Harlingen",
+    warningType: "warning",
     ...overrides,
   };
 }
 
 function api(warnings: KnmiWarningItem[]): KnmiWaarschuwingenApi {
   return {
+    locationLabel: "Harlingen",
     province: "FR",
     maxLevel: 1,
     maxLevelLabel: "Code geel",
     warnings,
     sourceFile: null,
+    source: "public-local",
     updatedAt: "2026-05-29T12:00:00.000Z",
   };
 }
