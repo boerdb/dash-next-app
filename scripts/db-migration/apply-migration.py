@@ -8,10 +8,12 @@ from pathlib import Path
 
 import paramiko
 
+from homelab import secret, ssh_key_kwargs
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 DB_NAME = "weerdata"
 DB_USER = "ben"
-DB_PASS = "kerkpoort"
+DB_PASS = secret("BEN_DB_PASS")
 NEW_HOST = "192.168.1.14"
 
 PHP_FILES_VARS = [
@@ -40,7 +42,7 @@ def load_secrets() -> dict[str, str]:
 def ssh(host: str, user: str, password: str, cmd: str, timeout: int = 300) -> tuple[int, str, str]:
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(host, username=user, password=password, timeout=15)
+    client.connect(host, username=user, timeout=15, **ssh_key_kwargs())
     try:
         _, stdout, stderr = client.exec_command(cmd, timeout=timeout)
         out = stdout.read().decode("utf-8", errors="replace")
@@ -53,7 +55,7 @@ def ssh(host: str, user: str, password: str, cmd: str, timeout: int = 300) -> tu
 def scp_put(local_path: str, remote_host: str, remote_path: str, user: str, password: str) -> None:
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(remote_host, username=user, password=password, timeout=15)
+    client.connect(remote_host, username=user, timeout=15, **ssh_key_kwargs())
     try:
         sftp = client.open_sftp()
         sftp.put(local_path, remote_path)
@@ -101,7 +103,7 @@ def main() -> int:
     local_dump = SCRIPT_DIR / "weerdata_migrate.sql"
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(php_host, username=user, password=pw, timeout=15)
+    client.connect(php_host, username=user, timeout=15, **ssh_key_kwargs())
     sftp = client.open_sftp()
     sftp.get(dump_remote, str(local_dump))
     sftp.close()

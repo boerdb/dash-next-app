@@ -4,6 +4,8 @@ import time
 from pathlib import Path
 import paramiko
 
+from homelab import ssh_key_kwargs
+
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 SCRIPT_DIR = Path(__file__).resolve().parent
 s = {}
@@ -14,7 +16,7 @@ for line in (SCRIPT_DIR / ".secrets.local").read_text().splitlines():
 
 c = paramiko.SSHClient()
 c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-c.connect("192.168.1.32", username=s["SSH_USER"], password=s["SSH_PASS"], timeout=15)
+c.connect("192.168.1.32", username=s["SSH_USER"], timeout=15, **ssh_key_kwargs())
 
 
 def run(cmd: str, timeout: int = 60) -> str:

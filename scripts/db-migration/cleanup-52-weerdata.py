@@ -6,6 +6,8 @@ import urllib.request
 
 import paramiko
 
+from homelab import secret, ssh_key_kwargs
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 
 
@@ -21,7 +23,7 @@ def load():
 def ssh(host, user, pw, cmd, timeout=60):
     c = paramiko.SSHClient()
     c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    c.connect(host, username=user, password=pw, timeout=15)
+    c.connect(host, username=user, timeout=15, **ssh_key_kwargs())
     _, o, e = c.exec_command(cmd, timeout=timeout)
     out, err = o.read().decode(), e.read().decode()
     code = o.channel.recv_exit_status()
@@ -34,7 +36,7 @@ def main():
     php = s["PHP_HOST"]
     db = s["DB_HOST"]
     user, pw = s["SSH_USER"], s["SSH_PASS"]
-    db_user, db_pass = "ben", "kerkpoort"
+    db_user, db_pass = "ben", secret("BEN_DB_PASS")
 
     print("==> Controle .14")
     code, out, err = ssh(

@@ -11,6 +11,8 @@ from pathlib import Path
 
 import paramiko
 
+from homelab import ssh_key_kwargs
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 WEB = "/var/www/html"
 
@@ -105,7 +107,7 @@ done
 
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(host, username=user, password=pw, timeout=15)
+    client.connect(host, username=user, timeout=15, **ssh_key_kwargs())
     _, stdout, stderr = client.exec_command(cmd, timeout=120)
     out = stdout.read().decode("utf-8", errors="replace")
     err = stderr.read().decode("utf-8", errors="replace")

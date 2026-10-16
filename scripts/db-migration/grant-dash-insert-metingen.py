@@ -2,6 +2,8 @@
 from pathlib import Path
 import paramiko
 
+from homelab import ssh_key_kwargs
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 s = {}
 for line in (SCRIPT_DIR / ".secrets.local").read_text().splitlines():
@@ -16,7 +18,7 @@ sql = (
 )
 c = paramiko.SSHClient()
 c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-c.connect(s["DB_HOST"], username=s["SSH_USER"], password=s["SSH_PASS"], timeout=15)
+c.connect(s["DB_HOST"], username=s["SSH_USER"], timeout=15, **ssh_key_kwargs())
 _, o, e = c.exec_command(f"mysql -u root -p{s['SSH_PASS']} -e \"{sql}\"")
 print(o.read().decode() or e.read().decode() or "OK")
 c.close()

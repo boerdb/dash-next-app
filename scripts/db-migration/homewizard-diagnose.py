@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 import paramiko
 
+from homelab import ssh_key_kwargs
+
 s = {}
 for line in (Path(__file__).parent / ".secrets.local").read_text().splitlines():
     if "=" in line and not line.strip().startswith("#"):
@@ -13,7 +15,7 @@ for line in (Path(__file__).parent / ".secrets.local").read_text().splitlines():
 body = json.dumps({"name": "local/dash-next-app"})
 c = paramiko.SSHClient()
 c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-c.connect("192.168.1.32", username=s["SSH_USER"], password=s["SSH_PASS"], timeout=15)
+c.connect("192.168.1.32", username=s["SSH_USER"], timeout=15, **ssh_key_kwargs())
 
 
 def run(cmd: str) -> str:

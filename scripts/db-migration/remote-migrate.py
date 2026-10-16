@@ -9,6 +9,8 @@ from pathlib import Path
 
 try:
     import paramiko
+
+    from homelab import ssh_key_kwargs
     import pymysql
 except ImportError:
     print("Installeer: pip install paramiko pymysql", file=sys.stderr)
@@ -35,7 +37,7 @@ def load_secrets() -> dict[str, str]:
 def ssh_run(host: str, user: str, password: str, cmd: str, timeout: int = 60) -> tuple[int, str, str]:
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(host, username=user, password=password, timeout=15)
+    client.connect(host, username=user, timeout=15, **ssh_key_kwargs())
     try:
         stdin, stdout, stderr = client.exec_command(cmd, timeout=timeout)
         out = stdout.read().decode("utf-8", errors="replace")

@@ -3,6 +3,8 @@ import sys
 from pathlib import Path
 import paramiko
 
+from homelab import ssh_key_kwargs
+
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -14,7 +16,7 @@ for line in (SCRIPT_DIR / ".secrets.local").read_text().splitlines():
 
 c = paramiko.SSHClient()
 c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-c.connect("192.168.1.32", username=s["SSH_USER"], password=s["SSH_PASS"], timeout=15)
+c.connect("192.168.1.32", username=s["SSH_USER"], timeout=15, **ssh_key_kwargs())
 for cmd in [
     "cd /var/www/dash-next-app && pm2 restart dash-next-app --update-env",
     "curl -s -m 8 'http://127.0.0.1:3000/api/weer/ingest?tempf=71.2&temp2f=75.6&humidity=70'",

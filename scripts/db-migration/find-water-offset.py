@@ -4,6 +4,8 @@ import sys
 from pathlib import Path
 import paramiko
 
+from homelab import ssh_key_kwargs
+
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 SCRIPT_DIR = Path(__file__).resolve().parent
 s = {}
@@ -14,7 +16,7 @@ for line in (SCRIPT_DIR / ".secrets.local").read_text().splitlines():
 
 c = paramiko.SSHClient()
 c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-c.connect(s["DB_HOST"], username=s["SSH_USER"], password=s["SSH_PASS"], timeout=15)
+c.connect(s["DB_HOST"], username=s["SSH_USER"], timeout=15, **ssh_key_kwargs())
 
 
 def mysql(db: str, q: str) -> str:
@@ -51,7 +53,7 @@ for db in ["personen_db", "ic_labels_db"]:
 print("=== HomeWizard offset op apparaat (.169 via .32) ===")
 c32 = paramiko.SSHClient()
 c32.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-c32.connect("192.168.1.32", username=s["SSH_USER"], password=s["SSH_PASS"], timeout=15)
+c32.connect("192.168.1.32", username=s["SSH_USER"], timeout=15, **ssh_key_kwargs())
 _, o, e = c32.exec_command("curl -sf -m 10 http://192.168.1.169/api/v1/data", timeout=15)
 print((o.read() + e.read()).decode("utf-8", errors="replace"))
 print("=== som dagmaxima water (liter) sinds april ===")

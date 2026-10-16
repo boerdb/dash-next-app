@@ -4,6 +4,8 @@ import time
 from pathlib import Path
 import paramiko
 
+from homelab import ssh_key_kwargs
+
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 s = {}
 for line in (Path(__file__).parent / ".secrets.local").read_text().splitlines():
@@ -12,7 +14,7 @@ for line in (Path(__file__).parent / ".secrets.local").read_text().splitlines():
         s[k.strip()] = v.strip()
 c = paramiko.SSHClient()
 c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-c.connect("192.168.1.32", username=s["SSH_USER"], password=s["SSH_PASS"], timeout=15)
+c.connect("192.168.1.32", username=s["SSH_USER"], timeout=15, **ssh_key_kwargs())
 APP = "/var/www/dash-next-app"
 for cmd in [
     f"cd {APP} && git pull && npm install && npm run build && pm2 restart dash-next-app --update-env",

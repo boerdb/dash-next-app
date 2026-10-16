@@ -3,9 +3,11 @@
 from pathlib import Path
 import paramiko
 
+from homelab import secret, ssh_key_kwargs
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 HOST = "192.168.1.32"
-PASS = "kerkpoort"
+PASS = secret("DASH_APP_DB_PASS")
 
 GRANTS = [
     f"CREATE USER IF NOT EXISTS 'dash_app'@'{HOST}' IDENTIFIED BY '{PASS}'",
@@ -24,7 +26,7 @@ def main():
             s[k.strip()] = v.strip()
     c = paramiko.SSHClient()
     c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    c.connect(s["DB_HOST"], username=s["SSH_USER"], password=s["SSH_PASS"], timeout=15)
+    c.connect(s["DB_HOST"], username=s["SSH_USER"], timeout=15, **ssh_key_kwargs())
     for g in GRANTS:
         _, o, e = c.exec_command(f"mysql -u root -p{s['SSH_PASS']} -e \"{g};\"")
         err = e.read().decode()

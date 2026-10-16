@@ -8,6 +8,8 @@ from pathlib import Path
 
 import paramiko
 
+from homelab import ssh_key_kwargs
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 
 
@@ -25,7 +27,7 @@ def load_secrets() -> dict[str, str]:
 def ssh(host: str, user: str, pw: str, cmd: str, timeout: int = 600) -> tuple[int, str, str]:
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(host, username=user, password=pw, timeout=15)
+    client.connect(host, username=user, timeout=15, **ssh_key_kwargs())
     try:
         _, stdout, stderr = client.exec_command(cmd, timeout=timeout)
         out = stdout.read().decode("utf-8", errors="replace")

@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
+import shlex
 import sys
 import time
 from pathlib import Path
 import paramiko
+
+from homelab import secret, ssh_key_kwargs
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
@@ -16,7 +19,7 @@ for line in (SCRIPT_DIR / ".secrets.local").read_text().splitlines():
 
 c = paramiko.SSHClient()
 c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-c.connect("192.168.1.32", username=s["SSH_USER"], password=s["SSH_PASS"], timeout=15)
+c.connect("192.168.1.32", username=s["SSH_USER"], timeout=15, **ssh_key_kwargs())
 
 
 def run(cmd: str, timeout: int = 600) -> str:
@@ -35,7 +38,7 @@ print("live:", run("curl -s -m 10 http://127.0.0.1:3000/api/weer/live")[:280])
 print("historie:", run("curl -s -m 10 http://127.0.0.1:3000/api/weer/historie")[:280])
 print(
     run(
-        f"mysql -h 192.168.1.14 -u dash_app -pkerkpoort weerdata -e "
+        f"mysql -h 192.168.1.14 -u dash_app -p{shlex.quote(secret('DASH_APP_DB_PASS'))} weerdata -e "
         "\"SELECT meet_moment,temp_c FROM metingen ORDER BY meet_moment DESC LIMIT 3;\""
     )
 )

@@ -3,6 +3,8 @@ import sys
 from pathlib import Path
 import paramiko
 
+from homelab import ssh_key_kwargs
+
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -24,7 +26,7 @@ FROM weer_live WHERE id=1;
 
 c = paramiko.SSHClient()
 c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-c.connect("192.168.1.14", username=s["SSH_USER"], password=s["SSH_PASS"], timeout=15)
+c.connect("192.168.1.14", username=s["SSH_USER"], timeout=15, **ssh_key_kwargs())
 cmd = f"mysql -u root -p{s['SSH_PASS']} weerdata -e \"{sql}\""
 _, o, e = c.exec_command(cmd)
 print((o.read() + e.read()).decode("utf-8", errors="replace"))

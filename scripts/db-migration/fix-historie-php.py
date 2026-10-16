@@ -2,6 +2,8 @@
 from pathlib import Path
 import paramiko
 
+from homelab import ssh_key_kwargs
+
 s = {}
 for line in Path(__file__).parent.joinpath(".secrets.local").read_text().splitlines():
     if "=" in line and not line.strip().startswith("#"):
@@ -18,7 +20,7 @@ files = {
 
 c = paramiko.SSHClient()
 c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-c.connect(host, username=user, password=pw, timeout=15)
+c.connect(host, username=user, timeout=15, **ssh_key_kwargs())
 sftp = c.open_sftp()
 
 for path, (old, new) in files.items():

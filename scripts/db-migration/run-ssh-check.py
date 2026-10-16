@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import paramiko
+
+from homelab import ssh_key_kwargs
 from pathlib import Path
 
 def load():
@@ -14,7 +16,7 @@ def run(host, cmd):
     s = load()
     c = paramiko.SSHClient()
     c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    c.connect(host, username=s["SSH_USER"], password=s["SSH_PASS"], timeout=15)
+    c.connect(host, username=s["SSH_USER"], timeout=15, **ssh_key_kwargs())
     _, o, e = c.exec_command(cmd, timeout=120)
     out = o.read().decode()
     err = e.read().decode()

@@ -5,6 +5,8 @@ from pathlib import Path
 
 import paramiko
 
+from homelab import ssh_key_kwargs
+
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 HOST = "192.168.1.32"
@@ -35,7 +37,7 @@ for line in (SCRIPT_DIR / ".secrets.local").read_text().splitlines():
 def main() -> None:
     c = paramiko.SSHClient()
     c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    c.connect(HOST, username=s["SSH_USER"], password=s["SSH_PASS"], timeout=15)
+    c.connect(HOST, username=s["SSH_USER"], timeout=15, **ssh_key_kwargs())
     sftp = c.open_sftp()
 
     for rel in FILES:

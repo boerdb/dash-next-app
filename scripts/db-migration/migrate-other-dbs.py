@@ -7,10 +7,12 @@ from pathlib import Path
 
 import paramiko
 
+from homelab import secret, ssh_key_kwargs
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 DATABASES = ["personen_db", "ic_labels_db"]
 DB_USER = "ben"
-DB_PASS = "kerkpoort"
+DB_PASS = secret("BEN_DB_PASS")
 NEW_HOST = "192.168.1.14"
 
 PHP_UPDATES = [
@@ -35,7 +37,7 @@ def load_secrets() -> dict[str, str]:
 def ssh(host: str, user: str, pw: str, cmd: str, timeout: int = 300) -> tuple[int, str, str]:
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(host, username=user, password=pw, timeout=15)
+    client.connect(host, username=user, timeout=15, **ssh_key_kwargs())
     try:
         _, stdout, stderr = client.exec_command(cmd, timeout=timeout)
         out = stdout.read().decode("utf-8", errors="replace")
@@ -48,7 +50,7 @@ def ssh(host: str, user: str, pw: str, cmd: str, timeout: int = 300) -> tuple[in
 def sftp_get(host: str, user: str, pw: str, remote: str, local: Path) -> None:
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(host, username=user, password=pw, timeout=15)
+    client.connect(host, username=user, timeout=15, **ssh_key_kwargs())
     try:
         client.open_sftp().get(remote, str(local))
     finally:
@@ -58,7 +60,7 @@ def sftp_get(host: str, user: str, pw: str, remote: str, local: Path) -> None:
 def sftp_put(host: str, user: str, pw: str, local: Path, remote: str) -> None:
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(host, username=user, password=pw, timeout=15)
+    client.connect(host, username=user, timeout=15, **ssh_key_kwargs())
     try:
         client.open_sftp().put(str(local), remote)
     finally:
@@ -68,7 +70,7 @@ def sftp_put(host: str, user: str, pw: str, local: Path, remote: str) -> None:
 def patch_php(host: str, user: str, pw: str, path: str, replacements: list[tuple[str, str]]) -> None:
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(host, username=user, password=pw, timeout=15)
+    client.connect(host, username=user, timeout=15, **ssh_key_kwargs())
     sftp = client.open_sftp()
     with sftp.open(path, "r") as f:
         data = f.read().decode("utf-8")
@@ -194,7 +196,7 @@ def main() -> int:
         )
         print(f"DROP {db}:", out or err or "OK")
 
-    code, out, err = ssh(php_host, ssh_user, ssh_pw, "mysql -u ben -pkerkpoort -N -e 'SHOW DATABASES;'")
+    code, out, err = ssh(php_host, ssh_user, ssh_pw, f"mysql -u ben -p{DB_PASS} -N -e 'SHOW DATABASES;'")
     print("Databases over op .52:\n", out or err)
 
     print("\nKlaar.")

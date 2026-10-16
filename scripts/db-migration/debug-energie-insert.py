@@ -3,6 +3,8 @@ import sys
 from pathlib import Path
 import paramiko
 
+from homelab import ssh_key_kwargs
+
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 SCRIPT_DIR = Path(__file__).resolve().parent
 s = {}
@@ -26,13 +28,13 @@ SHOW GRANTS FOR 'dash_app'@'192.168.1.32';
 
 c = paramiko.SSHClient()
 c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-c.connect("192.168.1.14", username=s["SSH_USER"], password=pw, timeout=15)
+c.connect("192.168.1.14", username=s["SSH_USER"], timeout=15, **ssh_key_kwargs())
 _, o, e = c.exec_command(f'mysql -u root -p{pw} weerdata -e "{sql}"', timeout=30)
 print((o.read() + e.read()).decode())
 
 c2 = paramiko.SSHClient()
 c2.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-c2.connect("192.168.1.32", username=s["SSH_USER"], password=pw, timeout=15)
+c2.connect("192.168.1.32", username=s["SSH_USER"], timeout=15, **ssh_key_kwargs())
 _, o2, e2 = c2.exec_command(
     "cd /var/www/dash-next-app && pm2 logs dash-next-app --lines 30 --nostream 2>&1 | tail -20",
     timeout=30,

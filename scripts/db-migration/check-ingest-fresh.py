@@ -3,6 +3,8 @@ import sys
 from pathlib import Path
 import paramiko
 
+from homelab import ssh_key_kwargs
+
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 s = {}
 for line in (Path(__file__).parent / ".secrets.local").read_text().splitlines():
@@ -31,8 +33,8 @@ for host, cmd in [
     c.connect(
         "192.168.1.32" if host == "32" else "192.168.1.14",
         username=s["SSH_USER"],
-        password=s["SSH_PASS"],
         timeout=15,
+        **ssh_key_kwargs(),
     )
     _, o, e = c.exec_command(cmd)
     print(f"=== {host} ===")

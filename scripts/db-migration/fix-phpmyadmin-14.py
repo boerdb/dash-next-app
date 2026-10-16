@@ -8,6 +8,8 @@ from pathlib import Path
 
 import paramiko
 
+from homelab import secret, ssh_key_kwargs
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 
 
@@ -23,7 +25,7 @@ def load() -> dict[str, str]:
 def ssh(host: str, user: str, pw: str, cmd: str, timeout: int = 120) -> tuple[int, str, str]:
     c = paramiko.SSHClient()
     c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    c.connect(host, username=user, password=pw, timeout=20)
+    c.connect(host, username=user, timeout=20, **ssh_key_kwargs())
     try:
         _, o, e = c.exec_command(cmd, timeout=timeout)
         return o.channel.recv_exit_status(), o.read().decode(), e.read().decode()
@@ -78,9 +80,9 @@ apt-get install -y apache2 php php-mysql phpmyadmin libapache2-mod-php 2>/dev/nu
 # phpMyAdmin non-interactive als nog niet geinstalleerd
 if ! dpkg -l phpmyadmin 2>/dev/null | grep -q ^ii; then
   echo "phpmyadmin phpmyadmin/dbconfig-install boolean true" | debconf-set-selections
-  echo "phpmyadmin phpmyadmin/app-password-confirm password kerkpoort" | debconf-set-selections
-  echo "phpmyadmin phpmyadmin/mysql/admin-pass password kerkpoort" | debconf-set-selections
-  echo "phpmyadmin phpmyadmin/mysql/app-pass password kerkpoort" | debconf-set-selections
+  echo "phpmyadmin phpmyadmin/app-password-confirm password __PMA_APP_PASS__" | debconf-set-selections
+  echo "phpmyadmin phpmyadmin/mysql/admin-pass password __MYSQL_ROOT_PASS__" | debconf-set-selections
+  echo "phpmyadmin phpmyadmin/mysql/app-pass password __PMA_APP_PASS__" | debconf-set-selections
   echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" | debconf-set-selections
   apt-get install -y phpmyadmin
 fi
@@ -95,6 +97,9 @@ echo "==> Lokaal test"
 wget -qO- http://127.0.0.1/phpmyadmin/ 2>/dev/null | head -c 100 || wget -qO- http://127.0.0.1/ 2>/dev/null | head -c 100
 echo ""
 """
+    cmd = cmd.replace("__PMA_APP_PASS__", secret("PHPMYADMIN_APP_PASS")).replace(
+        "__MYSQL_ROOT_PASS__", secret("MYSQL_ROOT_PASS")
+    )
     code, out, err = ssh(host, user, pw, cmd, timeout=300)
     print(out)
     if err:
@@ -109,7 +114,7 @@ echo ""
             print(f"HTTP {path}: {e}")
 
     print(f"\nProbeer in browser: http://{host}/phpmyadmin/")
-    print("Login: admin / kerkpoort (of root / kerkpoort voor MySQL)")
+    print("Login: admin of root (wachtwoorden in .secrets.local / je wachtwoordbeheer)")
     return 0 if code == 0 else 1
 
 

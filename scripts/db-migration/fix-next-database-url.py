@@ -3,11 +3,13 @@
 from pathlib import Path
 import paramiko
 
+from homelab import secret, ssh_key_kwargs
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 HOST = "192.168.1.32"
 ENV_FILE = "/var/www/dash-next-app/.env.local"
 DATABASE_LINE = (
-    "DATABASE_URL=mysql://dash_app:kerkpoort@192.168.1.14:3306/weerdata"
+    f"DATABASE_URL=mysql://dash_app:{secret('DASH_APP_DB_PASS')}@192.168.1.14:3306/weerdata"
 )
 
 s = {}
@@ -18,7 +20,7 @@ for line in (SCRIPT_DIR / ".secrets.local").read_text().splitlines():
 
 c = paramiko.SSHClient()
 c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-c.connect(HOST, username=s["SSH_USER"], password=s["SSH_PASS"], timeout=15)
+c.connect(HOST, username=s["SSH_USER"], timeout=15, **ssh_key_kwargs())
 
 _, o, _ = c.exec_command(f"grep -q '^DATABASE_URL=' {ENV_FILE} 2>/dev/null; echo $?")
 has = o.read().decode().strip() == "0"

@@ -7,6 +7,8 @@ from pathlib import Path
 
 import paramiko
 
+from homelab import ssh_key_kwargs
+
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -61,7 +63,7 @@ def main() -> None:
     s = load_secrets()
     c = paramiko.SSHClient()
     c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    c.connect(HOST, username=s["SSH_USER"], password=s["SSH_PASS"], timeout=15)
+    c.connect(HOST, username=s["SSH_USER"], timeout=15, **ssh_key_kwargs())
     patch_env_local(c.open_sftp(), updates)
     _, o, e = c.exec_command(
         f"cd {APP} && pm2 restart dash-next-app --update-env", timeout=30

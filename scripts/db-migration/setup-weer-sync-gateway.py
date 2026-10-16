@@ -6,6 +6,8 @@ from pathlib import Path
 
 import paramiko
 
+from homelab import ssh_key_kwargs
+
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 HOST = "192.168.1.32"
@@ -30,7 +32,7 @@ def run(c: paramiko.SSHClient, cmd: str, timeout: int = 120) -> str:
 def main() -> None:
     c = paramiko.SSHClient()
     c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    c.connect(HOST, username=s["SSH_USER"], password=s["SSH_PASS"], timeout=15)
+    c.connect(HOST, username=s["SSH_USER"], timeout=15, **ssh_key_kwargs())
 
     print("==> ECOWITT_GATEWAY_URL in .env.local")
     has = run(c, f"grep '^ECOWITT_GATEWAY_URL=' {ENV_PATH} 2>/dev/null").strip()

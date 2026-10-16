@@ -2,6 +2,8 @@
 from pathlib import Path
 import paramiko
 
+from homelab import ssh_key_kwargs
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 SQL = """
 CREATE TABLE IF NOT EXISTS weerdata.energie_dagstart (
@@ -24,7 +26,7 @@ def main():
             s[k.strip()] = v.strip()
     c = paramiko.SSHClient()
     c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    c.connect(s["DB_HOST"], username=s["SSH_USER"], password=s["SSH_PASS"], timeout=15)
+    c.connect(s["DB_HOST"], username=s["SSH_USER"], timeout=15, **ssh_key_kwargs())
     for stmt in SQL.strip().split(";"):
         if stmt.strip():
             c.exec_command(f"mysql -u root -p{s['SSH_PASS']} -e \"{stmt.strip()};\"")

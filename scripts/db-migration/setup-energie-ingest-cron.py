@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Zet energie-ingest cron op Next-host (192.168.1.32). Vereist .secrets.local."""
+import shlex
 import secrets
 import sys
 from pathlib import Path
 
 import paramiko
+
+from homelab import secret, ssh_key_kwargs
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
@@ -28,7 +31,7 @@ def run(c: paramiko.SSHClient, cmd: str, timeout: int = 120) -> str:
 def main() -> None:
     c = paramiko.SSHClient()
     c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    c.connect(HOST, username=s["SSH_USER"], password=s["SSH_PASS"], timeout=15)
+    c.connect(HOST, username=s["SSH_USER"], timeout=15, **ssh_key_kwargs())
 
     print("==> Huidige crontab")
     print(run(c, "crontab -l 2>/dev/null || echo '(leeg)'"))
@@ -84,7 +87,7 @@ def main() -> None:
     print(
         run(
             c,
-            f"mysql -h 192.168.1.14 -u dash_app -pkerkpoort weerdata -e \"{sql}\" 2>/dev/null",
+            f"mysql -h 192.168.1.14 -u dash_app -p{shlex.quote(secret('DASH_APP_DB_PASS'))} weerdata -e \"{sql}\" 2>/dev/null",
         )
     )
 
