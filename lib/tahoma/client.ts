@@ -13,7 +13,7 @@ import type {
  * Somfy TaHoma local API (Developer Mode).
  *
  * Auth: Authorization: Bearer <token>
- * Base: https://192.168.1.128:8443 (self-signed cert → rejectUnauthorized: false)
+ * Base: https://192.168.1.124:8443 (self-signed cert → rejectUnauthorized: false)
  * Spec: https://github.com/Somfy-Developer/Somfy-TaHoma-Developer-Mode
  */
 

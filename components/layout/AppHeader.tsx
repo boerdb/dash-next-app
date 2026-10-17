@@ -7,6 +7,7 @@ const titles: Record<string, string> = {
   "/energie": "Energie",
   "/tahoma": "Tahoma",
   "/hue": "Hue",
+  "/hisense": "Was",
 };
 
 export function AppHeader() {

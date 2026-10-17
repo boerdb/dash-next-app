@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CloudSun, Zap, Blinds, Lightbulb } from "lucide-react";
+import { CloudSun, Zap, Blinds, Lightbulb, WashingMachine } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -33,6 +33,13 @@ const links = [
     icon: Lightbulb,
     accent: "text-accent-amber",
     activeBg: "bg-accent-amber-soft",
+  },
+  {
+    href: "/hisense",
+    label: "Was",
+    icon: WashingMachine,
+    accent: "text-accent-teal",
+    activeBg: "bg-accent-teal-soft",
   },
 ] as const;
 

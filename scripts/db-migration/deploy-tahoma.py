@@ -16,7 +16,7 @@ ROOT = SCRIPT_DIR.parent.parent
 HOST = "192.168.1.32"
 APP = "/var/www/dash-next-app"
 ENV_FILE = f"{APP}/.env.local"
-BASE_URL = "https://192.168.1.128:8443"
+BASE_URL = "https://192.168.1.124:8443"
 
 
 def load_secrets() -> dict[str, str]:

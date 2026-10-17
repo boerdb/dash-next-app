@@ -1,7 +1,7 @@
 /** Somfy Tahoma / Connexoon local API types (Developer Mode). */
 
 export interface TahomaSettings {
-  /** Base URL van de box, bijv. https://192.168.1.128:8443 */
+  /** Base URL van de box, bijv. https://192.168.1.124:8443 */
   baseUrl: string;
   /** Bearer-token uit Developer Mode in de Tahoma-app. */
   token: string;

@@ -103,11 +103,11 @@ export function TahomaStatusCard() {
         ) : null}
 
         <div className="grid gap-3">
-          <Field label="Base URL" hint="https://192.168.1.128:8443">
+          <Field label="Base URL" hint="https://192.168.1.124:8443">
             <input
               value={baseUrl}
               onChange={(e) => setBaseUrl(e.target.value)}
-              placeholder="https://192.168.1.128:8443"
+              placeholder="https://192.168.1.124:8443"
               className="tahoma-input"
             />
           </Field>

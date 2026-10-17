@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 interface SectionProps {
   title: string;
   subtitle?: string;
-  accent?: "weather" | "energy" | "export" | "violet" | "amber";
+  accent?: "weather" | "energy" | "export" | "violet" | "amber" | "teal";
   collapsible?: boolean;
   defaultOpen?: boolean;
   children: React.ReactNode;
@@ -20,6 +20,7 @@ const accentBar: Record<NonNullable<SectionProps["accent"]>, string> = {
   export: "bg-accent-export",
   violet: "bg-accent-violet",
   amber: "bg-accent-amber",
+  teal: "bg-accent-teal",
 };
 
 const accentText: Record<NonNullable<SectionProps["accent"]>, string> = {
@@ -28,6 +29,7 @@ const accentText: Record<NonNullable<SectionProps["accent"]>, string> = {
   export: "text-accent-export",
   violet: "text-accent-violet",
   amber: "text-accent-amber",
+  teal: "text-accent-teal",
 };
 
 export function Section({

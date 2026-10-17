@@ -17,11 +17,13 @@
   --accent-danger: #ff3b4a;
   --accent-violet: #a78bfa;
   --accent-amber: #ffcc00;
+  --accent-teal: #2dd4bf;
   --accent-weather-soft: rgba(0, 180, 240, 0.2);
   --accent-energy-soft: rgba(255, 106, 0, 0.2);
   --accent-export-soft: rgba(34, 197, 94, 0.2);
   --accent-violet-soft: rgba(167, 139, 250, 0.2);
   --accent-amber-soft: rgba(255, 204, 0, 0.22);
+  --accent-teal-soft: rgba(45, 212, 191, 0.2);
   --nav-bg: rgba(8, 30, 52, 0.96);
   --nav-inactive: #7a97ae;
   --nav-hover: #f2f7fb;
@@ -89,11 +91,13 @@
   --color-accent-danger: var(--accent-danger);
   --color-accent-violet: var(--accent-violet);
   --color-accent-amber: var(--accent-amber);
+  --color-accent-teal: var(--accent-teal);
   --color-accent-weather-soft: var(--accent-weather-soft);
   --color-accent-energy-soft: var(--accent-energy-soft);
   --color-accent-export-soft: var(--accent-export-soft);
   --color-accent-violet-soft: var(--accent-violet-soft);
   --color-accent-amber-soft: var(--accent-amber-soft);
+  --color-accent-teal-soft: var(--accent-teal-soft);
   --color-nav-bg: var(--nav-bg);
   --color-nav-inactive: var(--nav-inactive);
   --color-nav-hover: var(--nav-hover);
