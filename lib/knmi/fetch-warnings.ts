@@ -64,7 +64,9 @@ async function downloadDatasetFile(
   if (!downloadUrl) {
     throw new Error("KNMI download-URL ontbreekt");
   }
-  const res = await fetch(downloadUrl, { next: { revalidate: 600 } });
+  // Niet via de Next-datacache: de provincie-XML is >2 MB en past daar niet in
+  // (gaf per aanvraag een logregel met de volledige download-URL).
+  const res = await fetch(downloadUrl, { cache: "no-store" });
   if (!res.ok) {
     throw new Error(`KNMI download ${res.status}: ${filename}`);
   }
@@ -154,6 +156,28 @@ export async function fetchKnmiWaarschuwingen(
   apiKey: string,
   province: string = KNMI_DEFAULT_PROVINCE,
   now: number = Date.now()
+): Promise<KnmiWaarschuwingenApi> {
+  const key = province.toUpperCase();
+  const hit = resultCache.get(key);
+  if (hit && now - hit.at < RESULT_CACHE_MS) return hit.data;
+  const data = await fetchUncached(apiKey, province, now);
+  resultCache.set(key, { at: now, data });
+  return data;
+}
+
+/** KNMI publiceert hooguit enkele keren per uur; 10 min scheelt MB's per bezoek. */
+const RESULT_CACHE_MS = 10 * 60 * 1000;
+const resultCache = new Map<string, { at: number; data: KnmiWaarschuwingenApi }>();
+
+/** Alleen voor tests: begin zonder gecachte uitkomst. */
+export function clearKnmiResultCache(): void {
+  resultCache.clear();
+}
+
+async function fetchUncached(
+  apiKey: string,
+  province: string,
+  now: number
 ): Promise<KnmiWaarschuwingenApi> {
   if (now < KNMI_CUTOVER_AT) {
     return fetchLegacyProvinceWarnings(apiKey, province);

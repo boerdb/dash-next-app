@@ -2,7 +2,7 @@ import { afterEach, describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { fetchKnmiWaarschuwingen } from "./fetch-warnings";
+import { clearKnmiResultCache, fetchKnmiWaarschuwingen } from "./fetch-warnings";
 import { KNMI_CUTOVER_AT } from "./constants";
 
 const legacyXml = readFileSync(
@@ -18,6 +18,7 @@ const heartbeat = {
 const realFetch = globalThis.fetch;
 afterEach(() => {
   globalThis.fetch = realFetch;
+  clearKnmiResultCache();
 });
 
 /** Nep-KNMI: bestandslijsten, download-URL's en de bestanden zelf. */
@@ -68,6 +69,7 @@ describe("fetchKnmiWaarschuwingen · bronkeuze rond de cutover", () => {
     mockKnmi({ legacyModified: "2026-11-02T03:00:00Z", publicFails: true });
     const fresh = await fetchKnmiWaarschuwingen("key", "FR", KNMI_CUTOVER_AT + 4 * 3_600_000);
     assert.equal(fresh.source, "legacy-province");
+    clearKnmiResultCache();
 
     mockKnmi({ legacyModified: "2026-11-01T22:00:00Z", publicFails: true });
     await assert.rejects(
