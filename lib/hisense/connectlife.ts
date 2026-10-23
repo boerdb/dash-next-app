@@ -177,11 +177,19 @@ async function refresh(): Promise<void> {
   );
 }
 
+/**
+ * Na een geweigerde login niet meteen opnieuw proberen: Gigya blokkeert het
+ * account dan tijdelijk ("Account Temporarily Locked Out").
+ */
+const LOGIN_BACKOFF_MS = 30 * 60_000;
+let loginFailure: { at: number; error: ConnectLifeError } | null = null;
+
 async function ensureToken(username: string, password: string): Promise<string> {
   const key = `${username}\n${password}`;
   if (tokenKey !== key) {
     token = null;
     tokenKey = key;
+    loginFailure = null;
   }
   if (token && token.expiresAt > Date.now()) return token.accessToken;
   if (token?.refreshToken) {
