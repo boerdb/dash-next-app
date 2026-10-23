@@ -192,7 +192,14 @@ async function ensureToken(username: string, password: string): Promise<string> 
       token = null;
     }
   }
-  await login(username, password);
+  if (loginFailure && Date.now() - loginFailure.at < LOGIN_BACKOFF_MS) throw loginFailure.error;
+  try {
+    await login(username, password);
+  } catch (err) {
+    if (err instanceof ConnectLifeError && err.auth) loginFailure = { at: Date.now(), error: err };
+    throw err;
+  }
+  loginFailure = null;
   return token!.accessToken;
 }
 
