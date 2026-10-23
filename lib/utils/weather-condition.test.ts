@@ -266,3 +266,47 @@ describe("getWeatherCondition · dagperioden", () => {
     assert.equal(condition, "rain");
   });
 });
+
+describe("getWeatherCondition · sneeuw", () => {
+  const snowSky: OpenMeteoSky = {
+    cloudCoverPct: 100,
+    weatherCode: 73,
+    precipitationMm: 0.4,
+    shortwaveRadiationWm2: 0,
+  };
+
+  it("toont sneeuw overdag ook als de piezo droog meldt", () => {
+    const condition = getWeatherCondition(
+      { temp_c: 0.5, rainrate_mm: 0, solarradiation: 40 },
+      "day",
+      false,
+      { ...snowSky, shortwaveRadiationWm2: 40 }
+    );
+    assert.equal(condition, "snow");
+  });
+
+  it("toont sneeuw 's nachts", () => {
+    const condition = getWeatherCondition({ temp_c: -1 }, "night", true, snowSky);
+    assert.equal(condition, "snow");
+  });
+
+  it("negeert een sneeuwcode bij te hoge stationtemperatuur", () => {
+    const condition = getWeatherCondition(
+      { temp_c: 8, rainrate_mm: 0 },
+      "night",
+      true,
+      snowSky
+    );
+    assert.notEqual(condition, "snow");
+  });
+
+  it("onweer gaat voor sneeuw", () => {
+    const condition = getWeatherCondition(
+      { temp_c: 0 },
+      "day",
+      false,
+      { ...snowSky, weatherCode: 95 }
+    );
+    assert.equal(condition, "thunder");
+  });
+});

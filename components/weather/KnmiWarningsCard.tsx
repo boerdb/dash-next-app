@@ -14,17 +14,18 @@ const LEVEL_STYLES: Record<
   1 | 2 | 3,
   {
     border: string;
-    badge: "energy" | "danger" | "default";
+    badge: "amber" | "energy" | "danger" | "default";
     title: string;
     icon: string;
     muted: string;
   }
 > = {
+  // Code geel in geel: anders leek het op code oranje.
   1: {
-    border: "border-accent-energy/40",
-    badge: "energy",
+    border: "border-accent-amber/50",
+    badge: "amber",
     title: "text-foreground",
-    icon: "text-accent-energy",
+    icon: "text-accent-amber",
     muted: "text-surface-muted",
   },
   2: {

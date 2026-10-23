@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { faseCount, mapP1Phases } from "./p1-phases";
+import { faseCount, mapP1Phases, type P1PhaseRaw } from "./p1-phases";
 
 describe("mapP1Phases", () => {
   it("mapt v1 veldnamen", () => {
@@ -40,7 +40,8 @@ describe("mapP1Phases", () => {
   });
 
   it("geeft null bij ontbrekende fasevelden", () => {
-    assert.equal(mapP1Phases({ active_power_w: 500 }), null);
+    const zonderFases = { active_power_w: 500 } as P1PhaseRaw;
+    assert.equal(mapP1Phases(zonderFases), null);
   });
 
   it("ondersteunt 1-fase (alleen L1)", () => {

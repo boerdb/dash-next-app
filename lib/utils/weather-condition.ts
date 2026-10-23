@@ -69,6 +69,20 @@ function externalThunderCondition(
   return null;
 }
 
+/** Boven deze stationtemperatuur geloven we een sneeuwcode van het model niet. */
+const SNOW_MAX_TEMP_C = 3;
+
+/**
+ * Sneeuw komt uit Open-Meteo (WMO 71-77, 85-86): de WS90-piezo registreert
+ * sneeuw nauwelijks, dus "station droog" mag sneeuw niet wegdrukken. Wel een
+ * temperatuurcheck, zodat een modelcode bij 8 °C geen sneeuw-hero geeft.
+ */
+function isSnowing(data: WeerLive, openMeteoSky?: OpenMeteoSky | null): boolean {
+  if (!openMeteoSky || !openMeteoImpliesSnow(openMeteoSky.weatherCode)) return false;
+  const temp = Number(data.temp_c);
+  return data.temp_c == null || !Number.isFinite(temp) || temp <= SNOW_MAX_TEMP_C;
+}
+
 function isStationRainy(data: WeerLive): boolean {
   const rate = resolveRainRateMm(data) ?? 0;
   return rate > 0;
@@ -134,6 +148,7 @@ export function getWeatherCondition(
 
   if (isStationThunder(data)) return external ?? "thunder";
   if (external) return external;
+  if (isSnowing(data, openMeteoSky)) return "snow";
   if (isStationRainy(data)) return "rain";
   if (isStationFoggy(data, openMeteoSky)) return "fog";
   if (isStationWindy(data)) return "wind";

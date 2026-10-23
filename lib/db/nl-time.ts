@@ -1,6 +1,3 @@
-/** CEST; winter (CET) wordt +01:00 — later via env indien nodig. */
-export const NL_TZ_OFFSET = "+02:00";
-
 const NL_TZ = "Europe/Amsterdam";
 
 /** Huidige Amsterdam-tijd als "HH:MM" (24-uurs). */

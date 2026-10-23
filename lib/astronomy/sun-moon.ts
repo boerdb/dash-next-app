@@ -114,8 +114,8 @@ export function toAstronomieApi(info: AstronomyInfo) {
 
 export function getAstronomyInfo(
   date = new Date(),
-  lat = HARLINGEN.latitude,
-  lng = HARLINGEN.longitude
+  lat: number = HARLINGEN.latitude,
+  lng: number = HARLINGEN.longitude
 ): AstronomyInfo {
   const civilNoon = amsterdamCivilNoon(date);
   const times = SunCalc.getTimes(civilNoon, lat, lng);

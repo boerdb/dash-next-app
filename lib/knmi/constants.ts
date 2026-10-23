@@ -28,6 +28,16 @@ export const KNMI_PROVINCE_LABELS: Record<string, string> = {
   WAB: "Waddenzee boven water",
 };
 
+/**
+ * KNMI stopt de provincie-XML per 2 nov 2026 ("will no longer receive updates
+ * per November 2, 2026"). Tot dan is de nieuwe dataset "for testing purposes
+ * only" en bevat hij alleen heartbeats; daarom pas vanaf dit moment primair.
+ */
+export const KNMI_CUTOVER_AT = Date.parse("2026-11-02T00:00:00+01:00");
+
+/** Legacy-bestand ouder dan dit telt na de cutover niet meer als actueel. */
+export const KNMI_LEGACY_MAX_AGE_MS = 6 * 60 * 60 * 1000;
+
 /** Nieuwe unified dataset (lokaal / polygon, vanaf 2 nov 2026). */
 export const KNMI_PUBLIC_DATASET = "KNMI-public-weather-warnings";
 export const KNMI_PUBLIC_DATASET_VERSION = "1.0";
@@ -69,6 +79,7 @@ export const KNMI_PHENOMENON_LABELS: Record<string, string> = {
   snow: "Gladheid door sneeuw",
   "freezing-rain": "Gladheid door ijzel",
   iciness: "Gladheid",
+  temperature: "Temperatuur",
   heat: "Hitte",
   heatstress: "Hitte",
   "high-temperature": "Hitte",

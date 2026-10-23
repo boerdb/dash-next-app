@@ -69,7 +69,7 @@ export function useWeerData() {
 
   const astroData = useLiveAstronomy();
 
-  const { data: knmiWaarschuwingen, mutate: mutateKnmi } = useSWR<
+  const { data: knmiWaarschuwingen, error: knmiError, mutate: mutateKnmi } = useSWR<
     KnmiWaarschuwingenApi | null,
     FetchError
   >("/api/weer/knmi-waarschuwingen", knmiFetcher, {
@@ -135,6 +135,7 @@ export function useWeerData() {
     getijBron: getijdenData?.source ?? "rws",
     astroData,
     knmiWaarschuwingen,
+    knmiError,
     openMeteoForecast,
     updateLabel,
     condition,

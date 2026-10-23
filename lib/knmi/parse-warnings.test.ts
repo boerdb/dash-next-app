@@ -17,6 +17,8 @@ describe("parseKnmiWarningsXml", () => {
     assert.equal(result.maxLevelLabel, "Code geel");
     assert.equal(result.warnings.length, 1);
     assert.equal(result.warnings[0].phenomenonLabel, "Onweersbuien");
+    // Oude code LT → nieuwe id, zodat de onweer-hero de waarschuwing herkent.
+    assert.equal(result.warnings[0].phenomenonId, "thunderstorm");
     assert.equal(result.warnings[0].level, 1);
     assert.equal(result.warnings[0].areaLabel, "Friesland");
     assert.equal(result.warnings[0].warningType, "warning");

@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server";
 import { jsonNoStore } from "@/lib/api/no-store";
 import { getSettings, isConfigured } from "@/lib/tahoma/settings";
-import { fetchDevices, ping, resetClientCache } from "@/lib/tahoma/client";
+import { fetchDevices, resetClientCache } from "@/lib/tahoma/client";
 import type { TahomaStatus } from "@/lib/tahoma/types";
 
 export const dynamic = "force-dynamic";

@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { jsonNoStore } from "@/lib/api/no-store";
 import { clearLog, getLog } from "@/lib/hue/action-log";
 

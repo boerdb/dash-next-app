@@ -392,7 +392,7 @@ export function aggregateBatterijen(
   const online = batterijen.filter((b) => b.bereikbaar);
   let vermogen_totaal = online.reduce((s, b) => s + b.vermogen_w, 0);
   const socs = online.map((b) => b.soc).filter((s): s is number => s != null);
-  let soc_gemiddeld =
+  const soc_gemiddeld =
     socs.length > 0
       ? Math.round(socs.reduce((a, b) => a + b, 0) / socs.length)
       : null;

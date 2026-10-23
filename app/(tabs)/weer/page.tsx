@@ -50,6 +50,7 @@ export default function WeerPage() {
     getijBron,
     astroData,
     knmiWaarschuwingen,
+    knmiError,
     openMeteoForecast,
     updateLabel,
     condition,
@@ -67,7 +68,13 @@ export default function WeerPage() {
         <StatusPanel message={weerError.message} onRetry={() => mutateWeer()} />
       ) : weer ? (
         <div className="space-y-[var(--space-section)] pb-2">
-          {knmiWaarschuwingen ? <KnmiWarningsCard data={knmiWaarschuwingen} /> : null}
+          {knmiWaarschuwingen ? (
+            <KnmiWarningsCard data={knmiWaarschuwingen} />
+          ) : knmiError ? (
+            <p className="text-caption px-1 text-accent-danger">
+              KNMI-waarschuwingen niet beschikbaar: {knmiError.message}
+            </p>
+          ) : null}
 
           <WeatherHero
             data={weer}

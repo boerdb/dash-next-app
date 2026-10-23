@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { ChartFrame } from "@/components/ui/chart-frame";
 import { Surface, SurfaceBody } from "@/components/ui/surface";
 import { chartTooltipStyle, useChartTheme } from "@/lib/hooks/use-chart-theme";
+import { summarizePrecipForecast } from "@/lib/precip-forecast/summary";
 
 const CHART_HEIGHT = 180;
 
@@ -78,6 +79,9 @@ export function PrecipForecastCard({ data, error, onRetry }: PrecipForecastCardP
   return (
     <Surface level="raised">
       <SurfaceBody>
+        <p className="text-sm font-medium text-foreground">
+          {summarizePrecipForecast(data.slots, data.hours)}
+        </p>
         <p className="text-caption mb-4 text-surface-muted">
           Verwachte neerslag · komende {data.hours} uur · mm per uur
         </p>

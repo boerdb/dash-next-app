@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { jsonNoStore } from "@/lib/api/no-store";
 import { getLog, clearLog } from "@/lib/tahoma/action-log";
 

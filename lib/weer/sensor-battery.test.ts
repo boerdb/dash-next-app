@@ -21,6 +21,7 @@ describe("formatEcowittBattery", () => {
 describe("getLightningBattery", () => {
   it("leest alleen WH57", () => {
     assert.equal(getLightningBattery({ wh57batt: "5" })?.detail, "5/5");
-    assert.equal(getLightningBattery({ wh65batt: "0", wh25batt: "0" }), null);
+    const zonderWh57 = { wh65batt: "0", wh25batt: "0" } as Parameters<typeof getLightningBattery>[0];
+    assert.equal(getLightningBattery(zonderWh57), null);
   });
 });

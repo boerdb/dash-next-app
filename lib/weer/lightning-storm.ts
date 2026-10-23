@@ -44,17 +44,6 @@ export function isRecentLightningStrikeNearby(data: WeerLive): boolean {
   return isRecentLightningStrike(data.lightning_time ?? undefined);
 }
 
-/**
- * Onweersfront / kans op onweer zonder bevestigde inslag.
- * GW1100 kan afstand melden vóórdat lightning_time gezet is.
- */
-export function isLightningStormFront(data: WeerLive): boolean {
-  const km = data.lightning_km;
-  if (km == null || km <= 0 || km > WH57_MAX_KM) return false;
-  if (data.lightning_time) return false;
-  return fieldPresent(data, "wh57batt");
-}
-
 /** Console-achtige stormvoorspelling uit dalende druk + warm vochtig weer. */
 export function isBarometerStormForecast(data: WeerLive): boolean {
   const delta = Number(data.barom_trend_delta_hpa);
@@ -96,7 +85,7 @@ export function shouldClearStormRiskLatch(data: WeerLive): boolean {
  * Daadwerkelijke WH57-activiteit: een recente, getimede inslag binnen bereik.
  * Dit (en alleen dit) start/verlengt de latch en stuurt de onweer-hero aan.
  *
- * Bewust NIET op `isLightningStormFront`: de GW1100 blijft de afstand van de
+ * Bewust NIET op afstand zonder tijd: de GW1100 blijft de afstand van de
  * laatste inslag uren melden, dus "afstand zonder tijd" is geen betrouwbaar
  * front-signaal. Een echte nieuwe inslag krijgt via de Ecowitt-upload direct
  * een numerieke `lightning_time` en wordt zo wél als recent herkend.
@@ -232,7 +221,6 @@ export type LightningStatusKind = "strike" | "risk" | "airmass" | "idle";
 
 export type LightningRiskReason =
   | "strike"
-  | "storm_front"
   | "latched"
   | "barometer"
   | "convective"
@@ -240,7 +228,6 @@ export type LightningRiskReason =
 
 export function getLightningRiskReason(data: WeerLive): LightningRiskReason {
   if (isRecentLightningStrikeNearby(data)) return "strike";
-  if (isLightningStormFront(data)) return "storm_front";
   if (data.lightning_storm_risk === true && data.lightning_storm_risk_until) {
     return "latched";
   }
@@ -280,7 +267,6 @@ export function shouldAccelerateLightningPoll(
 export function getLightningStatusLabel(data: WeerLive): string {
   const reason = getLightningRiskReason(data);
   if (reason === "strike") return "Recente inslag gedetecteerd";
-  if (reason === "storm_front") return "WH57 detecteert onweersfront";
   if (reason === "latched") return "Kans op onweer · nog actief";
   if (reason === "barometer") return "Onweersgevoelige lucht · dalende druk";
   if (reason === "convective") return "Onweersgevoelige lucht · warm & vochtig";

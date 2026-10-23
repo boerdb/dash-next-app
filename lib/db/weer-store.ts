@@ -21,7 +21,8 @@ import {
 } from "@/lib/weer/gateway-temp-minmax";
 import { applyDailyExtremes } from "@/lib/weer/daily-extremes";
 import { applyMaxGustTime } from "@/lib/weer/max-gust-time";
-import { meetMomentFromWeer, NL_TZ_OFFSET } from "@/lib/db/nl-time";
+import { meetMomentFromWeer } from "@/lib/db/nl-time";
+import { amsterdamSqlOffset } from "@/lib/energie/amsterdam-sql-offset";
 import { syncRegenFromIngest } from "@/lib/db/weer-regen-store";
 import { persistBliksemAfterLiveUpdate } from "@/lib/db/weer-bliksem-store";
 import {
@@ -85,12 +86,15 @@ export async function writeWeerLiveCache(
 /** Elke 5 min een rij in metingen (zoals save_weather.php cron). */
 export async function maybeInsertMeting(data: WeerLive): Promise<boolean> {
   const pool = getPool();
+  // CET/CEST: een vaste +02:00 liep in de winter een uur voor, waardoor elke upload een rij werd.
+  const offset = amsterdamSqlOffset();
   const [gap] = await pool.query<RowDataPacket[]>(
     `SELECT TIMESTAMPDIFF(
        MINUTE,
        (SELECT MAX(meet_moment) FROM metingen),
-       CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+02:00')
-     ) AS mins`
+       CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', ?)
+     ) AS mins`,
+    [offset]
   );
   const mins = gap[0]?.mins as number | null;
   if (mins != null && mins < 5) {
@@ -120,10 +124,10 @@ export async function maybeInsertMeting(data: WeerLive): Promise<boolean> {
   await pool.query(
     `INSERT INTO metingen (meet_moment, temp_c, luchtvochtigheid, wind_kmh, wind_richting, regen_mm, zon_straling, baromrel_hpa)
      VALUES (
-       COALESCE(?, CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '${NL_TZ_OFFSET}')),
+       COALESCE(?, CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', ?)),
        ?, ?, ?, ?, ?, ?, ?
      )`,
-    [meetMoment, temp, humidity, wind, dir, rain, Math.round(sun), barom]
+    [meetMoment, offset, temp, humidity, wind, dir, rain, Math.round(sun), barom]
   );
   return true;
 }

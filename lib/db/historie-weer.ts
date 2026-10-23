@@ -1,6 +1,7 @@
 import type { RowDataPacket } from "mysql2";
 import type { WeerHistorie } from "@/lib/api/types";
 import { getPool } from "@/lib/db/pool";
+import { amsterdamSqlOffset } from "@/lib/energie/amsterdam-sql-offset";
 
 interface HourRow extends RowDataPacket {
   uur: string;
@@ -12,7 +13,7 @@ const QUERY_24H = `
     DATE_FORMAT(meet_moment, '%H:00') AS uur,
     ROUND(AVG(temp_c), 1) AS gem_temp
   FROM metingen
-  WHERE meet_moment >= DATE_SUB(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+02:00'), INTERVAL 24 HOUR)
+  WHERE meet_moment >= DATE_SUB(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', ?), INTERVAL 24 HOUR)
   GROUP BY DATE(meet_moment), HOUR(meet_moment)
   ORDER BY MIN(meet_moment) ASC
 `;
@@ -52,7 +53,7 @@ function rowsToHistorie(rows: HourRow[]): WeerHistorie {
 
 export async function fetchWeerHistorieFromDb(): Promise<WeerHistorie> {
   const pool = getPool();
-  const [rows] = await pool.query<HourRow[]>(QUERY_24H);
+  const [rows] = await pool.query<HourRow[]>(QUERY_24H, [amsterdamSqlOffset()]);
   if (rows.length > 0) {
     return rowsToHistorie(rows);
   }

@@ -46,11 +46,15 @@ function BatteryUnit({
       )}
       <Metric
         label={label}
-        value={bereikbaar && soc != null ? soc : (melding ?? "Offline")}
+        value={bereikbaar && soc != null ? soc : "Offline"}
         unit={bereikbaar && soc != null ? "%" : undefined}
         size="md"
         className="mt-2"
       />
+      {/* Melding als bijschrift: als metriek liep een lange fouttekst buiten de tegel. */}
+      {!bereikbaar && melding ? (
+        <p className="text-caption mt-1 break-words text-surface-muted">{melding}</p>
+      ) : null}
       {bereikbaar ? (
         <>
           <p

@@ -24,10 +24,11 @@ const CHART_HEIGHT = 160;
 
 export function BatteryChart({ data }: BatteryChartProps) {
   const chartTheme = useChartTheme();
+  // Hooks vóór de vroege return: anders crasht de pagina zodra historie binnenkomt.
+  const fillId = useId().replace(/:/g, "");
   const hist = data.batterij_historie;
   if (!hist?.labels?.length) return null;
 
-  const fillId = useId().replace(/:/g, "");
   const seriesColor = chartTheme.battery;
   const chartData: { label: string; watt: number | null | undefined }[] = [];
   for (let i = 0; i < hist.labels.length; i++) {

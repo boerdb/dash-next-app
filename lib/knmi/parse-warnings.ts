@@ -56,6 +56,20 @@ function extractBlocks(outer: string, tag: string): string[] {
   return blocks;
 }
 
+/**
+ * Codes uit de provincie-XML → ids van de nieuwe dataset. Zo herkent o.a. de
+ * onweer-hero ("thunderstorm") ook een waarschuwing uit de oude bron.
+ */
+const LEGACY_PHENOMENON_IDS: Record<string, string> = {
+  lt: "thunderstorm",
+  fx: "wind",
+  ic: "iciness",
+  rr: "rain",
+  vv: "fog",
+  tx: "temperature",
+  ws: "tornado",
+};
+
 function phenomenonLabel(id: string): string {
   const key = id.trim().toLowerCase();
   return KNMI_PHENOMENON_LABELS[key] ?? id.replace(/_/g, " ");
@@ -100,8 +114,8 @@ export function parseKnmiWarningsXml(
     const slotLabel = formatSlotTime(slotTime);
 
     for (const phenomenon of extractBlocks(timeslice, "phenomenon")) {
-      const phenomenonId =
-        tagText(phenomenon, "phenomenon_id")?.toLowerCase() ?? "onbekend";
+      const rawId = tagText(phenomenon, "phenomenon_id")?.toLowerCase() ?? "onbekend";
+      const phenomenonId = LEGACY_PHENOMENON_IDS[rawId] ?? rawId;
 
       for (const location of extractBlocks(phenomenon, "location")) {
         const locId = tagText(location, "location_id")?.toUpperCase();

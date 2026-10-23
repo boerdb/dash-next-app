@@ -436,3 +436,12 @@ describe("shouldAccelerateLightningPoll", () => {
     );
   });
 });
+
+describe("getLightningStatusLabel · oude afstand", () => {
+  it("meldt geen onweersfront bij een afstand zonder inslagtijd", () => {
+    assert.equal(
+      getLightningStatusLabel({ wh57batt: "5", lightning_km: 22 }),
+      "WH57 actief · geen inslagen"
+    );
+  });
+});

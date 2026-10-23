@@ -5,7 +5,7 @@ import {
   buildHueStateBody,
   canApplyPreset,
   capabilitiesFromType,
-} from "./colors.ts";
+} from "./colors";
 
 describe("hue colors", () => {
   it("herkent extended color lamp", () => {
