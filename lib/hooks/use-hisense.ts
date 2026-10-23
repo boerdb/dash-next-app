@@ -10,7 +10,13 @@ export function useHisenseStatus() {
   const { data, error, isLoading, mutate } = useSWR<HisenseStatus, FetchError>(
     "/api/hisense/status",
     jsonFetcher,
-    { revalidateOnMount: true, revalidateOnFocus: true, keepPreviousData: true },
+    {
+      // Alleen pollen als ConnectLife gekoppeld is; anders verandert er niets.
+      refreshInterval: (latest) => (latest?.linked ? 30_000 : 0),
+      revalidateOnMount: true,
+      revalidateOnFocus: true,
+      keepPreviousData: true,
+    },
   );
   const revalidate = useCallback(() => void mutate(), [mutate]);
   useRevalidateOnVisible(revalidate);

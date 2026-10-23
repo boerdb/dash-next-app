@@ -1,4 +1,4 @@
-/** Hisense ConnectLife — was-droogcombinatie. Koppeling volgt; dit is het statusmodel. */
+/** Hisense ConnectLife — was-droogcombinatie. Statusmodel voor de Was-tab. */
 
 export interface HisenseAppliance {
   brand: "Hisense";
@@ -32,7 +32,7 @@ export type HisenseCycleMode = "wash" | "dry" | "wash_dry";
 
 export type HisenseDoor = "open" | "closed" | "locked";
 
-/** Live cyclus. Velden blijven leeg tot ConnectLife status levert. */
+/** Live cyclus uit de ConnectLife-statusList. */
 export interface HisenseCycle {
   state: HisenseRunState;
   program: string | null;
@@ -41,6 +41,10 @@ export interface HisenseCycle {
   remainingMinutes: number | null;
   door: HisenseDoor | null;
   childLock: boolean | null;
+  spinRpm: number | null;
+  temperature: string | null;
+  /** Storingscode van de machine; null als er geen storing is. */
+  errorCode: string | null;
 }
 
 export interface HisenseStatus {
@@ -48,4 +52,9 @@ export interface HisenseStatus {
   appliance: HisenseAppliance;
   cycle: HisenseCycle | null;
   notice: string | null;
+  /** Naam en featurecode zoals de ConnectLife-app ze kent. */
+  nickname: string | null;
+  featureCode: string | null;
+  /** ISO-tijd van de laatste geslaagde cloud-uitlezing. */
+  updatedAt: string | null;
 }

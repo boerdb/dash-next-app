@@ -1,6 +1,6 @@
 import type { HisenseAppliance, HisenseStatus } from "@/lib/hisense/types";
 
-/** Vaste gegevens van de WD5I1245BBRH/BLX. Live cyclus komt later via ConnectLife. */
+/** Vaste gegevens van de WD5I1245BBRH/BLX. Live cyclus komt via ConnectLife. */
 export const WD5I1245BBRH: HisenseAppliance = {
   brand: "Hisense",
   model: "WD5I1245BBRH/BLX",
@@ -23,12 +23,16 @@ export const WD5I1245BBRH: HisenseAppliance = {
   ],
 };
 
-export function unlinkedStatus(): HisenseStatus {
+export function unlinkedStatus(
+  notice = "Nog niet gekoppeld. Log in bij ConnectLife onder Koppeling; dan verschijnen programma, fase en resttijd hier.",
+): HisenseStatus {
   return {
     linked: false,
     appliance: WD5I1245BBRH,
     cycle: null,
-    notice:
-      "Nog niet gekoppeld. Programma, fase en resttijd verschijnen hier zodra ConnectLife is aangesloten.",
+    notice,
+    nickname: null,
+    featureCode: null,
+    updatedAt: null,
   };
 }

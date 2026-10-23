@@ -5,9 +5,14 @@ import { HisenseLinkCard } from "@/components/hisense/HisenseLinkCard";
 import { HisenseMachineCard } from "@/components/hisense/HisenseMachineCard";
 import { PullToRefresh } from "@/components/shared/PullToRefresh";
 import { Section } from "@/components/ui/section";
-import { refreshHisense } from "@/lib/hooks/use-hisense";
+import { refreshHisense, useHisenseStatus } from "@/lib/hooks/use-hisense";
 
 export default function HisensePage() {
+  const { status } = useHisenseStatus();
+  const linkSubtitle = status?.linked
+    ? `ConnectLife · ${status.cycle?.state === "offline" ? "machine offline" : "gekoppeld"}`
+    : "ConnectLife · nog niet aangesloten";
+
   return (
     <PullToRefresh onRefresh={refreshHisense}>
       <div className="space-y-[var(--space-section)] pb-2">
@@ -21,10 +26,10 @@ export default function HisensePage() {
 
         <Section
           title="Koppeling"
-          subtitle="ConnectLife · nog niet aangesloten"
+          subtitle={linkSubtitle}
           accent="teal"
           collapsible
-          defaultOpen={false}
+          defaultOpen={!status?.linked}
         >
           <HisenseLinkCard />
         </Section>

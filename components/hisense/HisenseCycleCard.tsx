@@ -36,8 +36,20 @@ function remainingLabel(minutes: number | null): string {
   return `${h} u ${m} min`;
 }
 
+function updatedLabel(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const time = new Date(iso).toLocaleTimeString("nl-NL", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Europe/Amsterdam",
+  });
+  return `Bijgewerkt: ${time}`;
+}
+
 function cycleFields(cycle: HisenseCycle | null) {
   return {
+    temperature: dash(cycle?.temperature),
+    spin: cycle?.spinRpm != null ? `${cycle.spinRpm} tpm` : "—",
     state: cycle ? STATE_LABEL[cycle.state] : "—",
     program: dash(cycle?.program),
     phase: dash(cycle?.phase),
@@ -62,17 +74,27 @@ export function HisenseCycleCard() {
   }
 
   const linked = status?.linked ?? false;
-  const fields = cycleFields(status?.cycle ?? null);
+  const cycle = status?.cycle ?? null;
+  const fields = cycleFields(cycle);
+  const updated = updatedLabel(status?.updatedAt);
 
   return (
     <Surface level="raised">
       <SurfaceBody className="space-y-4">
         <div className="flex items-center justify-between gap-3">
-          <Badge variant={linked ? "teal" : "default"}>
-            {linked ? "Gekoppeld" : "Niet gekoppeld"}
-          </Badge>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant={linked ? "teal" : "default"}>
+              {linked ? "Gekoppeld" : "Niet gekoppeld"}
+            </Badge>
+            {cycle?.state === "offline" ? <Badge variant="default">Offline</Badge> : null}
+            {cycle?.errorCode ? (
+              <Badge variant="danger">Storing {cycle.errorCode}</Badge>
+            ) : null}
+          </div>
           {isLoading && !status ? (
             <span className="text-caption text-surface-muted">Laden…</span>
+          ) : updated ? (
+            <span className="text-caption text-surface-muted">{updated}</span>
           ) : null}
         </div>
 
@@ -83,6 +105,8 @@ export function HisenseCycleCard() {
           <Metric label="Modus" value={fields.mode} size="sm" />
           <Metric label="Resttijd" value={fields.remaining} size="sm" />
           <Metric label="Deur" value={fields.door} size="sm" />
+          <Metric label="Temperatuur" value={fields.temperature} size="sm" />
+          <Metric label="Centrifuge" value={fields.spin} size="sm" />
         </MetricRow>
 
         {status?.notice ? (
