@@ -53,7 +53,11 @@ export async function getHisenseStatus(): Promise<HisenseStatus> {
   try {
     device = await loadWasher(false);
   } catch (err) {
-    const message = err instanceof ConnectLifeError ? err.message : "ConnectLife is niet bereikbaar.";
+    let message = err instanceof ConnectLifeError ? err.message : "ConnectLife is niet bereikbaar.";
+    if (err instanceof ConnectLifeError && err.auth && !(await oauthLinked())) {
+      // Apple/Google-accounts hebben geen ConnectLife-wachtwoord.
+      message += " Log je in met Apple of Google? Gebruik dan Inloggen bij ConnectLife onder Koppeling.";
+    }
     // Laatste bekende stand tonen is beter dan een lege kaart bij een cloud-hik.
     if (cached && !(err instanceof ConnectLifeError && err.auth)) {
       return toStatus(cached.device, `${message} Laatst bekende stand.`, cached.at);
