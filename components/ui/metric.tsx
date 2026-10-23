@@ -28,7 +28,7 @@ export function Metric({
 }: MetricProps) {
   return (
     <div className={cn("min-w-0", className)}>
-      <p className="text-label text-surface-muted">{label}</p>
+      <p className="text-caption font-medium text-surface-muted">{label}</p>
       <p
         className={cn(
           "mt-1 font-bold tabular-nums leading-none",

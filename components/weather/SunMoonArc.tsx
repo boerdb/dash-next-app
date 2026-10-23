@@ -198,7 +198,7 @@ export function SunMoonArc({ astro }: SunMoonArcProps) {
         </text>
       </svg>
 
-      <div className="mt-2 flex items-center justify-center gap-2.5 rounded-xl border border-white/25 bg-gradient-to-br from-indigo-500/30 to-slate-900/60 px-3 py-2 shadow-[0_4px_16px_rgba(0,0,0,0.2)] ring-1 ring-white/10 backdrop-blur-md">
+      <div className="mt-2 flex items-center justify-center gap-2.5 rounded-2xl bg-black/25 px-3 py-2 backdrop-blur-md [text-shadow:none]">
         {astro.moon.riseLabel ? (
           <span className="shrink-0 text-xs font-medium tabular-nums text-white/85">
             ↑ {astro.moon.riseLabel}

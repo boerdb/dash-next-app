@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CloudSun, Zap, Blinds, Lightbulb, WashingMachine } from "lucide-react";
+import { CloudSun, Zap, Blinds, Lightbulb } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -34,13 +34,6 @@ const links = [
     accent: "text-accent-amber",
     activeBg: "bg-accent-amber-soft",
   },
-  {
-    href: "/hisense",
-    label: "Was",
-    icon: WashingMachine,
-    accent: "text-accent-teal",
-    activeBg: "bg-accent-teal-soft",
-  },
 ] as const;
 
 function NavLink({
@@ -63,19 +56,18 @@ function NavLink({
   return (
     <Link
       href={href}
+      aria-current={active ? "page" : undefined}
       className={cn(
-        "relative flex items-center gap-2 font-medium transition-colors",
-        layout === "bottom" && "flex-1 flex-col py-3 text-xs",
-        layout === "side" && "rounded-[var(--radius-sm)] px-3 py-2.5 text-sm",
+        "flex items-center font-medium transition-colors duration-200",
+        layout === "bottom" &&
+          "flex-1 flex-col gap-1 rounded-[1.1rem] py-2 text-[0.6875rem]",
+        layout === "side" && "gap-3 rounded-[var(--radius-sm)] px-3 py-2.5 text-sm",
         active
-          ? cn(accent, "font-semibold", activeBg)
+          ? cn(accent, activeBg, "font-semibold")
           : "text-nav-inactive hover:text-nav-hover"
       )}
     >
-      {active && layout === "bottom" ? (
-        <span className={cn("absolute inset-x-6 top-0 h-0.5 rounded-full", accent.replace("text-", "bg-"))} />
-      ) : null}
-      <Icon className={layout === "bottom" ? "h-6 w-6" : "h-5 w-5"} />
+      <Icon className={layout === "bottom" ? "h-[1.35rem] w-[1.35rem]" : "h-5 w-5"} strokeWidth={active ? 2.2 : 1.8} />
       {label}
     </Link>
   );
@@ -86,8 +78,9 @@ export function BottomNav() {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-nav-bg pb-[env(safe-area-inset-bottom,0px)] md:hidden">
-        <div className="mx-auto flex w-full max-w-md">
+      {/* Zwevende balk op mobiel; marge onder volgt de home-indicator. */}
+      <nav className="fixed inset-x-0 bottom-0 z-50 px-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] md:hidden">
+        <div className="mx-auto flex w-full max-w-md gap-1 rounded-[1.5rem] border border-border bg-nav-bg p-1.5 shadow-[var(--nav-shadow)] backdrop-blur-xl">
           {links.map((link) => (
             <NavLink
               key={link.href}
@@ -99,8 +92,13 @@ export function BottomNav() {
         </div>
       </nav>
 
-      <nav className="hidden md:flex md:w-48 md:shrink-0 md:flex-col md:gap-1 md:border-r md:border-border md:bg-nav-bg md:p-4 lg:w-52">
-        <p className="text-label mb-3 px-3 text-surface-muted">Dashboard</p>
+      <nav className="hidden md:sticky md:top-0 md:flex md:h-dvh md:w-52 md:shrink-0 md:flex-col md:gap-1 md:px-4 md:py-8 lg:w-56">
+        <div className="mb-8 flex items-center gap-2.5 px-3">
+          <span className="flex h-8 w-8 items-center justify-center rounded-[0.6rem] bg-primary text-primary-foreground">
+            <CloudSun className="h-4.5 w-4.5" strokeWidth={2.2} />
+          </span>
+          <span className="text-base font-bold tracking-tight text-foreground">ThuisDash</span>
+        </div>
         {links.map((link) => (
           <NavLink
             key={link.href}

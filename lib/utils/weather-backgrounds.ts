@@ -23,7 +23,8 @@ export const weatherBackgrounds: Record<WeatherCondition, { image: string }> = {
 export function getWeatherBackgroundStyle(condition: WeatherCondition): CSSProperties {
   const { image } = weatherBackgrounds[condition];
   return {
-    backgroundImage: `linear-gradient(180deg, rgba(4,18,34,0.25) 0%, rgba(4,18,34,0.55) 55%, rgba(4,18,34,0.82) 100%), url(${image})`,
+    // Neutrale schaduw (geen navy): tekst blijft leesbaar op elke foto.
+    backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.6) 100%), url(${image})`,
     backgroundSize: "cover",
     backgroundPosition: "center",
   };

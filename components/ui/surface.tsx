@@ -5,8 +5,8 @@ const surfaceVariants = cva("rounded-[var(--radius-lg)] border transition-colors
   variants: {
     level: {
       flat: "border-border-subtle bg-surface",
-      raised: "border-border bg-surface-raised shadow-[var(--elevation-shadow)]",
-      inset: "border-border-subtle bg-surface-subtle",
+      raised: "border-border-subtle bg-surface-raised shadow-[var(--elevation-shadow)]",
+      inset: "border-transparent bg-surface-subtle",
     },
   },
   defaultVariants: {
@@ -33,7 +33,7 @@ export function SurfaceBody({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("p-4", className)} {...props}>
+    <div className={cn("p-4 sm:p-5", className)} {...props}>
       {children}
     </div>
   );

@@ -1,65 +1,65 @@
 @import "tailwindcss";
 
-/* ── Weer&Radar-stijl: vaste donkere navy/teal (geen dag/nacht) ── */
+/* ── Fris: warm papierwit, zeegroen accent. Donker volgt het systeem. ── */
 :root {
-  --background: #061a2e;
-  --foreground: #f2f7fb;
-  --surface: #0b2a45;
-  --surface-raised: #0e3556;
-  --surface-muted: #8eabc2;
-  --surface-subtle: #123a5c;
-  --border: #1a4d73;
-  --border-subtle: #153d5c;
-  --primary: #00a8e8;
-  --accent-weather: #00b4f0;
-  --accent-energy: #ff6a00;
-  --accent-export: #22c55e;
-  --accent-danger: #ff3b4a;
-  --accent-violet: #a78bfa;
-  --accent-amber: #ffcc00;
-  --accent-teal: #2dd4bf;
-  --accent-weather-soft: rgba(0, 180, 240, 0.2);
-  --accent-energy-soft: rgba(255, 106, 0, 0.2);
-  --accent-export-soft: rgba(34, 197, 94, 0.2);
-  --accent-violet-soft: rgba(167, 139, 250, 0.2);
-  --accent-amber-soft: rgba(255, 204, 0, 0.22);
-  --accent-teal-soft: rgba(45, 212, 191, 0.2);
-  --nav-bg: rgba(8, 30, 52, 0.96);
-  --nav-inactive: #7a97ae;
-  --nav-hover: #f2f7fb;
-  --header-bg: #083052;
-  --header-fg: #ffffff;
-  --hero-foreground: #f2f7fb;
-  --hero-muted: #a8c2d6;
-  --gradient-from: #041525;
-  --gradient-via: #061a2e;
-  --gradient-to: #0a2744;
-  --elevation-shadow: 0 2px 6px rgba(0, 0, 0, 0.35),
-    0 12px 28px rgba(0, 0, 0, 0.28);
-  --moon-dark: #061a2e;
-  --moon-light: #e8f4fc;
-  --chart-grid: rgba(255, 255, 255, 0.08);
-  --chart-tick: #8eabc2;
-  --chart-tooltip-bg: #0e3556;
-  --chart-tooltip-border: #1a4d73;
-  --chart-tooltip-label: #8eabc2;
-  --chart-cursor: rgba(0, 180, 240, 0.12);
-  --chart-ref-line: rgba(255, 255, 255, 0.16);
-  --chart-weather: #00b4f0;
-  --chart-weather-light: #5ad0ff;
-  --chart-energy: #ff6a00;
-  --chart-energy-light: #ff9a4d;
-  --chart-battery: #a78bfa;
-  --chart-net: #ff6a00;
-  --chart-export: #22c55e;
-  --chart-solar: #ffcc00;
-  --chart-temperature: #00b4f0;
-  --chart-rain: #00a0e0;
-  --chart-rain-light: #5ad0ff;
-  --chart-lightning: #ffcc00;
-  --chart-lightning-light: #ffe066;
-  --radius-sm: 0.625rem;
-  --radius-lg: 1rem;
+  --background: #f4f3ee;
+  --foreground: #1b1c1a;
+  --surface: #faf9f6;
+  --surface-raised: #ffffff;
+  --surface-muted: #6e6b63;
+  --surface-subtle: #f0efe9;
+  --border: #e5e3db;
+  --border-subtle: #edebe5;
+  --primary: #0f8b74;
+  --primary-foreground: #ffffff;
+  --accent-weather: #0f8b74;
+  --accent-energy: #e8590c;
+  --accent-export: #5c940d;
+  --accent-danger: #e03131;
+  --accent-violet: #7048e8;
+  --accent-amber: #c98a00;
+  --accent-weather-soft: rgba(15, 139, 116, 0.12);
+  --accent-energy-soft: rgba(232, 89, 12, 0.12);
+  --accent-export-soft: rgba(92, 148, 13, 0.12);
+  --accent-violet-soft: rgba(112, 72, 232, 0.12);
+  --accent-amber-soft: rgba(242, 169, 0, 0.16);
+  --nav-bg: rgba(255, 255, 255, 0.86);
+  --nav-inactive: #8a877e;
+  --nav-hover: #1b1c1a;
+  --header-bg: transparent;
+  --header-fg: #1b1c1a;
+  --hero-foreground: #ffffff;
+  --hero-muted: rgba(255, 255, 255, 0.78);
+  --gradient-from: #eef4ef;
+  --gradient-via: #f4f3ee;
+  --gradient-to: #f7f1e8;
+  --elevation-shadow: 0 1px 2px rgba(28, 27, 24, 0.04),
+    0 10px 30px -12px rgba(28, 27, 24, 0.12);
+  --nav-shadow: 0 10px 30px -8px rgba(28, 27, 24, 0.18);
+  --moon-dark: #2b2d2a;
+  --moon-light: #fbfaf5;
+  --chart-grid: rgba(28, 27, 24, 0.07);
+  --chart-tick: #8a877e;
+  --chart-tooltip-bg: #ffffff;
+  --chart-tooltip-border: #e5e3db;
+  --chart-tooltip-label: #6e6b63;
+  --chart-cursor: rgba(15, 139, 116, 0.08);
+  --chart-ref-line: rgba(28, 27, 24, 0.16);
+  --chart-weather: #0f8b74;
+  --chart-weather-light: #63c7b2;
+  --chart-energy: #e8590c;
+  --chart-energy-light: #ff922b;
+  --chart-battery: #7048e8;
+  --chart-net: #e8590c;
+  --chart-export: #5c940d;
+  --chart-solar: #f2a900;
+  --chart-temperature: #f76707;
+  --chart-rain: #0c8599;
+  --chart-rain-light: #66d9e8;
+  --chart-lightning: #f2a900;
+  --chart-lightning-light: #ffd43b;
+  --radius-sm: 0.75rem;
+  --radius-lg: 1.25rem;
   --text-xs: 0.6875rem;
   --text-sm: 0.8125rem;
   --text-base: 0.9375rem;
@@ -67,12 +67,67 @@
   --text-xl: 1.375rem;
   --text-2xl: 1.75rem;
   --text-3xl: 2.25rem;
-  --text-4xl: 3rem;
+  --text-4xl: 3.25rem;
   --text-label: 0.6875rem;
   --text-caption: 0.75rem;
-  --tracking-label: 0.06em;
-  --space-section: 2rem;
+  --tracking-label: 0.05em;
+  --space-section: 1.75rem;
   --space-stack: 1rem;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --background: #121412;
+  --foreground: #eceee9;
+  --surface: #181b19;
+  --surface-raised: #1e2220;
+  --surface-muted: #9a9d96;
+  --surface-subtle: #252a27;
+  --border: #2d322f;
+  --border-subtle: #262a28;
+  --primary: #2bc4a4;
+  --primary-foreground: #08201a;
+  --accent-weather: #2bc4a4;
+  --accent-energy: #ff8a3d;
+  --accent-export: #94d82d;
+  --accent-danger: #ff6b6b;
+  --accent-violet: #9775fa;
+  --accent-amber: #fcc419;
+  --accent-weather-soft: rgba(43, 196, 164, 0.16);
+  --accent-energy-soft: rgba(255, 138, 61, 0.16);
+  --accent-export-soft: rgba(148, 216, 45, 0.16);
+  --accent-violet-soft: rgba(151, 117, 250, 0.18);
+  --accent-amber-soft: rgba(252, 196, 25, 0.16);
+  --nav-bg: rgba(30, 34, 32, 0.86);
+  --nav-inactive: #8b8f88;
+  --nav-hover: #eceee9;
+  --header-fg: #eceee9;
+  --gradient-from: #101412;
+  --gradient-via: #121412;
+  --gradient-to: #16140f;
+  --elevation-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px -12px rgba(0, 0, 0, 0.5);
+  --nav-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.6);
+  --chart-grid: rgba(255, 255, 255, 0.07);
+  --chart-tick: #8b8f88;
+  --chart-tooltip-bg: #1e2220;
+  --chart-tooltip-border: #2d322f;
+  --chart-tooltip-label: #9a9d96;
+  --chart-cursor: rgba(43, 196, 164, 0.1);
+  --chart-ref-line: rgba(255, 255, 255, 0.16);
+  --chart-weather: #2bc4a4;
+  --chart-weather-light: #7fe0c9;
+  --chart-energy: #ff8a3d;
+  --chart-energy-light: #ffb27a;
+  --chart-battery: #9775fa;
+  --chart-net: #ff8a3d;
+  --chart-export: #94d82d;
+  --chart-solar: #fcc419;
+  --chart-temperature: #ff922b;
+  --chart-rain: #3bc9db;
+  --chart-rain-light: #99e9f2;
+  --chart-lightning: #fcc419;
+  --chart-lightning-light: #ffe066;
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -91,13 +146,11 @@
   --color-accent-danger: var(--accent-danger);
   --color-accent-violet: var(--accent-violet);
   --color-accent-amber: var(--accent-amber);
-  --color-accent-teal: var(--accent-teal);
   --color-accent-weather-soft: var(--accent-weather-soft);
   --color-accent-energy-soft: var(--accent-energy-soft);
   --color-accent-export-soft: var(--accent-export-soft);
   --color-accent-violet-soft: var(--accent-violet-soft);
   --color-accent-amber-soft: var(--accent-amber-soft);
-  --color-accent-teal-soft: var(--accent-teal-soft);
   --color-nav-bg: var(--nav-bg);
   --color-nav-inactive: var(--nav-inactive);
   --color-nav-hover: var(--nav-hover);
@@ -118,21 +171,12 @@
   --color-chart-rain-light: var(--chart-rain-light);
   --color-chart-lightning: var(--chart-lightning);
   --color-chart-lightning-light: var(--chart-lightning-light);
-  --font-sans: var(--font-geist-sans);
+  --color-primary-foreground: var(--primary-foreground);
+  --font-sans: var(--font-jakarta);
   --font-mono: var(--font-geist-mono);
 }
 
-html {
-  color-scheme: dark;
-}
-
 body {
-  background: linear-gradient(
-    165deg,
-    var(--gradient-from) 0%,
-    var(--gradient-via) 45%,
-    var(--gradient-to) 100%
-  );
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
@@ -141,22 +185,21 @@ body {
 }
 
 .app-shell {
-  background: linear-gradient(
-    165deg,
-    var(--gradient-from) 0%,
-    var(--gradient-via) 45%,
-    var(--gradient-to) 100%
-  );
+  background:
+    radial-gradient(120% 60% at 0% 0%, var(--gradient-from) 0%, transparent 60%),
+    radial-gradient(90% 50% at 100% 100%, var(--gradient-to) 0%, transparent 60%),
+    var(--background);
 }
 
 * {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Rustige labels: geen kapitalen meer, wel iets zwaarder. */
 .text-label {
-  font-size: var(--text-label);
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
+  font-size: var(--text-caption);
+  font-weight: 500;
+  letter-spacing: 0;
 }
 
 .text-caption {
@@ -190,6 +233,7 @@ body {
 .text-metric {
   font-size: var(--text-2xl);
   font-weight: 700;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
 }
@@ -197,6 +241,7 @@ body {
 .text-metric-lg {
   font-size: var(--text-4xl);
   font-weight: 700;
+  letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }

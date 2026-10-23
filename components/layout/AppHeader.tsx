@@ -2,21 +2,43 @@
 
 import { usePathname } from "next/navigation";
 
-const titles: Record<string, string> = {
-  "/weer": "Weer",
-  "/energie": "Energie",
-  "/tahoma": "Tahoma",
-  "/hue": "Hue",
-  "/hisense": "Was",
+const titles: Record<string, { title: string; subtitle: string }> = {
+  "/weer": { title: "Weer", subtitle: "Eigen weerstation · Harlingen" },
+  "/energie": { title: "Energie", subtitle: "Verbruik, zon en batterijen" },
+  "/tahoma": { title: "Tahoma", subtitle: "Zonwering en rolluiken" },
+  "/hue": { title: "Hue", subtitle: "Verlichting" },
 };
+
+function todayLabel(): string {
+  return new Date().toLocaleDateString("nl-NL", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    timeZone: "Europe/Amsterdam",
+  });
+}
 
 export function AppHeader() {
   const pathname = usePathname();
-  const title = titles[pathname] ?? "Dashboard";
+  const page = titles[pathname] ?? { title: "ThuisDash", subtitle: "" };
 
   return (
-    <header className="-mx-4 mb-6 flex items-center bg-header-bg px-4 pb-4 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] shadow-[0_2px_12px_rgba(0,60,120,0.35)] sm:-mx-6 sm:px-6 lg:-mx-8 lg:rounded-b-[var(--radius-lg)] lg:px-8">
-      <h1 className="text-lg font-semibold tracking-tight text-header-fg">{title}</h1>
+    <header className="mb-5 flex items-end justify-between gap-4 pt-[calc(env(safe-area-inset-top,0px)+1.25rem)] md:pt-8">
+      <div className="min-w-0">
+        {/* Server en client kunnen rond middernacht een andere dag zien. */}
+        <p
+          className="text-caption font-medium text-surface-muted first-letter:uppercase"
+          suppressHydrationWarning
+        >
+          {todayLabel()}
+        </p>
+        <h1 className="mt-0.5 text-[1.75rem] font-bold leading-tight tracking-[-0.03em] text-header-fg">
+          {page.title}
+        </h1>
+      </div>
+      {page.subtitle ? (
+        <p className="text-caption hidden pb-1.5 text-surface-muted sm:block">{page.subtitle}</p>
+      ) : null}
     </header>
   );
 }

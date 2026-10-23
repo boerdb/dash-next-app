@@ -16,9 +16,7 @@ export function StationCard({
     <Surface level="raised" className={className}>
       <SurfaceBody className={cn(title && "pt-3", bodyClassName)}>
         {title ? (
-          <p className="text-label mb-3 text-center font-medium tracking-wide text-surface-muted">
-            {title}
-          </p>
+          <p className="mb-3 text-sm font-bold tracking-[-0.01em] text-foreground">{title}</p>
         ) : null}
         {children}
       </SurfaceBody>
@@ -34,7 +32,13 @@ export function StationSplit({
   className?: string;
 }) {
   return (
-    <div className={cn("grid grid-cols-2 divide-x divide-border-subtle", className)}>
+    // Lijn alleen tussen de kolommen (divide-x zette er ook één rechts van de rechterkolom).
+    <div
+      className={cn(
+        "grid grid-cols-2 [&>*:nth-child(odd)]:border-r [&>*:nth-child(odd)]:border-border-subtle",
+        className
+      )}
+    >
       {children}
     </div>
   );

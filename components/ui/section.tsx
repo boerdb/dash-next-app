@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 interface SectionProps {
   title: string;
   subtitle?: string;
-  accent?: "weather" | "energy" | "export" | "violet" | "amber" | "teal";
+  accent?: "weather" | "energy" | "export" | "violet" | "amber";
   collapsible?: boolean;
   defaultOpen?: boolean;
   children: React.ReactNode;
@@ -20,16 +20,6 @@ const accentBar: Record<NonNullable<SectionProps["accent"]>, string> = {
   export: "bg-accent-export",
   violet: "bg-accent-violet",
   amber: "bg-accent-amber",
-  teal: "bg-accent-teal",
-};
-
-const accentText: Record<NonNullable<SectionProps["accent"]>, string> = {
-  weather: "text-accent-weather",
-  energy: "text-accent-energy",
-  export: "text-accent-export",
-  violet: "text-accent-violet",
-  amber: "text-accent-amber",
-  teal: "text-accent-teal",
 };
 
 export function Section({
@@ -78,19 +68,15 @@ function SectionHeader({
   accent?: SectionProps["accent"];
 }) {
   return (
-    <div className="flex items-start gap-2.5">
+    <div className="flex items-baseline gap-2.5 px-1">
       {accent ? (
-        <span className={cn("mt-1 h-4 w-1 shrink-0 rounded-full", accentBar[accent])} aria-hidden />
+        <span
+          className={cn("h-2 w-2 shrink-0 translate-y-[-0.1rem] rounded-full", accentBar[accent])}
+          aria-hidden
+        />
       ) : null}
-      <div>
-        <h2
-          className={cn(
-            "text-label font-semibold",
-            accent ? accentText[accent] : "text-foreground"
-          )}
-        >
-          {title}
-        </h2>
+      <div className="min-w-0">
+        <h2 className="text-base font-bold tracking-[-0.01em] text-foreground">{title}</h2>
         {subtitle ? (
           <p className="text-caption mt-0.5 text-surface-muted">{subtitle}</p>
         ) : null}

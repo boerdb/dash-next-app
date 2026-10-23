@@ -46,6 +46,12 @@ interface WeatherHeroProps {
   updateLabel?: string;
 }
 
+function formatTemp(value: unknown): string | null {
+  if (value == null || value === "") return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n.toFixed(1) : null;
+}
+
 export function WeatherHero({
   data,
   condition,
@@ -53,57 +59,56 @@ export function WeatherHero({
   updateLabel,
 }: WeatherHeroProps) {
   const Icon = icons[condition];
-  const temp = data.temp_c != null ? Number(data.temp_c).toFixed(1) : "—";
+  const temp = formatTemp(data.temp_c) ?? "—";
+  const min = formatTemp(data.temp_min_c);
+  const max = formatTemp(data.temp_max_c);
   const periodLabel = periodLabels[astro.period];
   const weatherLabel = conditionLabels[condition];
-  const showWeatherSub =
-    weatherLabel !== periodLabel &&
-    !(astro.period === "day" && ["Bewolkt", "Deels bewolkt", "Zonnig"].includes(weatherLabel));
 
   return (
     <section
-      className="relative -mx-4 min-h-[22rem] overflow-hidden rounded-b-[var(--radius-lg)] px-4 pb-8 pt-6 sm:-mx-6 sm:min-h-[24rem] lg:mx-0 lg:min-h-[26rem] lg:rounded-[var(--radius-lg)] lg:px-6 lg:pb-10 lg:pt-8"
+      className="relative overflow-hidden rounded-[1.75rem] text-hero-foreground shadow-[var(--elevation-shadow)]"
       style={getWeatherBackgroundStyle(condition)}
     >
-      <div className="relative z-10 flex min-h-[20rem] flex-col items-center justify-end text-center [text-shadow:0_1px_12px_rgba(0,0,0,0.7)] sm:min-h-[22rem] lg:min-h-[24rem]">
-        <div className="mb-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-white/90">
-          {updateLabel ? <span>{updateLabel}</span> : null}
-          {updateLabel ? <span className="hidden text-white/50 sm:inline">·</span> : null}
-          <span className="text-label font-semibold uppercase tracking-wide text-white">
-            {periodLabel}
+      <div className="relative z-10 flex min-h-[21rem] flex-col justify-between p-5 [text-shadow:0_1px_10px_rgba(0,0,0,0.45)] sm:min-h-[23rem] sm:p-7">
+        <div className="flex items-start justify-between gap-3">
+          <span className="inline-flex items-center gap-2 rounded-full bg-black/25 py-1.5 pl-2 pr-3 text-sm font-semibold backdrop-blur-md [text-shadow:none]">
+            <Icon
+              className={cn(
+                "h-5 w-5",
+                (condition === "sunny" || condition === "night" || condition === "night-partly-cloudy") &&
+                  "text-[#ffd43b]",
+                (condition === "evening" || condition === "dusk") && "text-[#ffa94d]"
+              )}
+              strokeWidth={2}
+            />
+            {weatherLabel}
           </span>
-          {showWeatherSub ? (
-            <>
-              <span className="text-white/50">·</span>
-              <span className="text-label font-medium uppercase text-white/90">
-                {weatherLabel}
-              </span>
-            </>
-          ) : null}
+          <div className="text-right text-xs font-medium text-hero-muted">
+            <p className="text-hero-foreground">{periodLabel}</p>
+            {updateLabel ? <p className="mt-0.5">{updateLabel}</p> : null}
+          </div>
         </div>
 
-        <Icon
-          className={cn(
-            "mb-1 h-10 w-10 text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)]",
-            condition === "sunny" && "text-accent-amber",
-            (condition === "evening" || condition === "dusk") && "text-orange-300",
-            (condition === "night" || condition === "night-partly-cloudy") &&
-              "text-accent-amber"
-          )}
-          strokeWidth={1.5}
-        />
-
-        <SunMoonArc astro={astro} />
-
-        <p className="text-caption mt-3 uppercase tracking-label text-white/80">
-          Buitentemperatuur
-        </p>
-        <h1 className="text-metric-lg text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.85)]">
-          {temp}
-          <DegreeMark mode="sup" className="text-white/90">
-            °C
-          </DegreeMark>
-        </h1>
+        <div className="mt-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
+          <div>
+            <p className="text-sm font-medium text-hero-muted">Buiten</p>
+            <h1 className="text-[4.75rem] font-bold leading-[0.9] tracking-[-0.05em] tabular-nums sm:text-[5.5rem]">
+              {temp}
+              <DegreeMark mode="sup" className="align-top text-3xl text-hero-muted">
+                °C
+              </DegreeMark>
+            </h1>
+            {min && max ? (
+              <p className="mt-2 text-sm font-semibold tabular-nums">
+                <span className="text-hero-muted">Vandaag</span> ↓ {min}° · ↑ {max}°
+              </p>
+            ) : null}
+          </div>
+          <div className="w-full sm:w-auto sm:min-w-[17rem]">
+            <SunMoonArc astro={astro} />
+          </div>
+        </div>
       </div>
     </section>
   );

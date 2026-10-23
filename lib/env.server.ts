@@ -51,21 +51,6 @@ const envSchema = z.object({
   ENPHASE_ENLIGHTEN_PASSWORD: z.string().min(1).optional(),
   /** GW1100 LAN-URL voor WH57-aanvulling (bijv. http://192.168.1.150) */
   ECOWITT_GATEWAY_URL: z.string().url().optional(),
-  /** ConnectLife-account (Hisense-wasmachine, tab Was) */
-  CONNECTLIFE_USERNAME: z.string().min(1).optional(),
-  CONNECTLIFE_PASSWORD: z.string().min(1).optional(),
-  /** Optioneel: deviceId als het account meer dan één wasmachine heeft */
-  CONNECTLIFE_DEVICE_ID: z.string().min(1).optional(),
-  /** Vaste ConnectLife-appsleutels (zie .env.example en lib/hisense/keys.ts) */
-  CONNECTLIFE_OAUTH_CLIENT_ID: z.string().min(1).optional(),
-  CONNECTLIFE_OAUTH_CLIENT_SECRET: z.string().min(1).optional(),
-  CONNECTLIFE_GIGYA_API_KEY: z.string().min(1).optional(),
-  CONNECTLIFE_APP_CLIENT_ID: z.string().min(1).optional(),
-  CONNECTLIFE_APP_CLIENT_SECRET: z.string().min(1).optional(),
-  CONNECTLIFE_GATEWAY_APP_ID: z.string().min(1).optional(),
-  CONNECTLIFE_GATEWAY_APP_SECRET: z.string().min(1).optional(),
-  CONNECTLIFE_GATEWAY_SIGN_SUFFIX: z.string().min(1).optional(),
-  CONNECTLIFE_GATEWAY_PUBLIC_KEY: z.string().min(1).optional(),
 });
 
 export const env = envSchema.parse({
@@ -86,18 +71,6 @@ export const env = envSchema.parse({
   ENPHASE_ENLIGHTEN_USER: process.env.ENPHASE_ENLIGHTEN_USER || undefined,
   ENPHASE_ENLIGHTEN_PASSWORD: process.env.ENPHASE_ENLIGHTEN_PASSWORD || undefined,
   ECOWITT_GATEWAY_URL: process.env.ECOWITT_GATEWAY_URL || undefined,
-  CONNECTLIFE_USERNAME: process.env.CONNECTLIFE_USERNAME || undefined,
-  CONNECTLIFE_PASSWORD: process.env.CONNECTLIFE_PASSWORD || undefined,
-  CONNECTLIFE_DEVICE_ID: process.env.CONNECTLIFE_DEVICE_ID || undefined,
-  CONNECTLIFE_OAUTH_CLIENT_ID: process.env.CONNECTLIFE_OAUTH_CLIENT_ID || undefined,
-  CONNECTLIFE_OAUTH_CLIENT_SECRET: process.env.CONNECTLIFE_OAUTH_CLIENT_SECRET || undefined,
-  CONNECTLIFE_GIGYA_API_KEY: process.env.CONNECTLIFE_GIGYA_API_KEY || undefined,
-  CONNECTLIFE_APP_CLIENT_ID: process.env.CONNECTLIFE_APP_CLIENT_ID || undefined,
-  CONNECTLIFE_APP_CLIENT_SECRET: process.env.CONNECTLIFE_APP_CLIENT_SECRET || undefined,
-  CONNECTLIFE_GATEWAY_APP_ID: process.env.CONNECTLIFE_GATEWAY_APP_ID || undefined,
-  CONNECTLIFE_GATEWAY_APP_SECRET: process.env.CONNECTLIFE_GATEWAY_APP_SECRET || undefined,
-  CONNECTLIFE_GATEWAY_SIGN_SUFFIX: process.env.CONNECTLIFE_GATEWAY_SIGN_SUFFIX || undefined,
-  CONNECTLIFE_GATEWAY_PUBLIC_KEY: process.env.CONNECTLIFE_GATEWAY_PUBLIC_KEY || undefined,
 });
 
 export const enphaseConfigured = Boolean(

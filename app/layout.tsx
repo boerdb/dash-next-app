@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { PwaProvider } from "@/components/PwaProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { themeBootScript } from "@/lib/theme/apply-theme";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
   subsets: ["latin"],
 });
 
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   applicationName: "ThuisDash",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "ThuisDash",
   },
   manifest: "/manifest.webmanifest",
@@ -35,7 +35,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#083052",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f4f3ee" },
+    { media: "(prefers-color-scheme: dark)", color: "#121412" },
+  ],
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -52,7 +55,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-dvh antialiased`}
+        className={`${jakarta.variable} ${geistMono.variable} min-h-dvh antialiased`}
       >
         <ThemeProvider>{children}</ThemeProvider>
         <PwaProvider />
