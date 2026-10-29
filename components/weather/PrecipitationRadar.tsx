@@ -72,7 +72,8 @@ export function PrecipitationRadar() {
   const frames = data?.frames ?? [];
   const hasFrames = frames.length > 0;
   const lastIndex = Math.max(0, frames.length - 1);
-  const safeIndex = hasFrames ? Math.min(frameIndex, lastIndex) : 0;
+  // Live volgen = altijd het nieuwste frame; afgeleid, niet via een effect gezet.
+  const safeIndex = !hasFrames ? 0 : followLive ? lastIndex : Math.min(frameIndex, lastIndex);
   const currentFrame = frames[safeIndex];
 
   const stopPlay = useCallback(() => {
@@ -87,11 +88,12 @@ export function PrecipitationRadar() {
     if (frames.length < 2) return;
     stopPlay();
     setFollowLive(false);
+    setFrameIndex(safeIndex);
     setPlaying(true);
     playTimer.current = setInterval(() => {
       setFrameIndex((i) => (i >= lastIndex ? 0 : i + 1));
     }, FRAME_MS);
-  }, [frames.length, lastIndex, stopPlay]);
+  }, [frames.length, lastIndex, safeIndex, stopPlay]);
 
   const destroyMap = useCallback(() => {
     if (mapInstance.current) {
@@ -209,11 +211,6 @@ export function PrecipitationRadar() {
     radarLayer.current = layer;
   }, [mapReady, data?.host, currentFrame, safeIndex]);
 
-  useEffect(() => {
-    if (playing || !followLive || !hasFrames) return;
-    setFrameIndex(lastIndex);
-  }, [playing, followLive, hasFrames, lastIndex, data?.generated]);
-
   useEffect(() => () => stopPlay(), [stopPlay]);
 
   if (error && !data) {
@@ -251,7 +248,7 @@ export function PrecipitationRadar() {
             onClick={() => {
               stopPlay();
               setFollowLive(false);
-              setFrameIndex((i) => Math.max(0, i - 1));
+              setFrameIndex(Math.max(0, safeIndex - 1));
             }}
             disabled={!hasFrames || safeIndex <= 0}
             className="rounded-lg p-2 text-surface-muted hover:bg-surface-subtle disabled:opacity-30"
@@ -284,12 +281,9 @@ export function PrecipitationRadar() {
             type="button"
             onClick={() => {
               stopPlay();
-              setFrameIndex((i) => {
-                const next = Math.min(lastIndex, i + 1);
-                if (next >= lastIndex) setFollowLive(true);
-                else setFollowLive(false);
-                return next;
-              });
+              const next = Math.min(lastIndex, safeIndex + 1);
+              setFollowLive(next >= lastIndex);
+              setFrameIndex(next);
             }}
             disabled={!hasFrames || safeIndex >= lastIndex}
             className="rounded-lg p-2 text-surface-muted hover:bg-surface-subtle disabled:opacity-30"
@@ -312,7 +306,6 @@ export function PrecipitationRadar() {
               onClick={() => {
                 stopPlay();
                 setFollowLive(true);
-                setFrameIndex(lastIndex);
                 void mutate();
               }}
               className="rounded-md bg-accent-weather/15 px-2 py-0.5 text-accent-weather hover:bg-accent-weather/25"
