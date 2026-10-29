@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { Download, Share, X } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -24,16 +24,33 @@ function isStandalone(): boolean {
   );
 }
 
+function wasInstallDismissed(): boolean {
+  try {
+    return sessionStorage.getItem(INSTALL_DISMISS_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+/** iOS kent geen beforeinstallprompt: hint tonen buiten de app, tot weggeklikt. */
+function iosHintSnapshot(): boolean {
+  return isIos() && !isStandalone() && !wasInstallDismissed();
+}
+
+const noSubscribe = () => () => {};
+
 export function PwaProvider() {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [showInstall, setShowInstall] = useState(false);
-  const [showIosHint, setShowIosHint] = useState(false);
+  const [iosHintDismissed, setIosHintDismissed] = useState(false);
+  const iosHintEligible = useSyncExternalStore(noSubscribe, iosHintSnapshot, () => false);
+  const showIosHint = iosHintEligible && !iosHintDismissed;
   const [updateReloading, setUpdateReloading] = useState(false);
 
   const dismissInstall = useCallback(() => {
     setShowInstall(false);
-    setShowIosHint(false);
+    setIosHintDismissed(true);
     try {
       sessionStorage.setItem(INSTALL_DISMISS_KEY, "1");
     } catch {
@@ -80,17 +97,7 @@ export function PwaProvider() {
   }, []);
 
   useEffect(() => {
-    if (isStandalone()) return;
-    try {
-      if (sessionStorage.getItem(INSTALL_DISMISS_KEY) === "1") return;
-    } catch {
-      /* ignore */
-    }
-
-    if (isIos()) {
-      setShowIosHint(true);
-      return;
-    }
+    if (isStandalone() || wasInstallDismissed() || isIos()) return;
 
     const onBeforeInstall = (e: Event) => {
       e.preventDefault();

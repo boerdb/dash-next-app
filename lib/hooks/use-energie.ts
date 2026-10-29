@@ -27,12 +27,14 @@ export function useEnergieData() {
     { refreshInterval: 30_000, revalidateOnFocus: true }
   );
 
+  // Alleen herberekenen als het live vermogen verandert, niet bij elke poll.
+  const stroomNu = energie?.stroom_nu;
   const chartHistorie = useMemo(
     () =>
-      historie && energie
-        ? applyLiveWattToHistorie(historie, energie.stroom_nu)
+      historie && stroomNu != null
+        ? applyLiveWattToHistorie(historie, stroomNu)
         : historie,
-    [historie, energie?.stroom_nu]
+    [historie, stroomNu]
   );
 
   const refreshAll = async () => {

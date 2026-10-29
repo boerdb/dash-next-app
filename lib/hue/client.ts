@@ -170,7 +170,7 @@ export async function restoreLightSnapshot(
   settings: HueSettings,
   lightId: string,
   snapshot: HueLightStateSnapshot,
-  lightType?: string,
+  _lightType?: string,
 ): Promise<void> {
   const body: Record<string, unknown> = { on: snapshot.on };
   if (!snapshot.on) {

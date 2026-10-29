@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import useSWR from "swr";
 import {
   Bar,
@@ -142,11 +142,10 @@ export function MonthlyEnergyChart() {
     return i >= 0 ? i : data.dagen.length - 1;
   }, [data]);
 
-  const [selectedIndex, setSelectedIndex] = useState(-1);
-
-  useEffect(() => {
-    if (defaultIndex >= 0) setSelectedIndex(defaultIndex);
-  }, [defaultIndex, jaar, maand]);
+  // Keuze geldt per maand; zonder eigen keuze volgt de selectie vandaag.
+  const maandKey = `${jaar}-${maand}`;
+  const [keuze, setKeuze] = useState<{ maandKey: string; index: number } | null>(null);
+  const selectedIndex = keuze?.maandKey === maandKey ? keuze.index : defaultIndex;
 
   const selected =
     selectedIndex >= 0 && data ? data.dagen[selectedIndex] : undefined;
@@ -228,8 +227,11 @@ export function MonthlyEnergyChart() {
               data={chartData}
               margin={{ top: 8, right: 4, left: -16, bottom: 0 }}
               onClick={(state) => {
-                const idx = state?.activeTooltipIndex;
-                if (typeof idx === "number") setSelectedIndex(idx);
+                // Recharts 3 geeft de index als string ("2").
+                const idx = Number(state?.activeTooltipIndex);
+                if (state?.activeTooltipIndex != null && Number.isInteger(idx)) {
+                  setKeuze({ maandKey, index: idx });
+                }
               }}
             >
               <CartesianGrid stroke={chartTheme.grid} vertical={false} />

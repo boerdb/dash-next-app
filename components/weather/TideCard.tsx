@@ -33,9 +33,10 @@ const BRON_TEKST: Record<
 };
 
 export function TideCard({ getijden, bron = "rws" }: TideCardProps) {
+  // Opnieuw filteren bij dagwissel (Amsterdam), ook als getijden niet veranderen.
   const amsterdamDayKey = useAmsterdamDayKey();
   const visible = useMemo(
-    () => normalizeGetijdenForDisplay(getijden),
+    () => normalizeGetijdenForDisplay(getijden, new Date(`${amsterdamDayKey}T12:00:00`)),
     [getijden, amsterdamDayKey]
   );
 
