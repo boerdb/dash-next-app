@@ -8,7 +8,7 @@ export async function GET() {
     const data = await fetchNearbyVisibility();
     return NextResponse.json(data, {
       headers: {
-        "Cache-Control": "public, s-maxage=600, stale-while-revalidate=1200",
+        "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=1800",
       },
     });
   } catch (e) {

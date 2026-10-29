@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { getWeatherCondition } from "./weather-condition";
+import { formatVisibility, getWeatherCondition } from "./weather-condition";
 import type { OpenMeteoSky } from "@/lib/api/types";
 
 const clearSky: OpenMeteoSky = {
@@ -356,5 +356,17 @@ describe("getWeatherCondition · sneeuw", () => {
       { ...snowSky, weatherCode: 95 }
     );
     assert.equal(condition, "thunder");
+  });
+});
+
+describe("formatVisibility", () => {
+  it("toont mistzicht in tientallen meters", () => {
+    assert.equal(formatVisibility(148), "150 m");
+    assert.equal(formatVisibility(3), "10 m");
+  });
+
+  it("toont groter zicht in km", () => {
+    assert.equal(formatVisibility(1200), "1,2 km");
+    assert.equal(formatVisibility(20000), "20 km");
   });
 });

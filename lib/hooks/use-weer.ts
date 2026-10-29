@@ -6,7 +6,7 @@ import { jsonFetcher, FetchError } from "@/lib/fetcher";
 import { useLiveAstronomy } from "@/lib/hooks/use-live-astronomy";
 import { useRevalidateOnVisible } from "@/lib/hooks/use-revalidate-on-visible";
 import { hasActiveKnmiThunderWarning } from "@/lib/knmi/thunder";
-import { getWeatherCondition } from "@/lib/utils/weather-condition";
+import { getWeatherCondition, isStationFogProne } from "@/lib/utils/weather-condition";
 import { formatWeerUpdateLabel } from "@/lib/weer/update-label";
 import {
   LIGHTNING_POLL_ACTIVE_MS,
@@ -90,11 +90,13 @@ export function useWeerData() {
   });
 
   // Gemeten zicht rond Harlingen: bevestigt plaatselijke mist die het model mist.
+  // Alleen ophalen als het station vochtig en windstil is; elk half uur verversen.
   const { data: zicht, mutate: mutateZicht } = useSWR<NearbyVisibility | null, FetchError>(
-    "/api/weer/zicht",
+    isStationFogProne(weer) ? "/api/weer/zicht" : null,
     jsonFetcher,
-    { refreshInterval: 600_000, shouldRetryOnError: false, ...swrFreshOnOpen }
+    { refreshInterval: 1_800_000, shouldRetryOnError: false, ...swrFreshOnOpen }
   );
+  const nearbyVisibilityM = isStationFogProne(weer) ? zicht?.visibilityM : undefined;
 
   const refreshAll = useCallback(async () => {
     await Promise.all([
@@ -125,7 +127,7 @@ export function useWeerData() {
         astroData.sunBelowHorizon,
         openMeteoForecast?.currentSky,
         knmiThunder,
-        zicht?.visibilityM
+        nearbyVisibilityM
       ),
     [
       weer,
@@ -133,11 +135,12 @@ export function useWeerData() {
       astroData.sunBelowHorizon,
       openMeteoForecast?.currentSky,
       knmiThunder,
-      zicht?.visibilityM,
+      nearbyVisibilityM,
     ]
   );
 
   return {
+    zicht: nearbyVisibilityM != null ? zicht : null,
     weer,
     weerError,
     weerLoading,

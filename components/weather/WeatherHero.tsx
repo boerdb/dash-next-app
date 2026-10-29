@@ -13,9 +13,9 @@ import {
   Sunset,
   Wind,
 } from "lucide-react";
-import type { AstronomieApi, WeerLive, WeatherCondition } from "@/lib/api/types";
+import type { AstronomieApi, NearbyVisibility, WeerLive, WeatherCondition } from "@/lib/api/types";
 import { periodLabels } from "@/lib/astronomy/sun-moon";
-import { conditionLabels } from "@/lib/utils/weather-condition";
+import { conditionLabels, formatVisibility, isFogCondition } from "@/lib/utils/weather-condition";
 import { getWeatherBackgroundStyle } from "@/lib/utils/weather-backgrounds";
 import { SunMoonArc } from "@/components/weather/SunMoonArc";
 import { DegreeMark } from "@/components/ui/degree-mark";
@@ -45,6 +45,8 @@ interface WeatherHeroProps {
   condition: WeatherCondition;
   astro: AstronomieApi;
   updateLabel?: string;
+  /** Gemeten zicht; alleen getoond bij mist. */
+  zicht?: NearbyVisibility | null;
 }
 
 function formatTemp(value: unknown): string | null {
@@ -58,6 +60,7 @@ export function WeatherHero({
   condition,
   astro,
   updateLabel,
+  zicht,
 }: WeatherHeroProps) {
   const Icon = icons[condition];
   const temp = formatTemp(data.temp_c) ?? "—";
@@ -65,6 +68,8 @@ export function WeatherHero({
   const max = formatTemp(data.temp_max_c);
   const periodLabel = periodLabels[astro.period];
   const weatherLabel = conditionLabels[condition];
+  const zichtLabel =
+    zicht && isFogCondition(condition) ? formatVisibility(zicht.visibilityM) : null;
 
   return (
     <section
@@ -84,6 +89,14 @@ export function WeatherHero({
               strokeWidth={2}
             />
             {weatherLabel}
+            {zichtLabel ? (
+              <span
+                className="font-medium text-hero-muted"
+                title={`Gemeten zicht · ${zicht?.stationName} (${zicht?.distanceKm} km)`}
+              >
+                · zicht {zichtLabel}
+              </span>
+            ) : null}
           </span>
           <div className="text-right text-xs font-medium text-hero-muted">
             <p className="text-hero-foreground">{periodLabel}</p>

@@ -57,7 +57,7 @@ export function parseNearbyVisibility(feed: unknown): NearbyVisibility | null {
 }
 
 export async function fetchNearbyVisibility(): Promise<NearbyVisibility | null> {
-  const res = await fetch(BUIENRADAR_FEED_URL, { next: { revalidate: 600 } });
+  const res = await fetch(BUIENRADAR_FEED_URL, { next: { revalidate: 1800 } });
   if (!res.ok) throw new Error(`Buienradar-feed: ${res.status}`);
   return parseNearbyVisibility(await res.json());
 }

@@ -53,6 +53,7 @@ export default function WeerPage() {
     knmiError,
     openMeteoForecast,
     updateLabel,
+    zicht,
     condition,
     refreshAll,
     mutateWeer,
@@ -81,6 +82,7 @@ export default function WeerPage() {
             condition={condition}
             astro={astroData}
             updateLabel={updateLabel}
+            zicht={zicht}
           />
 
           <StationMetrics data={weer} historie={historie} />

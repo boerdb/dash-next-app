@@ -26,6 +26,25 @@ function blendWithLocalSolar(
 /** Zicht onder 1 km is officieel mist (KNMI). */
 const FOG_VISIBILITY_M = 1000;
 
+/** Station vochtig én windstil: alleen dan kan het mistig zijn. */
+export function isStationFogProne(data: WeerLive | null | undefined): boolean {
+  if (!data) return false;
+  const humidity = Number(data.humidity) || 0;
+  const wind = Number(data.windspd_avg10m_kmh) || 0;
+  return humidity >= 95 && wind < 5;
+}
+
+/** Mist-hero overdag of 's nachts. */
+export function isFogCondition(condition: WeatherCondition): boolean {
+  return condition === "fog" || condition === "night-fog";
+}
+
+/** Zicht leesbaar: onder 1 km in tientallen meters, daarboven in km. */
+export function formatVisibility(meters: number): string {
+  if (meters < 1000) return `${Math.max(10, Math.round(meters / 10) * 10)} m`;
+  return `${(meters / 1000).toLocaleString("nl-NL", { maximumFractionDigits: 1 })} km`;
+}
+
 /**
  * Lokale mist-hero: vochtig én windstil is niet genoeg. Gemeten zicht van een
  * KNMI-station in de buurt of Open-Meteo (WMO 45/48) moet mist bevestigen.
@@ -36,9 +55,7 @@ function isStationFoggy(
   openMeteoSky?: OpenMeteoSky | null,
   nearbyVisibilityM?: number | null
 ): boolean {
-  const humidity = Number(data.humidity) || 0;
-  const wind = Number(data.windspd_avg10m_kmh) || 0;
-  if (humidity < 95 || wind >= 5) return false;
+  if (!isStationFogProne(data)) return false;
   if (nearbyVisibilityM != null && nearbyVisibilityM < FOG_VISIBILITY_M) return true;
   if (!openMeteoSky) return true;
   return openMeteoImpliesFog(openMeteoSky.weatherCode);
