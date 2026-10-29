@@ -23,17 +23,23 @@ function blendWithLocalSolar(
   return pickSunnierSkyCondition(meteoCondition, local);
 }
 
+/** Zicht onder 1 km is officieel mist (KNMI). */
+const FOG_VISIBILITY_M = 1000;
+
 /**
- * Lokale mist-hero: vochtig én windstil is niet genoeg. Open-Meteo moet mist
- * bevestigen (WMO 45/48). Zonder luchtdata blijft de stationheuristiek.
+ * Lokale mist-hero: vochtig én windstil is niet genoeg. Gemeten zicht van een
+ * KNMI-station in de buurt of Open-Meteo (WMO 45/48) moet mist bevestigen.
+ * Zonder luchtdata blijft de stationheuristiek.
  */
 function isStationFoggy(
   data: WeerLive,
-  openMeteoSky?: OpenMeteoSky | null
+  openMeteoSky?: OpenMeteoSky | null,
+  nearbyVisibilityM?: number | null
 ): boolean {
   const humidity = Number(data.humidity) || 0;
   const wind = Number(data.windspd_avg10m_kmh) || 0;
   if (humidity < 95 || wind >= 5) return false;
+  if (nearbyVisibilityM != null && nearbyVisibilityM < FOG_VISIBILITY_M) return true;
   if (!openMeteoSky) return true;
   return openMeteoImpliesFog(openMeteoSky.weatherCode);
 }
@@ -138,7 +144,27 @@ export function getWeatherCondition(
   period: DayPeriod = "day",
   sunBelowHorizon = false,
   openMeteoSky?: OpenMeteoSky | null,
-  knmiThunder = false
+  knmiThunder = false,
+  nearbyVisibilityM?: number | null
+): WeatherCondition {
+  const condition = getDaylightCondition(
+    data,
+    period,
+    openMeteoSky,
+    knmiThunder,
+    nearbyVisibilityM
+  );
+  // Mist na zonsondergang: donkere mist-hero in plaats van de grijze dagfoto.
+  if (condition === "fog" && (sunBelowHorizon || period === "night")) return "night-fog";
+  return condition;
+}
+
+function getDaylightCondition(
+  data: WeerLive | null,
+  period: DayPeriod,
+  openMeteoSky: OpenMeteoSky | null | undefined,
+  knmiThunder: boolean,
+  nearbyVisibilityM: number | null | undefined
 ): WeatherCondition {
   const external = externalThunderCondition(openMeteoSky, knmiThunder);
   if (!data) {
@@ -150,7 +176,7 @@ export function getWeatherCondition(
   if (external) return external;
   if (isSnowing(data, openMeteoSky)) return "snow";
   if (isStationRainy(data)) return "rain";
-  if (isStationFoggy(data, openMeteoSky)) return "fog";
+  if (isStationFoggy(data, openMeteoSky, nearbyVisibilityM)) return "fog";
   if (isStationWindy(data)) return "wind";
 
   if (period === "night") {
@@ -184,6 +210,7 @@ export const conditionLabels: Record<WeatherCondition, string> = {
   storm: "Storm",
   wind: "Wind",
   fog: "Mist",
+  "night-fog": "Mist",
   night: "Nacht",
   "night-partly-cloudy": "Deels bewolkt",
   "night-cloudy": "Bewolkt",

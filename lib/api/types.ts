@@ -288,6 +288,7 @@ export type WeatherCondition =
   | "storm"
   | "wind"
   | "fog"
+  | "night-fog"
   | "night"
   | "night-partly-cloudy"
   | "night-cloudy"
@@ -297,6 +298,14 @@ export type WeatherCondition =
   | "sunny"
   | "partly-cloudy"
   | "cloudy";
+
+/** Laagste gemeten zicht van KNMI-stations rond Harlingen (via Buienradar). */
+export interface NearbyVisibility {
+  stationName: string;
+  visibilityM: number;
+  distanceKm: number;
+  measuredAt: string | null;
+}
 
 /** Regenvoorspelling (Open-Meteo, uurlijks). */
 export interface PrecipForecastSlot {

@@ -31,6 +31,7 @@ const icons: Record<WeatherCondition, typeof Sun> = {
   storm: CloudLightning,
   wind: Wind,
   fog: CloudFog,
+  "night-fog": CloudFog,
   night: Moon,
   "night-partly-cloudy": CloudMoon,
   "night-cloudy": Cloud,

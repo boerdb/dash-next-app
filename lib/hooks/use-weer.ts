@@ -16,6 +16,7 @@ import {
 import type {
   GetijdenResponse,
   KnmiWaarschuwingenApi,
+  NearbyVisibility,
   PrecipForecastResponse,
   WeerHistorie,
   WeerLive,
@@ -88,6 +89,13 @@ export function useWeerData() {
     ...swrFreshOnOpen,
   });
 
+  // Gemeten zicht rond Harlingen: bevestigt plaatselijke mist die het model mist.
+  const { data: zicht, mutate: mutateZicht } = useSWR<NearbyVisibility | null, FetchError>(
+    "/api/weer/zicht",
+    jsonFetcher,
+    { refreshInterval: 600_000, shouldRetryOnError: false, ...swrFreshOnOpen }
+  );
+
   const refreshAll = useCallback(async () => {
     await Promise.all([
       mutateWeer(),
@@ -95,9 +103,10 @@ export function useWeerData() {
       mutateGetijden(),
       mutateKnmi(),
       mutateForecast(),
+      mutateZicht(),
       swrMutate("/api/weer/radar"),
     ]);
-  }, [mutateWeer, mutateHistorie, mutateGetijden, mutateKnmi, mutateForecast]);
+  }, [mutateWeer, mutateHistorie, mutateGetijden, mutateKnmi, mutateForecast, mutateZicht]);
 
   useRevalidateOnVisible(refreshAll);
 
@@ -115,7 +124,8 @@ export function useWeerData() {
         astroData.period,
         astroData.sunBelowHorizon,
         openMeteoForecast?.currentSky,
-        knmiThunder
+        knmiThunder,
+        zicht?.visibilityM
       ),
     [
       weer,
@@ -123,6 +133,7 @@ export function useWeerData() {
       astroData.sunBelowHorizon,
       openMeteoForecast?.currentSky,
       knmiThunder,
+      zicht?.visibilityM,
     ]
   );
 

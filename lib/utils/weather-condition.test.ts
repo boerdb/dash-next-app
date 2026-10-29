@@ -136,12 +136,12 @@ describe("getWeatherCondition · mist", () => {
       precipitationMm: 0,
       shortwaveRadiationWm2: 0,
     });
-    assert.equal(condition, "fog");
+    assert.equal(condition, "night-fog");
   });
 
   it("houdt de stationheuristiek als Open-Meteo ontbreekt", () => {
     const condition = getWeatherCondition(humidCalm, "night", true, null);
-    assert.equal(condition, "fog");
+    assert.equal(condition, "night-fog");
   });
 
   it("laat Open-Meteo-mist 's nachts door ook zonder hoge stationvochtigheid", () => {
@@ -156,7 +156,55 @@ describe("getWeatherCondition · mist", () => {
         shortwaveRadiationWm2: 0,
       }
     );
+    assert.equal(condition, "night-fog");
+  });
+
+  it("zet mist als een KNMI-station in de buurt < 1 km zicht meet, ook zonder modelcode", () => {
+    const condition = getWeatherCondition(
+      humidCalm,
+      "night",
+      true,
+      { cloudCoverPct: 31, weatherCode: 1, precipitationMm: 0, shortwaveRadiationWm2: 0 },
+      false,
+      177
+    );
+    assert.equal(condition, "night-fog");
+  });
+
+  it("negeert goed zicht in de buurt als het model geen mist geeft", () => {
+    const condition = getWeatherCondition(
+      humidCalm,
+      "night",
+      true,
+      { cloudCoverPct: 80, weatherCode: 3, precipitationMm: 0, shortwaveRadiationWm2: 0 },
+      false,
+      12_000
+    );
+    assert.equal(condition, "night-cloudy");
+  });
+
+  it("geeft overdag de gewone mist-hero", () => {
+    const condition = getWeatherCondition(
+      { ...humidCalm, solarradiation: 40 },
+      "day",
+      false,
+      { cloudCoverPct: 100, weatherCode: 3, precipitationMm: 0, shortwaveRadiationWm2: 40 },
+      false,
+      300
+    );
     assert.equal(condition, "fog");
+  });
+
+  it("geen mist bij laag zicht als het station niet vochtig en windstil is", () => {
+    const condition = getWeatherCondition(
+      { temp_c: 12, humidity: 85, windspd_avg10m_kmh: 12, solarradiation: 0 },
+      "night",
+      true,
+      { cloudCoverPct: 80, weatherCode: 3, precipitationMm: 0, shortwaveRadiationWm2: 0 },
+      false,
+      300
+    );
+    assert.equal(condition, "night-cloudy");
   });
 });
 
