@@ -14,10 +14,10 @@ const feed = {
 };
 
 describe("parseNearbyVisibility", () => {
-  it("kiest het laagste zicht binnen de straal rond Harlingen", () => {
+  it("kiest het dichtstbijzijnde station, niet het laagste zicht", () => {
     const result = parseNearbyVisibility(feed);
-    assert.equal(result?.stationName, "Vlieland");
-    assert.equal(result?.visibilityM, 148);
+    assert.equal(result?.stationName, "Leeuwarden");
+    assert.equal(result?.visibilityM, 177);
   });
 
   it("negeert stations zonder zichtmeting en verre stations", () => {
