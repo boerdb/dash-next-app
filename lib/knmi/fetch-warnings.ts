@@ -40,9 +40,11 @@ function pickLatestFile(
 }
 
 async function knmiGet<T>(apiKey: string, path: string): Promise<T> {
+  // Niet via de Next-datacache: die geeft na een stille periode eerst de oude
+  // lijst en download-URL terug, en die URL is na een uur verlopen (403).
   const res = await fetch(`${KNMI_OPEN_DATA_BASE}${path}`, {
     headers: { Authorization: apiKey },
-    next: { revalidate: 600 },
+    cache: "no-store",
   });
   if (!res.ok) {
     throw new Error(`KNMI Open Data ${res.status}: ${path}`);
@@ -209,6 +211,10 @@ async function fetchUncached(
     }
   } catch (e) {
     publicError = e;
+    console.warn(
+      "KNMI publieke dataset mislukt, terugval op provincie-XML:",
+      e instanceof Error ? e.message : e
+    );
   }
 
   try {
