@@ -8,6 +8,7 @@ const titles: Record<string, { title: string; subtitle: string }> = {
   "/energie": { title: "Energie", subtitle: "Verbruik, zon en batterijen" },
   "/tahoma": { title: "Tahoma", subtitle: "Zonwering en rolluiken" },
   "/hue": { title: "Hue", subtitle: "Verlichting" },
+  "/login": { title: "Inloggen", subtitle: "Energie, Tahoma en Hue" },
 };
 
 function todayLabel(): string {

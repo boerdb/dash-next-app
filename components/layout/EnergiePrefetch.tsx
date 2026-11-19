@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { preload } from "swr";
 import { jsonFetcher } from "@/lib/fetcher";
 import type { EnergieHistorie, EnergieLive } from "@/lib/api/types";
+import { isLoggedInClient } from "@/lib/auth/client";
 
 const LIVE_KEY = "/api/energie/live";
 const HISTORIE_KEY = "/api/energie/historie";
@@ -16,8 +17,12 @@ function prefetchEnergie() {
 /** Laadt energiedata op de achtergrond zodat de Energie-tab sneller opent. */
 export function EnergiePrefetch() {
   useEffect(() => {
-    prefetchEnergie();
-    const interval = setInterval(prefetchEnergie, 5_000);
+    const tick = () => {
+      // Zonder login geeft de API 401; dan niets ophalen.
+      if (isLoggedInClient()) prefetchEnergie();
+    };
+    tick();
+    const interval = setInterval(tick, 5_000);
     return () => clearInterval(interval);
   }, []);
 

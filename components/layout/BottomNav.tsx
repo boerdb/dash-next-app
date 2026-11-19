@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
-import { CloudSun, Zap, Blinds, Lightbulb } from "lucide-react";
+import { CloudSun, Zap, Blinds, Lightbulb, Lock } from "lucide-react";
+import { isLoggedInClient, subscribeLogin } from "@/lib/auth/client";
+
+const PROTECTED = new Set(["/energie", "/tahoma", "/hue"]);
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -44,6 +48,7 @@ function NavLink({
   activeBg,
   active,
   layout,
+  locked,
 }: {
   href: string;
   label: string;
@@ -52,6 +57,7 @@ function NavLink({
   activeBg: string;
   active: boolean;
   layout: "bottom" | "side";
+  locked: boolean;
 }) {
   return (
     <Link
@@ -67,7 +73,16 @@ function NavLink({
           : "text-nav-inactive hover:text-nav-hover"
       )}
     >
-      <Icon className={layout === "bottom" ? "h-[1.35rem] w-[1.35rem]" : "h-5 w-5"} strokeWidth={active ? 2.2 : 1.8} />
+      <span className="relative">
+        <Icon className={layout === "bottom" ? "h-[1.35rem] w-[1.35rem]" : "h-5 w-5"} strokeWidth={active ? 2.2 : 1.8} />
+        {locked ? (
+          <Lock
+            aria-label="vergrendeld"
+            className="absolute -right-1.5 -top-1 h-3 w-3 rounded-full bg-nav-bg p-[1px]"
+            strokeWidth={2.6}
+          />
+        ) : null}
+      </span>
       {label}
     </Link>
   );
@@ -75,6 +90,7 @@ function NavLink({
 
 export function BottomNav() {
   const pathname = usePathname();
+  const ingelogd = useSyncExternalStore(subscribeLogin, isLoggedInClient, () => true);
 
   return (
     <>
@@ -86,6 +102,7 @@ export function BottomNav() {
               key={link.href}
               {...link}
               active={pathname === link.href}
+              locked={PROTECTED.has(link.href) && !ingelogd}
               layout="bottom"
             />
           ))}
@@ -104,6 +121,7 @@ export function BottomNav() {
             key={link.href}
             {...link}
             active={pathname === link.href}
+            locked={PROTECTED.has(link.href) && !ingelogd}
             layout="side"
           />
         ))}
