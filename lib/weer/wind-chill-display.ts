@@ -1,8 +1,8 @@
 /** Windchill is zinvol bij ca. 10 °C of kouder (KNMI-formule). */
 export const WIND_CHILL_MAX_TEMP_C = 10;
 
-/** Ondergrens Beaufort 3 (KNMI: 12–19 km/u). */
-export const WIND_CHILL_MIN_WIND_KMH = 12;
+/** Ondergrens van de JAG/TI-formule (KNMI/Environment Canada): 4,8 km/u. */
+export const WIND_CHILL_MIN_WIND_KMH = 4.8;
 
 export function resolveWindSpeedKmh(data: {
   windspd_avg10m_kmh?: number | string | null;
@@ -19,7 +19,7 @@ export function resolveWindSpeedKmh(data: {
   return NaN;
 }
 
-/** Toon gevoelstemperatuur/windchill alleen bij kou (≤10 °C) + wind ≥3 Bft. */
+/** Toon gevoelstemperatuur/windchill alleen bij kou (≤10 °C) + wind ≥4,8 km/u. */
 export function shouldShowWindChill(data: {
   temp_c?: number | string | null;
   gevoelstemperatuur?: number | string | null;

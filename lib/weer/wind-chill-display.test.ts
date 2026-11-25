@@ -3,12 +3,23 @@ import assert from "node:assert/strict";
 import { shouldShowWindChill } from "./wind-chill-display";
 
 describe("shouldShowWindChill", () => {
-  it("toont bij ≤10 °C en wind ≥12 km/u (3 Bft)", () => {
+  it("toont bij ≤10 °C en wind ≥4,8 km/u", () => {
     assert.equal(
       shouldShowWindChill({
         temp_c: 8,
         windspd_avg10m_kmh: 15,
         gevoelstemperatuur: 5.2,
+      }),
+      true
+    );
+  });
+
+  it("toont bij lichte wind vanaf 4,8 km/u", () => {
+    assert.equal(
+      shouldShowWindChill({
+        temp_c: -0.5,
+        windspd_avg10m_kmh: 5,
+        gevoelstemperatuur: -1.8,
       }),
       true
     );
@@ -25,11 +36,11 @@ describe("shouldShowWindChill", () => {
     );
   });
 
-  it("verbergt onder 3 Bft (<12 km/u)", () => {
+  it("verbergt onder 4,8 km/u", () => {
     assert.equal(
       shouldShowWindChill({
         temp_c: 5,
-        windspd_avg10m_kmh: 8,
+        windspd_avg10m_kmh: 3.9,
         gevoelstemperatuur: 5,
       }),
       false

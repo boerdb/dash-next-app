@@ -13,7 +13,7 @@ describe("enrichWeerLive", () => {
     assert.equal(r.gevoelstemperatuur, 16.3);
   });
 
-  it("windchill bij kou en wind ≥3 Bft", () => {
+  it("windchill bij kou en wind ≥4,8 km/u", () => {
     const r = enrichWeerLive({
       temp_c: 5,
       humidity: 80,
@@ -22,13 +22,22 @@ describe("enrichWeerLive", () => {
     assert.ok(Number(r.gevoelstemperatuur) < 5);
   });
 
-  it("geen windchill-formule onder 3 Bft", () => {
+  it("geen windchill-formule onder 4,8 km/u", () => {
     const r = enrichWeerLive({
       temp_c: 5,
       humidity: 80,
-      windspd_avg10m_kmh: 8,
+      windspd_avg10m_kmh: 3.9,
     });
     assert.equal(r.gevoelstemperatuur, 5);
+  });
+
+  it("windchill bij vorst en 11,2 km/u (ca. -4 °C)", () => {
+    const r = enrichWeerLive({
+      temp_c: -0.5,
+      humidity: 85,
+      windspd_avg10m_kmh: 11.2,
+    });
+    assert.equal(r.gevoelstemperatuur, -4.2);
   });
 
   it("gevoelstemperatuur met alleen windspeed_kmh (GW1100)", () => {
